@@ -37,7 +37,16 @@ public class MWebcam extends MethodHandler {
 		if (methods.size() == 0) {
 			return null;
 		}
-		return  ThreatResult.fromMethod("Webcam", "This class has methods that can access the webcam.", mn, methods);
+		return  ThreatResult.withData(getName(), getDesc(), mn, methods);
 	}
 
+	@Override
+	public String getName() {
+		return "OpenCV/Sarxos Webcam Call";
+	}
+	
+	@Override
+	public String getDesc() {
+		return "This class has methods that can access the webcam.";
+	}
 }

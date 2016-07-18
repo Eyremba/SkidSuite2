@@ -15,7 +15,7 @@ public class CClassLoader extends ClassHandler {
 	public ThreatResult scanClass(ClassNode cn) {
 		List<String> fields = new ArrayList<String>();
 		if (cn.superName.contains("ClassLoader")) {
-			return new ThreatResult("ClassLoader:Extension", "This class allows loading new classes at runtime.", cn.name);
+			return new ThreatResult(getName(),getDesc() , cn.name);
 		}
 		// Scan fields for classloaders.
 		for (FieldNode fn : cn.fields) {
@@ -33,7 +33,17 @@ public class CClassLoader extends ClassHandler {
 		for (String field : fields) {
 			out += field + ", ";
 		}
-		return new ThreatResult("ClassLoader:Extension", "This class has fields that allow loading new classes at runtime.", cn.name + ":<br>Fields: " + out);
+		return new ThreatResult(getName(), "This class has fields that allow loading new classes at runtime.", cn.name + ":<br>Fields: " + out);
+	}
+
+	@Override
+	public String getName() {
+		return "Extended ClassLoader";
+	}
+	
+	@Override
+	public String getDesc() {
+		return "This class allows loading new classes at runtime.";
 	}
 
 }

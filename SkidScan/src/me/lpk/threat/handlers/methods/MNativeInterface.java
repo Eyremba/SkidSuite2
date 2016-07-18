@@ -32,6 +32,15 @@ public class MNativeInterface extends MethodHandler {
 		if (methods.size() == 0) {
 			return null;
 		}
-		return ThreatResult.fromMethod("JNI(Java Native Interface)", "This class can interact with non-java binaries.", mn, methods);
+		return ThreatResult.withData(getName(), getDesc(), mn, methods);
+	}
+	
+	@Override
+	public String getName() {
+		return "JNI/JNA Library";
+	}
+	@Override
+	public String getDesc() {
+		return  "This class can interact with non-java binaries.";
 	}
 }

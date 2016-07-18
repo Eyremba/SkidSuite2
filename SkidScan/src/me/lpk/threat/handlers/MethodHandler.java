@@ -7,7 +7,7 @@ import org.objectweb.asm.tree.MethodNode;
 
 import me.lpk.threat.result.ThreatResult;
 
-public abstract class MethodHandler {
+public abstract class MethodHandler implements IHandler {
 	public abstract ThreatResult scanMethod(MethodNode mn);
 
 	protected String toLocation(int opIndex, String methodNode, MethodInsnNode min) {

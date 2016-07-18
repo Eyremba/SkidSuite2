@@ -36,7 +36,16 @@ public class MClassLoader extends MethodHandler {
 		if (methods.size() == 0) {
 			return null;
 		}
-		return ThreatResult.fromMethod("ClassLoader:Reference",  "This class can load new classes at runtime.", mn, methods);
+		return ThreatResult.withData(getName(),  getDesc(), mn, methods);
 	}
 
+	@Override
+	public String getName() {
+		return "ClassLoader Call";
+	}
+	
+	@Override
+	public String getDesc() {
+		return "This class can load new classes at runtime.";
+	}
 }

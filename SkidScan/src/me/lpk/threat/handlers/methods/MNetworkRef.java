@@ -36,7 +36,16 @@ public class MNetworkRef extends MethodHandler {
 		if (methods.size() == 0) {
 			return null;
 		}
-		return ThreatResult.fromMethod("Networking", "This class has online interactions.", mn, methods);
+		return ThreatResult.withData(getName(), getDesc(), mn, methods);
 	}
 
+	@Override
+	public String getName() {
+		return "Networking";
+	}
+	
+	@Override
+	public String getDesc() {
+		return  "This class has online interactions.";
+	}
 }

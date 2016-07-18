@@ -29,10 +29,19 @@ public class MRuntime extends MethodHandler {
 		if (methods.size() == 0) {
 			return null;
 		}
-		return  ThreatResult.fromMethod("Runtime", 
-				"This method uses the Runtime class, which can be used for<br>" + 
-				"running external programs, gathering information about<br>the executing machine,<br>" +
-				"and modifying how the program closes (Such as prevention)", mn, methods);
+		return  ThreatResult.withData(getName(), 
+				getDesc(), mn, methods);
 	}
 
+	@Override
+	public String getName() {
+		return "Runtime Call";
+	}
+	
+	@Override
+	public String getDesc() {
+		return  "This method uses the Runtime class, which can be used for<br>" + 
+				"running external programs, gathering information about<br>the executing machine,<br>" +
+				"and modifying how the program closes (Such as prevention)";
+	}
 }

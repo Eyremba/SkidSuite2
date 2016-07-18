@@ -25,6 +25,7 @@ public class RegexUtils {
 
 	/**
 	 * Returns a list of all numbers found in a given string.
+	 * 
 	 * @param text
 	 * @return
 	 */
@@ -37,5 +38,21 @@ public class RegexUtils {
 			matches.add(m.group());
 		}
 		return matches;
+	}
+
+	/**
+	 * Returns true if text matches a given pattern.
+	 * 
+	 * @param pattern
+	 * @param text
+	 * @return
+	 */
+	public static boolean isMatch(String pattern, String text) {
+		Pattern pat = Pattern.compile(pattern);
+		Matcher m = pat.matcher(text);
+		while (m.find()) {
+			return true;
+		}
+		return false;
 	}
 }

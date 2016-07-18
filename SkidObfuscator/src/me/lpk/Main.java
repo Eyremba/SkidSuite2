@@ -12,23 +12,23 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
+
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
 import me.lpk.mapping.remap.MappingMode;
 import me.lpk.mapping.remap.MappingRenamer;
-import me.lpk.util.JarUtil;
+import me.lpk.util.JarUtils;
 import me.lpk.util.LazySetupMaker;
 
 public class Main {
 
 	public static void main(String[] args) {
-		
-		obfuscating2("Scan.jar", "Out.jar");
+		obfuscating("SkidASM.jar", "Out.jar");
 	}
 
 	public static void renaming(String jarIn, String jarOut) {
-		LazySetupMaker dat = LazySetupMaker.get(jarIn, true);
+		LazySetupMaker dat = LazySetupMaker.get(jarIn, true, false);
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 		//
@@ -44,7 +44,7 @@ public class Main {
 	}
 
 	public static void obfuscating(String jarIn, String jarOut) {
-		LazySetupMaker dat = LazySetupMaker.get(jarIn, false);
+		LazySetupMaker dat = LazySetupMaker.get(jarIn, false, false);
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 		//
@@ -57,18 +57,13 @@ public class Main {
 			if (mappings.get(cn.name) == null) {
 				System.err.println(cn.name);
 			}
-			// for (MethodNode mn : cn.methods) { Stringer.fuck(cn, mn); }
-			//
-			//
-			// Stringer.stringEncrypt(cn, mappings.get(cn.name).getNewName());
+			Stringer.stringEncrypt(cn, mappings.get(cn.name).getNewName());
 			//
 			//
 
 			//
 			//
-			for (MethodNode mn : cn.methods)
-				for (int i = 0; i < 50; i++)
-					Flow.shift_failed(cn, mn);
+			// for (MethodNode mn : cn.methods) for (int i = 0; i < 50; i++) Flow.shift_failed(cn, mn);
 
 		}
 		Logger.logLow("Modifying - Member Access");
@@ -88,7 +83,7 @@ public class Main {
 	}
 
 	public static void obfuscating2(String jarIn, String jarOut) {
-		LazySetupMaker dat = LazySetupMaker.get(jarIn, false);
+		LazySetupMaker dat = LazySetupMaker.get(jarIn, false, false);
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 		Logger.logLow("Modifying - Encryption");
@@ -166,7 +161,6 @@ public class Main {
 						sb.append('\u2589');
 						break;
 					}
-
 				}
 				used.add(sb.toString());
 				return sb.toString();
@@ -178,7 +172,7 @@ public class Main {
 		Map<String, byte[]> out = null;
 		out = MappingProcessor.process(nodes, mappedClasses, false);
 		try {
-			out.putAll(JarUtil.loadNonClassEntries(nonEntriesJar));
+			out.putAll(JarUtils.loadNonClassEntries(nonEntriesJar));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -189,7 +183,7 @@ public class Main {
 			}
 		}
 		System.out.println("Saving...  [Ranemed " + renamed + " classes]");
-		JarUtil.saveAsJar(out, name);
+		JarUtils.saveAsJar(out, name);
 	}
 
 }

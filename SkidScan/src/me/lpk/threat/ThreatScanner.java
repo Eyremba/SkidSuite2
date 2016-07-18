@@ -45,13 +45,19 @@ public class ThreatScanner {
 			threatsByClass.put(cn.name, threats);
 		}
 	}
+	
+	public void reset(){
+		threatsByClass.clear();
+		classHandlers.clear();
+		methodHandlers.clear();
+	}
 
 	/**
 	 * Registers a threat handler.
 	 * 
 	 * @param handler
 	 */
-	public void registerThreat(ClassHandler handler) {
+	public void registerClassHandler(ClassHandler handler) {
 		classHandlers.add(handler);
 	}
 
@@ -60,7 +66,7 @@ public class ThreatScanner {
 	 * 
 	 * @param handler
 	 */
-	public void registerThreat(MethodHandler handler) {
+	public void registerMethodHandler(MethodHandler handler) {
 		methodHandlers.add(handler);
 	}
 
@@ -69,7 +75,7 @@ public class ThreatScanner {
 	 * 
 	 * @return
 	 */
-	public String toHTML(String name) {
+	public String toHTML(String name, boolean includeCss) {
 		String jarName =  name;
 		String css = 
 				"*{font-family:Arial,sans-serif; overflow: auto;}"
@@ -87,7 +93,11 @@ public class ThreatScanner {
 		}
 		tableEntries.append("</table>");
 		StringBuilder content = new StringBuilder();
-		content.append("<html><head><meta charset=\"windows-1252\"><style>" + css + "</style></head><body>");
+		content.append("<html><head><meta charset=\"utf-8\">" );
+		if (includeCss){
+			content.append("<style>" + css + "</style>");
+		}
+		content.append("</head><body>");
 		content.append("<h1>Analysis of: " + jarName + "</h1><hr><hr>");
 		// TODO: Table of contents
 		// * Link to each class

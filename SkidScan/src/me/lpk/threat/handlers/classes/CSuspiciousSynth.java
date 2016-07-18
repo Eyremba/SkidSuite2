@@ -11,7 +11,7 @@ import me.lpk.util.AccessHelper;
 
 public class CSuspiciousSynth extends ClassHandler {
 	private boolean ignoreDollas = true;
-	private double threshhold = 0.75;
+	private double threshhold = 0.55;
 
 	@Override
 	public ThreatResult scanClass(ClassNode cn) {
@@ -41,11 +41,20 @@ public class CSuspiciousSynth extends ClassHandler {
 		double synthFieldPercent = totalFields == 0 ? 0 : synthFields / totalFields;
 		double synthMethodPercent = totalMethods == 0 ? 0 : synthMethods / totalMethods;
 		if ((synthFieldPercent + synthMethodPercent) / 2 > threshhold) {
-			return new ThreatResult("Unnatural Synthetic Class",
-					"The class seems to be modified forcing an unnatrual amount of members to be synthetic.<br>Known tactic for anti-reverse engineering.", cn.name);
+			return new ThreatResult(getName(), getDesc(), cn.name);
 
 		}
 		return null;
+	}
+
+	@Override
+	public String getName() {
+		return "Unnatural Synthetics";
+	}
+
+	@Override
+	public String getDesc() {
+		return "The class seems to be modified forcing an unnatrual amount of members to be synthetic.<br>Known tactic for anti-reverse engineering.";
 	}
 
 }

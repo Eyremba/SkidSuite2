@@ -30,7 +30,15 @@ public class MFileIO extends MethodHandler {
 		if (methods.size() == 0) {
 			return null;
 		}
-		return ThreatResult.fromMethod("FileIO", "This class has methods that interact with the file system.", mn, methods);
+		return ThreatResult.withData(getName(),getDesc(), mn, methods);
 	}
 
+	@Override
+	public String getName() {
+		return "FileIO";
+	}
+	@Override
+	public String getDesc() {
+		return  "This class has methods that interact with the file system.";
+	}
 }

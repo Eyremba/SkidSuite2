@@ -25,12 +25,28 @@ public class ThreatResult {
 	 * @param detections
 	 * @return
 	 */
-	public static ThreatResult fromMethod(String type, String desc, MethodNode mn, List<String> detections) {
+	public static ThreatResult withData(String type, String desc, MethodNode mn, List<String> detections) {
 		String detectionStr = "";
 		for (String detection : detections) {
 			detectionStr += detection + "<br>";
 		}
 		return new ThreatResult(type, desc, "<b>" + mn.name + "()</b>:<br>Detections:<br><br>" + detectionStr);
+	}
+
+	/**
+	 * Creates a ThreatResult given data.
+	 * 
+	 * @param type
+	 * @param desc
+	 * @param detections
+	 * @return
+	 */
+	public static ThreatResult withData(String type, String desc, List<String> detections) {
+		String detectionStr = "";
+		for (String detection : detections) {
+			detectionStr += detection + "<br>";
+		}
+		return new ThreatResult(type, desc, "<br>Detections:<br><br>" + detectionStr);
 	}
 
 	public String toHTMLTableRow() {

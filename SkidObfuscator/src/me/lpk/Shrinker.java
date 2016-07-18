@@ -45,6 +45,7 @@ import org.objectweb.asm.optimizer.MethodOptimizer;
 import org.objectweb.asm.tree.ClassNode;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
+import me.lpk.mapping.MappedMember;
 import me.lpk.mapping.SkidRemapper;
 import me.lpk.util.Classpather;
 import me.lpk.util.JarUtils;
@@ -59,7 +60,7 @@ import javax.swing.JSplitPane;
 public class Shrinker {
 	private JList<String> lstFileSizes;
 	private JCheckBox chkMaxs, chkNoRemoval;
-	private JCheckBox chkSource, chkInnerOuter, chkClassAnnotations, chkClassAttribs;
+	private JCheckBox chkSource, chkInnerOuter, chkClassAnnotations, chkClassAttribs, chkRemMethods;
 	private JCheckBox chkParameter, chkMethodsAnnotations, chkLocals, chkLines, chkFrames, chkMethodAttribs;
 	private JFrame frmSkidshrink;
 	private JPanel pnlOptions;
@@ -81,23 +82,9 @@ public class Shrinker {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Shrinker window = new Shrinker();
-					window.frmSkidshrink.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the application.
-	 */
-	public Shrinker() {
-		initialize();
+		Shrinker window = new Shrinker();
+		window.initialize();
+		window.frmSkidshrink.setVisible(true);
 	}
 
 	private void addLibrary(File jar) {
@@ -121,8 +108,12 @@ public class Shrinker {
 		}
 		String mainClass = JarUtils.getManifestMainClass(jar);
 		boolean isLibrary = chkNoRemoval.isSelected() || mainClass == null;
+		boolean remFuncs = chkRemMethods.isSelected();
 		Logger.logLow("Compting classes to ignore... (Processing time scales exponentially with file size)");
-		Set<String> keep = isLibrary ? null : Remover.evaluate(mainClass, lsm.getNodes());
+		Remover r = new Remover();
+		Remover r2 = new Remover();
+		Set<String> keep = isLibrary ? null : r.evaluate_old(mainClass, lsm.getNodes());
+		Set<String> keep2 = isLibrary ? null : r2.evaluate_new(mainClass, lsm.getNodes());
 		isLibrary = isLibrary || keep.size() == 0;
 		Logger.logLow("Optimizing classes...");
 		if (!chkMaxs.isSelected()) {
@@ -137,9 +128,9 @@ public class Shrinker {
 		Remapper m = new SkidRemapper(new HashMap<String, MappedClass>());
 		for (ClassNode cn : lsm.getNodes().values()) {
 			try {
-				if (isLibrary || keep.contains(cn.name)) {
+				if (isLibrary || (keep.contains(cn.name) || keep2.contains(cn.name))) {
 					ClassWriter cw = new ClassWriter(chkMaxs.isSelected() ? ClassWriter.COMPUTE_MAXS : ClassWriter.COMPUTE_FRAMES);
-					ClassVisitor remapper = new MyClassOptimizer(cw, m);
+					ClassVisitor remapper = new MyClassOptimizer(remFuncs ? r2 : r, lsm.getMappings().get(cn.name), cw, m);
 					cn.accept(remapper);
 					out.put(cn.name, cw.toByteArray());
 				}
@@ -256,7 +247,10 @@ public class Shrinker {
 		chkClassAttribs.setSelected(true);
 		chkClassAttribs.setBackground(SystemColor.controlHighlight);
 		pnlClassOptions.add(chkClassAttribs);
-
+		chkRemMethods = new JCheckBox("Remove Unused Methods");
+		chkRemMethods.setSelected(true);
+		chkRemMethods.setBackground(SystemColor.controlHighlight);
+		pnlClassOptions.add(chkRemMethods);
 		pnlEmb2 = new JPanel();
 		pnlEmb2.setBackground(SystemColor.controlHighlight);
 		pnlEmb1.add(pnlEmb2, BorderLayout.CENTER);
@@ -415,8 +409,13 @@ public class Shrinker {
 	}
 
 	class MyClassOptimizer extends ClassOptimizer {
-		public MyClassOptimizer(ClassVisitor cv, Remapper remapper) {
+		private final Remover r;
+		private final MappedClass mapped;
+
+		public MyClassOptimizer(Remover r, MappedClass mappedClass, ClassVisitor cv, Remapper remapper) {
 			super(cv, remapper);
+			this.r = r;
+			this.mapped = mappedClass;
 		}
 
 		@Override
@@ -472,7 +471,7 @@ public class Shrinker {
 		@Override
 		public FieldVisitor visitField(final int access, final String name, final String desc, final String signature, final Object value) {
 			// Cancelling what ClassOptimizer does
-			FieldVisitor fv = super.visitField(access, remapper.mapFieldName(className, name, desc), remapper.mapDesc(desc), remapper.mapSignature(signature, true),
+			FieldVisitor fv = super.visitField(access, remapper.mapFieldName(mapped.getNewName(), name, desc), remapper.mapDesc(desc), remapper.mapSignature(signature, true),
 					remapper.mapValue(value));
 			return fv == null ? null : createFieldRemapper(fv);
 		}
@@ -480,14 +479,26 @@ public class Shrinker {
 		@Override
 		public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
 			// Cancelling what ClassOptimizer does
-
-			return super.visitMethod(access, name, desc, signature, exceptions);
+			if (r.isMethodUsed(mapped.getNewName(), name + desc) || isOverride(name, desc)) {
+				return super.visitMethod(access, name, desc, signature, exceptions);
+			}
+			System.out.println("PRAISE KEK: " + mapped.getNewName() + ":" + name + desc);
+			return null;
 			// String newDesc = remapper.mapMethodDesc(desc);
 			// MethodVisitor mv = super.visitMethod(access,
 			// remapper.mapMethodName(className, name, desc), newDesc,
 			// remapper.mapSignature(signature, false), exceptions == null ?
 			// null : remapper.mapTypes(exceptions));
 			// return mv == null ? null : createMethodRemapper(mv);
+		}
+
+		private boolean isOverride(String name, String desc) {
+			for (MappedMember mm : mapped.getMethods()){
+				if (mm.getNewName().equals(name) && mm.getDesc().equals(desc)){
+					return mm.doesOverride();
+				}
+			}
+			return false;
 		}
 
 		@Override

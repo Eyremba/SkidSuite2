@@ -46,9 +46,17 @@ public class CWinRegHandler extends ClassHandler {
 			}
 		}
 		if ((regHKLU && regHKLM && regReadAll) || (regKeyStrFound || sunRegistry)) {
-			return new ThreatResult("Win-Registry", "This class can modify the window's registry.", cn.name);
+			return new ThreatResult(getName(), getDesc(), cn.name);
 		}
 		return null;
 	}
-
+	@Override
+	public String getName() {
+		return "Windows RegEdit";
+	}
+	
+	@Override
+	public String getDesc() {
+		return "This class can modify the window's registry.";
+	}
 }

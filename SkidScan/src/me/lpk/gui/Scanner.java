@@ -5,6 +5,8 @@ import javax.swing.JSplitPane;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -18,6 +20,9 @@ import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.tree.ClassNode;
 
 import me.lpk.threat.ThreatScanner;
+import me.lpk.threat.handlers.ClassHandler;
+import me.lpk.threat.handlers.MethodHandler;
+import me.lpk.threat.handlers.classes.CBase64;
 import me.lpk.threat.handlers.classes.CClassLoader;
 import me.lpk.threat.handlers.classes.CSuspiciousSynth;
 import me.lpk.threat.handlers.classes.CWinRegHandler;
@@ -34,6 +39,8 @@ import javax.swing.JPanel;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.JScrollPane;
@@ -42,13 +49,20 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JCheckBox;
 
 public class Scanner {
+	private final ThreatScanner th = new ThreatScanner();
 	private JFrame frame;
 	private JTree treeFiles;
 	private JTextPane txtpntesttitle;
 	private String path, jarName, text;
 	private JMenuItem mnSave;
+	private JCheckBox chckbxIncludeCss, chckbxAutomaticallyExportScans;
+	private final Map<String, ClassHandler> classHandlers = new LinkedHashMap<String, ClassHandler>();
+	private final Map<String, MethodHandler> methodHandlers = new LinkedHashMap<String, MethodHandler>();
+	private final Map<String, JCheckBox> classHandlerStatus = new HashMap<String, JCheckBox>();
+	private final Map<String, JCheckBox> methodHandlerStatus = new HashMap<String, JCheckBox>();
 
 	/**
 	 * Entry point.
@@ -63,8 +77,29 @@ public class Scanner {
 	 * Create the application.
 	 */
 	public Scanner() {
+		registerClassHandler(new CBase64());
+		registerClassHandler(new CClassLoader());
+		registerClassHandler(new CSuspiciousSynth());
+		registerClassHandler(new CWinRegHandler());
+		registerMethodHandler(new MClassLoader());
+		registerMethodHandler(new MFileIO());
+		registerMethodHandler(new MNativeInterface());
+		registerMethodHandler(new MNetworkRef());
+		registerMethodHandler(new MRuntime());
+		registerMethodHandler(new MWebcam());
+		//
 		initialize();
 		frame.setVisible(true);
+	}
+
+	private void registerMethodHandler(MethodHandler handler) {
+		String s = handler.getName();
+		methodHandlers.put(s, handler);
+	}
+
+	private void registerClassHandler(ClassHandler handler) {
+		String s = handler.getName();
+		classHandlers.put(s, handler);
 	}
 
 	/**
@@ -80,7 +115,6 @@ public class Scanner {
 		JScrollPane scrollPane = new JScrollPane();
 		splitPane.setRightComponent(scrollPane);
 		splitPane.setDividerLocation(150);
-		JMenu mnFile = new JMenu("File");
 		txtpntesttitle = new JTextPane();
 		JMenuBar menuBar = new JMenuBar();
 		frame.getContentPane().add(splitPane, BorderLayout.CENTER);
@@ -88,24 +122,46 @@ public class Scanner {
 		txtpntesttitle.setEditable(false);
 		scrollPane.setViewportView(txtpntesttitle);
 		scrollPane.setColumnHeaderView(menuBar);
+		JMenu mnFile = new JMenu("File");
 		menuBar.add(mnFile);
 		// Menu
 		// TODO: Upload options
 		mnSave = new JMenuItem("Save Report");
-		mnSave.addActionListener(new ActionListener(){
+		mnSave.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				File report = new File(jarName+"-Scan.html");
-				try {
-					FileUtils.write(report, text);
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(null, e.getMessage(), "Error saving file!", JOptionPane.ERROR_MESSAGE);
-				}
+				save();
 			}
 		});
 		mnSave.setEnabled(false);
 		mnFile.add(mnSave);
-		// 
+
+		JMenu mnSettings = new JMenu("Settings");
+		menuBar.add(mnSettings);
+
+		chckbxAutomaticallyExportScans = new JCheckBox("Automatically Export Scans");
+		mnSettings.add(chckbxAutomaticallyExportScans);
+
+		chckbxIncludeCss = new JCheckBox("Include CSS");
+		chckbxIncludeCss.setSelected(true);
+		mnSettings.add(chckbxIncludeCss);
+
+		JMenu mnDetectionsClass = new JMenu("Detections: Class");
+		JMenu mnDetectionsMethod = new JMenu("Detections: Method");
+		for (String s : classHandlers.keySet()){
+			JCheckBox chk = new JCheckBox(s, true);
+			classHandlerStatus.put(s, chk);
+			mnDetectionsClass.add(chk);
+		}
+		for (String s : methodHandlers.keySet()){
+			JCheckBox chk = new JCheckBox(s, true);
+			methodHandlerStatus.put(s, chk);
+			mnDetectionsMethod.add(chk);
+		}
+		mnSettings.add(mnDetectionsClass);
+		mnSettings.add(mnDetectionsMethod);
+		
+		//
 		//
 		// Left side (JTree)
 		JPanel pnlTree = new JPanel();
@@ -131,10 +187,22 @@ public class Scanner {
 					scan(file);
 				}
 			}
-			@Override public void mouseEntered(MouseEvent arg0){}
-			@Override public void mouseExited(MouseEvent arg0){}
-			@Override public void mousePressed(MouseEvent arg0){}
-			@Override public void mouseReleased(MouseEvent arg0){}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mousePressed(MouseEvent arg0) {
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent arg0) {
+			}
 		});
 		splitPane.setLeftComponent(pnlTree);
 		pnlTree.setLayout(new BorderLayout(0, 0));
@@ -148,32 +216,56 @@ public class Scanner {
 	 */
 	private void scan(File file) {
 		Map<String, ClassNode> nodes = null;
+		th.reset();
+		for (String s : classHandlers.keySet()){
+			if (classHandlerStatus.get(s).isSelected()){
+				th.registerClassHandler(classHandlers.get(s));
+			}
+		}
+		for (String s : methodHandlers.keySet()){
+			if (methodHandlerStatus.get(s).isSelected()){
+				th.registerMethodHandler(methodHandlers.get(s));
+			}
+		}
 		try {
 			nodes = JarUtils.loadClasses(file);
 		} catch (IOException e1) {
 			txtpntesttitle.setText("<html><body><span style=\" color: red;  \">" + e1.toString() + "</span></body></html>");
 		}
-		ThreatScanner th = new ThreatScanner();
-		th.registerThreat(new CSuspiciousSynth());
-		th.registerThreat(new CWinRegHandler());
-		th.registerThreat(new CClassLoader());
-		th.registerThreat(new MClassLoader());
-		th.registerThreat(new MFileIO());
-		th.registerThreat(new MWebcam());
-		th.registerThreat(new MRuntime());
-		th.registerThreat(new MNetworkRef());
-		th.registerThreat(new MNativeInterface());
 		for (ClassNode cn : nodes.values()) {
 			th.scan(cn);
 		}
 		jarName = file.getName().substring(0, file.getName().length() - 4);
-		text = th.toHTML(file.getName().substring(0, file.getName().indexOf(".")));
+		text = th.toHTML(file.getName().substring(0, file.getName().indexOf(".")), chckbxIncludeCss.isSelected());
 		txtpntesttitle.setText(text);
-		new Thread(){
-			// Instantly setting the caret position doesn't work, so delaying it 50 ms is a fair work-around.
-			@Override public void run(){ try { sleep(50); } catch (InterruptedException e) { e.printStackTrace(); } txtpntesttitle.setCaretPosition(0);}
+		new Thread() {
+			// Instantly setting the caret position doesn't work, so delaying it
+			// 50 ms is a fair work-around.
+			@Override
+			public void run() {
+				try {
+					sleep(50);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				txtpntesttitle.setCaretPosition(0);
+			}
 		}.start();
 		mnSave.setEnabled(true);
+		if (chckbxAutomaticallyExportScans.isSelected()){
+			save();
+		}
+	}
+
+	/**
+	 * Saves the scan to the filesystem.
+	 */
+	private void save() {
+		try {
+			FileUtils.write(new File(jarName + "-Scan.html"), text);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(null, e.getMessage(), "Error saving file!", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 
 	/**
@@ -223,5 +315,4 @@ public class Scanner {
 		return false;
 	}
 
-	
 }
