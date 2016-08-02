@@ -48,9 +48,8 @@ public class JarUtils {
 	 * @return
 	 */
 	private static Map<String, ClassNode> readJar(JarFile jar, JarEntry en, Map<String, ClassNode> classes) {
-		try {
-			final String name = en.getName();
-			InputStream jis = jar.getInputStream(en);
+		String name = en.getName();
+		try (InputStream jis = jar.getInputStream(en)){
 			if (name.endsWith(".class")) {
 				byte[] bytes = IOUtils.toByteArray(jis);
 				String cafebabe = String.format("%02X%02X%02X%02X", bytes[0], bytes[1], bytes[2], bytes[3]);

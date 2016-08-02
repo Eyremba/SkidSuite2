@@ -6,16 +6,20 @@ import java.lang.management.ManagementFactory;
 import com.sun.tools.attach.VirtualMachine;
 
 public class Loader {
-	public static void loadAgent(String jarFilePath) {
-		String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
-		int p = nameOfRunningVM.indexOf('@');
-		String pid = nameOfRunningVM.substring(0, p);
+	/**
+	 * Loads an agent from the given path.
+	 * 
+	 * @param agentPath
+	 *            The path to the agent jar
+	 */
+	public static void loadAgent(String agentPath) {
+		String vmName = ManagementFactory.getRuntimeMXBean().getName();
+		int index = vmName.indexOf('@');
+		String pid = vmName.substring(0, index);
 		try {
-			File f = new File(jarFilePath);
-			System.out.println("Loading agent: " + f.getPath());
+			File agentFile = new File(agentPath);
 			VirtualMachine vm = VirtualMachine.attach(pid);
-			vm.loadAgent(f.getAbsolutePath(), "");
-			
+			vm.loadAgent(agentFile.getAbsolutePath(), "");
 			VirtualMachine.attach(vm.id());
 		} catch (Exception e) {
 			throw new RuntimeException(e);

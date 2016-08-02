@@ -7,10 +7,13 @@ import java.util.Set;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.IincInsnNode;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
@@ -567,11 +570,23 @@ public class OpUtils implements org.objectweb.asm.Opcodes {
 			LdcInsnNode ldc = (LdcInsnNode) ain;
 			return s + " " + ldc.cst.toString();
 		case AbstractInsnNode.INT_INSN:
-			return s + " " +  getIntValue(ain);
+			return s + " " + getIntValue(ain);
 		case AbstractInsnNode.IINC_INSN:
 			IincInsnNode iinc = (IincInsnNode) ain;
-			return s  + " " + iinc.var + " +" + iinc.incr;
+			return s + " " + iinc.var + " +" + iinc.incr;
+		case AbstractInsnNode.FRAME:
+			FrameNode fn = (FrameNode) ain;
+			return s + " " + getOpcodeText(fn.type) + " " + fn.local.size() + " " + fn.stack.size();
+		case AbstractInsnNode.LABEL:
+			LabelNode ln = (LabelNode) ain;
+			return s + " " + getIndex(ln);
 		}
 		return s;
+	}
+
+	public static void print(InsnList instructions) {
+		for (AbstractInsnNode ain : instructions.toArray()) {
+			System.out.println(toString(ain));
+		}
 	}
 }

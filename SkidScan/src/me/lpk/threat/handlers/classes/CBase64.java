@@ -18,7 +18,7 @@ public class CBase64 extends ClassHandler {
 	@Override
 	public ThreatResult scanClass(ClassNode cn) {
 		String regex = "^(?:[A-Za-z0-9+\\/]{4})*(?:[A-Za-z0-9+\\/]{2}==|[A-Za-z0-9+\\/]{3}=)?$";
-		List<String> methods = new ArrayList<String>();
+		List<String> decrypts = new ArrayList<String>();
 		for (MethodNode mn : cn.methods) {
 			for (AbstractInsnNode ain : mn.instructions.toArray()) {
 				if (ain.getType() != AbstractInsnNode.LDC_INSN) {
@@ -27,15 +27,18 @@ public class CBase64 extends ClassHandler {
 				LdcInsnNode ldc = (LdcInsnNode) ain;
 				if (ldc.cst instanceof String) {
 					String encoded = ldc.cst.toString();
-					if (RegexUtils.isMatch(regex, encoded)){
-						String decoded = new String(Base64.getDecoder().decode(encoded.getBytes()));
-						System.out.println(mn.name + mn.desc + ": " + encoded + " --> " + decoded);
+					// TODO: Improve match regex
+					// It doesn't detect if it's valid. Just if it is the right length/chars
+					byte[] bytes = encoded.getBytes();
+					if (encoded.contains("==") && bytes.length >= 4 && RegexUtils.isMatch(regex, encoded)){
+						String decoded = new String(Base64.getDecoder().decode(bytes));
+						decrypts.add(decoded);
 					}
 				}
 			}
 		}
-		if (methods.size() > 0) {
-			return ThreatResult.withData(getName(), getDesc(), methods);
+		if (decrypts.size() > 0) {
+			return ThreatResult.withData(getName(), getDesc(), decrypts);
 		}
 		return null;
 	}

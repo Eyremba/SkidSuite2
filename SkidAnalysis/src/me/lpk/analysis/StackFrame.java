@@ -7,6 +7,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InvokeDynamicInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -42,6 +43,18 @@ public class StackFrame extends Frame {
 	public StackFrame(int nLocals, int nStack) {
 		super(nLocals, nStack);
 		this.ain = null;
+	}
+	
+	public FrameNode toFrame(){
+		List stack = new ArrayList();
+		for (int s = 0; s < this.getStackSize(); s++){
+			stack.add(this.getStack(s));
+		}
+		List locals = new ArrayList();
+		for (int l = 0; l< this.locals; l++){
+			stack.add(this.getLocal(l));
+		}
+		return new FrameNode(Opcodes.F_FULL, stack.size(),stack.toArray(), locals.size(), locals.toArray());
 	}
 
 	public void execute(final AbstractInsnNode insn, final StackHelper interpreter) throws AnalyzerException {
