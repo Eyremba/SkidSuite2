@@ -1,17 +1,19 @@
 package me.lpk.obfuscation;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
 
-import me.lpk.analysis.StackFrame;
-import me.lpk.analysis.StackUtil;
+import me.lpk.util.AccessHelper;
 
 public class Flow {
 
@@ -29,22 +31,38 @@ public class Flow {
 		LabelNode labelAfter = new LabelNode();
 		LabelNode labelBefore = new LabelNode();
 		LabelNode labelFinal = new LabelNode();
-		StackFrame[] frames = StackUtil.getFrames(mn);
 		mn.instructions.insertBefore(ain, labelBefore);
 		mn.instructions.insert(ain, labelAfter);
 		mn.instructions.insert(labelAfter, labelFinal);
-		mn.instructions.insert(frames[0].toFrame());
-
-		mn.instructions.insertBefore(labelBefore, gotoLogic(mn, labelAfter));
-		mn.instructions.insertBefore(labelAfter, gotoLogic(mn, labelFinal));
-		mn.instructions.insertBefore(labelFinal, gotoLogic(mn, labelBefore));
-
+		// TODO: Add variety. Make opaque predicates
+		// Tried before but muh stackframes
+		mn.instructions.insertBefore(labelBefore, new JumpInsnNode(Opcodes.GOTO, labelAfter));
+		mn.instructions.insertBefore(labelAfter, new JumpInsnNode(Opcodes.GOTO, labelFinal));
+		mn.instructions.insertBefore(labelFinal, new JumpInsnNode(Opcodes.GOTO, labelBefore));
 	}
 
-	private static InsnList gotoLogic(MethodNode mn, LabelNode label) {
-		InsnList list = new InsnList();
-		// TODO: Randomization
-		 list.add(new JumpInsnNode(Opcodes.GOTO, label));
-		return list;
+	public static void addTryCatch(MethodNode mn, String catchType, String handleType) {
+		if (mn.name.startsWith("<") || AccessHelper.isAbstract(mn.access)) {
+			return;
+		}
+		LabelNode start = new LabelNode();
+		LabelNode handler = new LabelNode();
+		LabelNode end = new LabelNode();
+		if (mn.localVariables == null) {
+			mn.localVariables = new ArrayList<LocalVariableNode>(5);
+		}
+		int index = mn.localVariables.size();
+		mn.instructions.insert(start);
+		mn.instructions.add(handler);
+		mn.instructions.add(new InsnNode(Opcodes.NOP));
+		mn.instructions.add(end);
+		mn.instructions.add(new InsnNode(Opcodes.ACONST_NULL));
+		mn.instructions.add(new InsnNode(Opcodes.ATHROW));
+
+		LocalVariableNode exVar = new LocalVariableNode("excptn", "L" + catchType + ";", null, start, handler, index);
+		TryCatchBlockNode tryBlock = new TryCatchBlockNode(start, end, handler, handleType == null ? null : ("L" + handleType + ";"));
+		mn.localVariables.add(exVar);
+		mn.tryCatchBlocks.add(tryBlock);
+		mn.exceptions.add(catchType);
 	}
 }

@@ -8,39 +8,25 @@ import java.util.Map;
 import java.util.Set;
 
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
-
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
 import me.lpk.mapping.remap.MappingMode;
 import me.lpk.mapping.remap.MappingRenamer;
+import me.lpk.obfuscation.AntiDecompile;
+import me.lpk.obfuscation.Flow;
+import me.lpk.obfuscation.Stringer;
+import me.lpk.util.AccessHelper;
 import me.lpk.util.JarUtils;
 import me.lpk.util.LazySetupMaker;
 
 public class Main {
 
 	public static void main(String[] args) {
-		obfuscating("SkidASM.jar", "Out.jar");
-	}
-
-	public static void renaming(String jarIn, String jarOut) {
-		LazySetupMaker dat = LazySetupMaker.get(jarIn, true, false);
-		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
-		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
-		//
-		//
-		Logger.logLow("Renaming");
-		mappings = MappingRenamer.remapClasses(mappings, mm());
-		mappings.get("me/lpk/MainWindow").setNewName("MainWindow");
-		//
-		//
-		Logger.logLow("Saving");
-		saveJar(jarOut, new File(jarIn), nodes, mappings);
-		System.out.println("Renaming done!");
+		obfuscating("In.jar", "Out.jar");
 	}
 
 	public static void obfuscating(String jarIn, String jarOut) {
@@ -48,124 +34,102 @@ public class Main {
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 		//
-		//
-		// mappings.get("me/lpk/MainWindow").setNewName("MainWindow");
-		//
-		//
-		Logger.logLow("Modifying - Encryption");
-		for (ClassNode cn : nodes.values()) {
-			if (mappings.get(cn.name) == null) {
-				System.err.println(cn.name);
-			}
-			Stringer.stringEncrypt(cn, mappings.get(cn.name).getNewName());
-			//
-			//
-
-			//
-			//
-			// for (MethodNode mn : cn.methods) for (int i = 0; i < 50; i++) Flow.shift_failed(cn, mn);
-
-		}
-		Logger.logLow("Modifying - Member Access");
-		for (ClassNode cn : nodes.values()) {
-			for (FieldNode fn : cn.fields) {
-				fn.access = fn.access | Opcodes.ACC_SYNTHETIC;
-			}
-			for (MethodNode mn : cn.methods) {
-				mn.access = mn.access | Opcodes.ACC_SYNTHETIC;
+		boolean tryCatch = true;
+		boolean ldc = false;
+		boolean types = true;
+		boolean varDupes = false;
+		boolean access = true;
+		boolean string = true;
+		boolean gotos = true;
+		boolean badPop = true;
+		boolean retObjErr = true;
+		if (tryCatch) {
+			Logger.logLow("Modifying - Try Catch");
+			for (ClassNode cn : nodes.values()) {
+				for (MethodNode mn : cn.methods) {
+					Flow.addTryCatch(mn, "java/lang/Exception", null);
+				}
 			}
 		}
-		//
-		//
-		Logger.logLow("Saving");
-		saveJar(jarOut, new File(jarIn), nodes, mappings);
-		System.out.println("Obfuscating done!");
-	}
-
-	public static void obfuscating2(String jarIn, String jarOut) {
-		LazySetupMaker dat = LazySetupMaker.get(jarIn, false, false);
-		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
-		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
-		Logger.logLow("Modifying - Encryption");
-		for (ClassNode cn : nodes.values()) {
-			for (MethodNode mn : cn.methods) {
-				for (AbstractInsnNode ain : mn.instructions.toArray()) {
-					int t = ain.getType();
-					if (t == AbstractInsnNode.FRAME || t == AbstractInsnNode.LINE) {
-						mn.instructions.remove(ain);
+		if (retObjErr) {
+			Logger.logLow("Modifying - Bad Return");
+			for (ClassNode cn : nodes.values()) {
+				AntiDecompile.retObjErr(cn);
+			}
+		}
+		if (badPop) {
+			Logger.logLow("Modifying - Bad Pop");
+			for (ClassNode cn : nodes.values()) {
+				for (MethodNode mn : cn.methods) {
+					AntiDecompile.badPop(mn);
+				}
+			}
+		}
+		if (access) {
+			Logger.logLow("Modifying - Member Access");
+			for (ClassNode cn : nodes.values()) {
+				for (FieldNode fn : cn.fields) {
+					if (!AccessHelper.isSynthetic(fn.access)) {
+						fn.access = fn.access | Opcodes.ACC_SYNTHETIC;
 					}
 				}
-					Flow.shift_failed(cn, mn);
-				
-			}
-
-		}
-		Logger.logLow("Saving");
-		saveJar(jarOut, new File(jarIn), nodes, mappings);
-		System.out.println("Obfuscating done!");
-	}
-
-	private static MappingMode mm() {
-		return (new MappingMode() {
-
-			private Set<String> used = new HashSet<String>();
-
-			@Override
-			public String getClassName(ClassNode cn) {
-				return randName();
-			}
-
-			@Override
-			public String getMethodName(MethodNode mn) {
-				return randName();
-			}
-
-			@Override
-			public String getFieldName(FieldNode fn) {
-				return randName();
-			}
-
-			private String randName() {
-				StringBuilder sb = new StringBuilder();
-				while (sb.length() < 9 || used.contains(sb.toString())) {
-					int o = (int) Math.round(Math.random() * 9);
-					switch (o) {
-					case 0:
-						sb.append('\u2580');
-						break;
-					case 1:
-						sb.append('\u2581');
-						break;
-					case 2:
-						sb.append('\u2582');
-						break;
-					case 3:
-						sb.append('\u2583');
-						break;
-					case 4:
-						sb.append('\u2584');
-						break;
-					case 5:
-						sb.append('\u2585');
-						break;
-					case 6:
-						sb.append('\u2586');
-						break;
-					case 7:
-						sb.append('\u2587');
-						break;
-					case 8:
-						sb.append('\u2588');
-						break;
-					case 9:
-						sb.append('\u2589');
-						break;
+				for (MethodNode mn : cn.methods) {
+					if (mn.name.contains("<")) {
+						continue;
+					}
+					if (!AccessHelper.isSynthetic(mn.access)) {
+						mn.access = mn.access | Opcodes.ACC_SYNTHETIC;
+					}
+					if (!AccessHelper.isBridge(mn.access)) {
+						mn.access = mn.access | Opcodes.ACC_BRIDGE;
 					}
 				}
-				used.add(sb.toString());
-				return sb.toString();
 			}
-		});
+		}
+		if (string) {
+			Logger.logLow("Modifying - Encryption");
+			for (ClassNode cn : nodes.values()) {
+				Stringer.stringEncrypt(cn, mappings.get(cn.name).getNewName());
+			}
+		}
+		if (gotos) {
+			Logger.logLow("Modifying - Flow Obfuscation");
+			for (ClassNode cn : nodes.values()) {
+				for (MethodNode mn : cn.methods) {
+					for (int i = 0; i < 10; i++) {
+						Flow.randomGotos(cn, mn);
+					}
+				}
+			}
+		}
+		if (types) {
+			Logger.logLow("Modifying - Type Overload");
+			for (ClassNode cn : nodes.values()) {
+				for (MethodNode mn : cn.methods) {
+					AntiDecompile.types(mn);
+				}
+			}
+		}
+		if (varDupes) {
+			Logger.logLow("Modifying - Var Dupes");
+			for (ClassNode cn : nodes.values()) {
+				for (MethodNode mn : cn.methods) {
+					AntiDecompile.duplicateVars(mn);
+				}
+			}
+		}
+		if (ldc) {
+			Logger.logLow("Modifying - Massive LDC");
+			for (ClassNode cn : nodes.values()) {
+				for (MethodNode mn : cn.methods) {
+					AntiDecompile.massiveLdc(mn);
+				}
+			}
+		}
+		//
+		//
+		saveJar(jarOut, new File(jarIn), nodes, mappings);
+		System.out.println("Finished!");
 	}
 
 	private static void saveJar(String name, File nonEntriesJar, Map<String, ClassNode> nodes, Map<String, MappedClass> mappedClasses) {

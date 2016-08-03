@@ -47,11 +47,11 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
 public class MainGUI {
-	private JCheckBox chkUseMaxs, chkNoRemoval;
+	private JCheckBox chkUseMaxs, chkOptimization;
 	private JCheckBox chkRemoveSource, chkRemoveInnerOuter, chkRemoveClassAnnotations, chkRemoveClassAttribs, chkRemoveMethods;
 	private JCheckBox chkRemoveParameter, chkRemoveMethodsAnnotations, chkRemoveLocals, chkRemoveLines, chkRemoveFrames, chkRemoveMethodAttribs;
 	private JFrame frmSkidshrink;
-	private JLabel lblMainOptions;
+	private JLabel lblOpMainOptions;
 	private JLabel lblClassOptions;
 	private JLabel lblMethodOptions;
 	private JLabel lblDragALibrary;
@@ -59,7 +59,7 @@ public class MainGUI {
 	private JPanel pnlLibraries;
 	private JList<String> lstLoadedLibs;
 	private JTabbedPane tabbedPane;
-	private JPanel panelObfuscation;
+	private JPanel pnlObfuscation;
 	private final Optimizer optimizer = new Optimizer();
 
 	/**
@@ -100,90 +100,140 @@ public class MainGUI {
 		pnlOptimization.setBackground(SystemColor.controlHighlight);
 		pnlOptimization.setLayout(new BoxLayout(pnlOptimization, BoxLayout.Y_AXIS));
 
-		JPanel pnlMainOptions = new JPanel();
-		pnlOptimization.add(pnlMainOptions);
-		pnlMainOptions.setBackground(SystemColor.controlHighlight);
-		pnlMainOptions.setBorder(null);
-		pnlMainOptions.setLayout(new BoxLayout(pnlMainOptions, BoxLayout.Y_AXIS));
+		JPanel pnlOpMainOptions = new JPanel();
+		pnlOptimization.add(pnlOpMainOptions);
+		pnlOpMainOptions.setBackground(SystemColor.controlHighlight);
+		pnlOpMainOptions.setBorder(null);
+		pnlOpMainOptions.setLayout(new BoxLayout(pnlOpMainOptions, BoxLayout.Y_AXIS));
 
-		lblMainOptions = new JLabel("Main Options");
-		lblMainOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
-		pnlMainOptions.add(lblMainOptions);
-		chkNoRemoval = new JCheckBox("No Removal");
-		chkNoRemoval.setBackground(SystemColor.controlHighlight);
-		pnlMainOptions.add(chkNoRemoval);
-		chkNoRemoval.setToolTipText("This may be needed when 'Use Maxs' is included");
-		chkUseMaxs = new JCheckBox("Use Maxs");
+		lblOpMainOptions = new JLabel("Main Options");
+		lblOpMainOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
+		pnlOpMainOptions.add(lblOpMainOptions);
+		chkOptimization = new JCheckBox("Optimize");
+		chkOptimization.setSelected(true);
+		chkOptimization.setBackground(SystemColor.controlHighlight);
+		pnlOpMainOptions.add(chkOptimization);
+		chkOptimization.setToolTipText("This may be needed when 'Use Maxs' is included");
+		chkUseMaxs = new JCheckBox("Compile with Maxs");
 		chkUseMaxs.setBackground(SystemColor.controlHighlight);
-		pnlMainOptions.add(chkUseMaxs);
+		pnlOpMainOptions.add(chkUseMaxs);
 		chkUseMaxs.setToolTipText("This may require you to start shrunk programs with '-noverify'.");
 
 		// Class optimizations
-		JPanel pnlClassOptions = new JPanel();
-		pnlOptimization.add(pnlClassOptions);
-		pnlClassOptions.setBackground(SystemColor.controlHighlight);
-		pnlClassOptions.setLayout(new BoxLayout(pnlClassOptions, BoxLayout.Y_AXIS));
+		JPanel pnlOpClassOptions = new JPanel();
+		pnlOptimization.add(pnlOpClassOptions);
+		pnlOpClassOptions.setBackground(SystemColor.controlHighlight);
+		pnlOpClassOptions.setLayout(new BoxLayout(pnlOpClassOptions, BoxLayout.Y_AXIS));
 
 		lblClassOptions = new JLabel("Class Options");
 		lblClassOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
-		pnlClassOptions.add(lblClassOptions);
+		pnlOpClassOptions.add(lblClassOptions);
 		chkRemoveSource = new JCheckBox("Remove Source Name");
 		chkRemoveSource.setSelected(true);
 		chkRemoveSource.setBackground(SystemColor.controlHighlight);
-		pnlClassOptions.add(chkRemoveSource);
-		pnlClassOptions.add(chkRemoveSource);
+		pnlOpClassOptions.add(chkRemoveSource);
+		pnlOpClassOptions.add(chkRemoveSource);
 		chkRemoveClassAnnotations = new JCheckBox("Remove Annotations");
 		chkRemoveClassAnnotations.setSelected(false);
 		chkRemoveClassAnnotations.setBackground(SystemColor.controlHighlight);
-		pnlClassOptions.add(chkRemoveClassAnnotations);
+		pnlOpClassOptions.add(chkRemoveClassAnnotations);
 		chkRemoveClassAttribs = new JCheckBox("Remove Attributes");
 		chkRemoveClassAttribs.setSelected(true);
 		chkRemoveClassAttribs.setBackground(SystemColor.controlHighlight);
-		pnlClassOptions.add(chkRemoveClassAttribs);
+		pnlOpClassOptions.add(chkRemoveClassAttribs);
 		chkRemoveMethods = new JCheckBox("Remove Unused Methods");
 		chkRemoveMethods.setSelected(false);
 		chkRemoveMethods.setEnabled(false);
 		chkRemoveMethods.setBackground(SystemColor.controlHighlight);
-		pnlClassOptions.add(chkRemoveMethods);
+		pnlOpClassOptions.add(chkRemoveMethods);
 
 		// Method optimizations
-		JPanel pnlMethodOptions = new JPanel();
-		pnlOptimization.add(pnlMethodOptions);
-		pnlMethodOptions.setBackground(SystemColor.controlHighlight);
-		pnlMethodOptions.setLayout(new BoxLayout(pnlMethodOptions, BoxLayout.Y_AXIS));
+		JPanel pnlOpMethodOptions = new JPanel();
+		pnlOptimization.add(pnlOpMethodOptions);
+		pnlOpMethodOptions.setBackground(SystemColor.controlHighlight);
+		pnlOpMethodOptions.setLayout(new BoxLayout(pnlOpMethodOptions, BoxLayout.Y_AXIS));
 
 		lblMethodOptions = new JLabel("Method Options");
 		lblMethodOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
-		pnlMethodOptions.add(lblMethodOptions);
+		pnlOpMethodOptions.add(lblMethodOptions);
 		chkRemoveParameter = new JCheckBox("Remove Parameter Names");
 		chkRemoveParameter.setSelected(true);
 		chkRemoveParameter.setBackground(SystemColor.controlHighlight);
-		pnlMethodOptions.add(chkRemoveParameter);
+		pnlOpMethodOptions.add(chkRemoveParameter);
 		chkRemoveMethodsAnnotations = new JCheckBox("Remove Annotations");
 		chkRemoveMethodsAnnotations.setSelected(false);
 		chkRemoveMethodsAnnotations.setBackground(SystemColor.controlHighlight);
-		pnlMethodOptions.add(chkRemoveMethodsAnnotations);
+		pnlOpMethodOptions.add(chkRemoveMethodsAnnotations);
 		chkRemoveLocals = new JCheckBox("Remove Local Variables");
 		chkRemoveLocals.setSelected(true);
 		chkRemoveLocals.setBackground(SystemColor.controlHighlight);
-		pnlMethodOptions.add(chkRemoveLocals);
+		pnlOpMethodOptions.add(chkRemoveLocals);
 		chkRemoveLines = new JCheckBox("Remove Line Numbers");
 		chkRemoveLines.setSelected(true);
 		chkRemoveLines.setBackground(SystemColor.controlHighlight);
-		pnlMethodOptions.add(chkRemoveLines);
-		chkRemoveFrames = new JCheckBox("Remove Frames");
-		chkRemoveFrames.setSelected(false);
-		chkRemoveFrames.setBackground(SystemColor.controlHighlight);
-		pnlMethodOptions.add(chkRemoveFrames);
+		pnlOpMethodOptions.add(chkRemoveLines);
 		chkRemoveMethodAttribs = new JCheckBox("Remove Attributes");
 		chkRemoveMethodAttribs.setSelected(true);
 		chkRemoveMethodAttribs.setBackground(SystemColor.controlHighlight);
-		pnlMethodOptions.add(chkRemoveMethodAttribs);
+		pnlOpMethodOptions.add(chkRemoveMethodAttribs);
+		chkRemoveFrames = new JCheckBox("Remove Frames");
+		chkRemoveFrames.setEnabled(false);
+		chkRemoveFrames.setSelected(false);
+		chkRemoveFrames.setBackground(SystemColor.controlHighlight);
+		pnlOpMethodOptions.add(chkRemoveFrames);
 
-		panelObfuscation = new JPanel();
-		panelObfuscation.setBackground(SystemColor.controlHighlight);
-		tabbedPane.addTab("Obfuscation", null, panelObfuscation, null);
-		panelObfuscation.setLayout(new BoxLayout(panelObfuscation, BoxLayout.Y_AXIS));
+		pnlObfuscation = new JPanel();
+		pnlObfuscation.setBackground(SystemColor.controlHighlight);
+		tabbedPane.addTab("Obfuscation", null, pnlObfuscation, null);
+		pnlObfuscation.setLayout(new BoxLayout(pnlObfuscation, BoxLayout.Y_AXIS));
+		
+		pnlObMainOptions = new JPanel();
+		pnlObMainOptions.setBackground(SystemColor.controlHighlight);
+		pnlObfuscation.add(pnlObMainOptions);
+		pnlObMainOptions.setLayout(new BoxLayout(pnlObMainOptions, BoxLayout.Y_AXIS));
+		
+		lblObMainOptions = new JLabel("Main Options");
+		lblObMainOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
+		pnlObMainOptions.add(lblObMainOptions);
+		
+		chkStringObfuscation = new JCheckBox("String Obfuscation");
+		chkStringObfuscation.setBackground(SystemColor.controlHighlight);
+		pnlObMainOptions.add(chkStringObfuscation);
+		
+		chckbxAntidecompile = new JCheckBox("Anti-Decompile");
+		chckbxAntidecompile.setBackground(SystemColor.controlHighlight);
+		pnlObMainOptions.add(chckbxAntidecompile);
+		
+		chckbxFlowObfuscation = new JCheckBox("Flow Obfuscation");
+		chckbxFlowObfuscation.setBackground(SystemColor.controlHighlight);
+		chckbxFlowObfuscation.setEnabled(false);
+		pnlObMainOptions.add(chckbxFlowObfuscation);
+		
+		pnlObStringOptions = new JPanel();
+		pnlObStringOptions.setBackground(SystemColor.controlHighlight);
+		pnlObfuscation.add(pnlObStringOptions);
+		pnlObStringOptions.setLayout(new BoxLayout(pnlObStringOptions, BoxLayout.Y_AXIS));
+		
+		lblObStringOptions = new JLabel("String Options");
+		lblObStringOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
+		pnlObStringOptions.add(lblObStringOptions);
+		
+		chckbxNewCheckBox = new JCheckBox("Break into array");
+		chckbxNewCheckBox.setBackground(SystemColor.controlHighlight);
+		pnlObStringOptions.add(chckbxNewCheckBox);
+		
+		pnlObAnti = new JPanel();
+		pnlObAnti.setBackground(SystemColor.controlHighlight);
+		pnlObfuscation.add(pnlObAnti);
+		pnlObAnti.setLayout(new BoxLayout(pnlObAnti, BoxLayout.Y_AXIS));
+		
+		lblAntidecompileOptions = new JLabel("Anti-Decompile Options");
+		pnlObAnti.add(lblAntidecompileOptions);
+		lblAntidecompileOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
+		
+		chkMakeSynthetic = new JCheckBox("Declare Synthetic");
+		chkMakeSynthetic.setBackground(SystemColor.controlHighlight);
+		pnlObAnti.add(chkMakeSynthetic);
 		JPanel mainPanel = new JPanel();
 		mainPanel.setBackground(new Color(227, 227, 227));
 		mainPanel.setBorder(null);
@@ -209,7 +259,7 @@ public class MainGUI {
 				} catch (Exception e) {
 					return false;
 				}
-				optimizer.update(chkUseMaxs.isSelected(), chkNoRemoval.isSelected(), chkRemoveSource.isSelected(), chkRemoveInnerOuter.isSelected(),
+				optimizer.update(chkUseMaxs.isSelected(), !chkOptimization.isSelected(), chkRemoveSource.isSelected(), chkRemoveInnerOuter.isSelected(),
 						chkRemoveClassAnnotations.isSelected(), chkRemoveClassAttribs.isSelected(), chkRemoveMethods.isSelected(), chkRemoveParameter.isSelected(),
 						chkRemoveMethodsAnnotations.isSelected(), chkRemoveLocals.isSelected(), chkRemoveLines.isSelected(), chkRemoveFrames.isSelected(),
 						chkRemoveMethodAttribs.isSelected());
@@ -289,6 +339,17 @@ public class MainGUI {
 	}
 
 	private Set<File> libraries = new HashSet<File>();
+	private JPanel pnlObMainOptions;
+	private JLabel lblObMainOptions;
+	private JCheckBox chkStringObfuscation;
+	private JCheckBox chckbxFlowObfuscation;
+	private JCheckBox chckbxAntidecompile;
+	private JPanel pnlObStringOptions;
+	private JLabel lblObStringOptions;
+	private JCheckBox chckbxNewCheckBox;
+	private JPanel pnlObAnti;
+	private JLabel lblAntidecompileOptions;
+	private JCheckBox chkMakeSynthetic;
 
 	public void addLibrary(File jar, JList<String> jlist) {
 		libraries.add(jar);
@@ -319,7 +380,7 @@ public class MainGUI {
 		}
 
 		// Removal
-		if (!chkNoRemoval.isSelected()) {
+		if (chkOptimization.isSelected()) {
 			// Find entry-point
 			String mainClass = JarUtils.getManifestMainClass(jar);
 			Logger.logLow("Compting classes to ignore...");
@@ -352,8 +413,78 @@ public class MainGUI {
 				optimizer.shrink(lsm.getMappings().get(cn.name), remover, new SkidRemapper(new HashMap<String, MappedClass>()), cw);
 			}
 		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 
 		// TODO: Obfuscation
+		
+		
+		//fucking do this
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 
 		// Finally export ClassNodes to bytes
 		for (ClassNode cn : lsm.getNodes().values()) {
