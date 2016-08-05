@@ -1,27 +1,43 @@
 package me.lpk.hijack;
 
-import java.io.IOException;
+import java.io.Serializable;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.AbstractCollection;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 
+import me.lpk.hijack.match.AbstractMatcher;
 import me.lpk.util.ASMUtils;
 
-public class Refactorer implements ClassFileTransformer, Opcodes {
-	private static final Map<String, ClassModder> modders = new HashMap<String, ClassModder>();
+public class Refactorer implements ClassFileTransformer {
+	private static final Set<AbstractMatcher<String>> matchers = new HashSet<AbstractMatcher<String>>();
+	public static final Refactorer INSTANCE = new Refactorer();
 
-	public static void register(String name, ClassModder modder) {
-		modders.put(name, modder);
+	static {
+		Serializable.class.getName();
+		Cloneable.class.getName();
+		Iterable .class.getName();
+		Collection.class.getName();
+		AbstractCollection.class.getName();
+		Set.class.getName();
+		AbstractSet.class.getName();
+		HashSet.class.getName();
 	}
-	
-	public static void unregister(String name) {
-		modders.remove(name);
+
+	/**
+	 * Registers a matcher.
+	 * 
+	 * @param matcher
+	 * @param modder
+	 */
+	public static void register(AbstractMatcher<String> matcher) {
+		matchers.add(matcher);
 	}
 
 	/**
@@ -36,44 +52,19 @@ public class Refactorer implements ClassFileTransformer, Opcodes {
 	 * @throws IllegalClassFormatException
 	 */
 	public byte[] transform(ClassLoader loader, String name, Class<?> clazz, ProtectionDomain domain, byte[] bytes) throws IllegalClassFormatException {
-		if (isRegistered(name)) {
-			ClassModder cm = modders.get(name);
-			ClassNode cn = getClass(name);
-			cm.setDomain(domain);
-			cm.setBackup(bytes);
-			cm.setLoader(loader);
-			cm.setClass(clazz);
-			cm.modify(cn);
-			return ASMUtils.getNodeBytes(cn, false);
+		for (AbstractMatcher<String> matcher : matchers) {
+			// TODO: Have a system that allows users to input a mapping
+			// Name will then use the remapped class name instead
+			// or...
+			// Have a ClassMatcher that does that rather than doing it here
+			if (matcher.isMatch(name)) {
+				matcher.update(loader, bytes, clazz, domain);
+				ClassNode cn = ASMUtils.getNode(bytes);
+				matcher.modify(cn);
+				bytes = ASMUtils.getNodeBytes(cn, true);
+			}
 		}
+
 		return bytes;
-	}
-
-	/**
-	 * Checks if a classname <i>(com/example/Format)</i> is registered.
-	 * 
-	 * @param name
-	 * @return
-	 */
-	private boolean isRegistered(String name) {
-		return modders.containsKey(name);
-	}
-
-	/**
-	 * Loads a classnode from a class in the JVM.
-	 * 
-	 * @param name
-	 * @return
-	 */
-	private ClassNode getClass(String name) {
-		ClassReader cr = null;
-		try {
-			cr = new ClassReader(name.replace('/', '.'));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		ClassNode cn = new ClassNode();
-		cr.accept(cn, ClassReader.EXPAND_FRAMES);
-		return cn;
 	}
 }

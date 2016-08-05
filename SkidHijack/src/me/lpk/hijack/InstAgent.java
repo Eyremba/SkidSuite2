@@ -6,7 +6,7 @@ public class InstAgent {
 	private static Instrumentation instrumentation;
 
 	/**
-	 * Called when declared before JVM start.
+	 * Called when declared in JVM arguments.
 	 * 
 	 * @param args
 	 * @param inst
@@ -17,7 +17,7 @@ public class InstAgent {
 	}
 
 	/**
-	 * Called when declared after JVM start.
+	 * Called when declared at runtime.
 	 * 
 	 * @param args
 	 * @param inst
@@ -29,14 +29,21 @@ public class InstAgent {
 
 	private static void setAndAddTransformer(Instrumentation inst) {
 		instrumentation = inst;
-		instrumentation.addTransformer(new Refactorer());
+		instrumentation.addTransformer(Refactorer.INSTANCE);
 		System.out.println("Instrumentation: " + "[ Redefinition:" + instrumentation.isRedefineClassesSupported() + ", Retransformation:"
 				+ instrumentation.isRetransformClassesSupported() + " ]");
+
+
+		// Registering class modders for Refactorer goes here
 	}
 
 	public static void initialize(String jarFilePath) {
 		if (instrumentation == null) {
-			Loader.loadAgent(jarFilePath);
+			RuntimeLoader.loadAgent(jarFilePath);
 		}
+	}
+
+	public static Instrumentation getInst() {
+		return instrumentation;
 	}
 }

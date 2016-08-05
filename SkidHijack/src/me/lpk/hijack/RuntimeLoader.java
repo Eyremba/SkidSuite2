@@ -5,7 +5,7 @@ import java.lang.management.ManagementFactory;
 
 import com.sun.tools.attach.VirtualMachine;
 
-public class Loader {
+public class RuntimeLoader {
 	/**
 	 * Loads an agent from the given path.
 	 * 
