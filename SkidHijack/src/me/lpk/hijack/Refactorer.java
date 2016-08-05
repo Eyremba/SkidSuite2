@@ -19,17 +19,6 @@ public class Refactorer implements ClassFileTransformer {
 	private static final Set<AbstractMatcher<String>> matchers = new HashSet<AbstractMatcher<String>>();
 	public static final Refactorer INSTANCE = new Refactorer();
 
-	static {
-		Serializable.class.getName();
-		Cloneable.class.getName();
-		Iterable .class.getName();
-		Collection.class.getName();
-		AbstractCollection.class.getName();
-		Set.class.getName();
-		AbstractSet.class.getName();
-		HashSet.class.getName();
-	}
-
 	/**
 	 * Registers a matcher.
 	 * 
@@ -66,5 +55,21 @@ public class Refactorer implements ClassFileTransformer {
 		}
 
 		return bytes;
+	}
+
+	static {
+		// This may look really stupid but if this isn't here the register
+		// method crashes citing ClassCircularityError.
+		// This is due to the improper order of loading classes. IDFK how to fix
+		// it other than by loading each in order.
+		// So yeah, you get this pretty static block now.
+		Serializable.class.getName();
+		Cloneable.class.getName();
+		Iterable.class.getName();
+		Collection.class.getName();
+		AbstractCollection.class.getName();
+		Set.class.getName();
+		AbstractSet.class.getName();
+		HashSet.class.getName();
 	}
 }
