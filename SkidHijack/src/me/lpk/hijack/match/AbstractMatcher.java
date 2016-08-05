@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.objectweb.asm.tree.ClassNode;
 
-import me.lpk.hijack.ClassModder;
+import me.lpk.hijack.modder.ClassModder;
 
 public abstract class AbstractMatcher<T> {
 	/**

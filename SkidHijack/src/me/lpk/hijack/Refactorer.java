@@ -56,7 +56,7 @@ public class Refactorer implements ClassFileTransformer {
 
 		return bytes;
 	}
-
+	
 	static {
 		// This may look really stupid but if this isn't here the register
 		// method crashes citing ClassCircularityError.

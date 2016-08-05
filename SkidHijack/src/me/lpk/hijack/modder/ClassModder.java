@@ -1,4 +1,4 @@
-package me.lpk.hijack;
+package me.lpk.hijack.modder;
 
 import org.objectweb.asm.tree.ClassNode;
 
