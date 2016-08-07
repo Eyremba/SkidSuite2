@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.objectweb.asm.tree.ClassNode;
-
 import me.lpk.hijack.match.AbstractMatcher;
 import me.lpk.util.ASMUtils;
 
@@ -41,22 +40,25 @@ public class Refactorer implements ClassFileTransformer {
 	 * @throws IllegalClassFormatException
 	 */
 	public byte[] transform(ClassLoader loader, String name, Class<?> clazz, ProtectionDomain domain, byte[] bytes) throws IllegalClassFormatException {
+		ClassNode cn = ASMUtils.getNode(bytes);
+		boolean modified = false;
 		for (AbstractMatcher<String> matcher : matchers) {
 			// TODO: Have a system that allows users to input a mapping
 			// Name will then use the remapped class name instead
 			// or...
 			// Have a ClassMatcher that does that rather than doing it here
 			if (matcher.isMatch(name)) {
+				modified = true;
 				matcher.update(loader, bytes, clazz, domain);
-				ClassNode cn = ASMUtils.getNode(bytes);
 				matcher.modify(cn);
-				bytes = ASMUtils.getNodeBytes(cn, true);
 			}
 		}
-
+		if (modified) {
+			bytes = ASMUtils.getNodeBytes(cn, true);
+		}
 		return bytes;
 	}
-	
+
 	static {
 		// This may look really stupid but if this isn't here the register
 		// method crashes citing ClassCircularityError.
