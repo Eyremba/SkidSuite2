@@ -20,6 +20,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import me.lpk.hijack.RemappedName;
 import me.lpk.hijack.match.AbstractMatcher;
 import me.lpk.hijack.modder.ClassModder;
 import me.lpk.util.ASMUtils;
@@ -30,6 +31,7 @@ import me.lpk.util.ASMUtils;
  * for different names at runtime.
  */
 public class ShellReplacementModder extends ClassModder {
+	private static final String ANNO_DESC = "L" + RemappedName.class.getName().replace(".", "/") + ";";
 	private final String shellPkg;
 
 	public ShellReplacementModder(AbstractMatcher<?> matcher, String shellPkg) {
@@ -97,6 +99,13 @@ public class ShellReplacementModder extends ClassModder {
 		// Rename the super class if needed.
 		if (needsRenaming(cn.superName)) {
 			cn.superName = updateClassName(cn.superName);
+		}
+		System.out.println(cn.name + " extends " + cn.superName);
+		for (FieldNode fn : cn.fields) {
+			System.out.println("\tField:   " + fn.name + "  " + fn.desc);
+		}
+		for (MethodNode mn : cn.methods) {
+			System.out.println("\tMethd:   " + mn.name + mn.desc);
 		}
 	}
 
@@ -219,13 +228,16 @@ public class ShellReplacementModder extends ClassModder {
 	 * @return
 	 */
 	private String updateMethodDesc(String desc) {
+		System.out.println("Updating: " + desc);
 		Type methodType = Type.getMethodType(desc);
 		// Iterate args and replace with corrected names.
 		for (Type arg : methodType.getArgumentTypes()) {
 			String argClass = arg.getClassName().replace(".", "/");
+			System.out.println("\tArg: " + argClass);
 			if (needsRenaming(argClass)) {
 				ClassNode acn = getClassNode(argClass);
 				desc = desc.replace(argClass, getRefactoredName(acn));
+				System.out.println("\tArg Renamed: " + getRefactoredName(acn));
 			}
 		}
 		// Replace return type.
@@ -281,7 +293,7 @@ public class ShellReplacementModder extends ClassModder {
 	private String getRefactoredName(ClassNode cn) {
 		if (cn.visibleAnnotations != null) {
 			for (AnnotationNode an : cn.visibleAnnotations) {
-				if (an.desc.equals("Lme/lpk/client/RemappedName;")) {
+				if (an.desc.equals(ANNO_DESC)) {
 					return an.values.get(1).toString();
 				}
 			}
@@ -299,7 +311,7 @@ public class ShellReplacementModder extends ClassModder {
 	private String getRefactoredName(FieldNode fn) {
 		if (fn.visibleAnnotations != null) {
 			for (AnnotationNode an : fn.visibleAnnotations) {
-				if (an.desc.equals("Lme/lpk/client/RemappedName;")) {
+				if (an.desc.equals(ANNO_DESC)) {
 					return an.values.get(1).toString();
 				}
 			}
@@ -318,7 +330,7 @@ public class ShellReplacementModder extends ClassModder {
 		try {
 			if (mn.visibleAnnotations != null) {
 				for (AnnotationNode an : mn.visibleAnnotations) {
-					if (an.desc.equals("Lme/lpk/client/RemappedName;")) {
+					if (an.desc.equals(ANNO_DESC)) {
 						String s = an.values.get(1).toString();
 						return s;
 					}
