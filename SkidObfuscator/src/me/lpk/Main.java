@@ -36,6 +36,7 @@ public class Main {
 		//
 		boolean tryCatch = false;
 		boolean ldc = false;
+		boolean math = true;
 		boolean types = false;
 		boolean varDupes = false;
 		boolean access = false;
@@ -123,6 +124,14 @@ public class Main {
 			for (ClassNode cn : nodes.values()) {
 				for (MethodNode mn : cn.methods) {
 					AntiDecompile.massiveLdc(mn);
+				}
+			}
+		}
+		if (math) {
+			Logger.logLow("Modifying - Math obfuscation");
+			for (ClassNode cn : nodes.values()) {
+				for (MethodNode mn : cn.methods) {
+					Flow.destroyMath(mn);
 				}
 			}
 		}

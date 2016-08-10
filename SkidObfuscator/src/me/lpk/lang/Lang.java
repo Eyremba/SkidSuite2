@@ -27,6 +27,7 @@ public class Lang {
 		OPTION_OBFU_ANTI_DECOMPILE_VULNS =     "obfuscate.anti.decompilevulns",
 		OPTION_OBFU_FLOW_TRYCATCH =            "obfuscate.flow.synthetic",
 		OPTION_OBFU_FLOW_GOTOFLOOD =           "obfuscate.flow.gotoflood",
+		OPTION_OBFU_FLOW_MATH =                "obfuscate.flow.math",
 		//
 		GUI_OBFUSCATION_GROUP_STRING = "gui.groups.obfuscate.strings",
 		GUI_OBFUSCATION_GROUP_FLOW =   "gui.groups.obfuscate.flow",
@@ -58,6 +59,7 @@ public class Lang {
 		translations.put(OPTION_OBFU_STRINGS_INTOARRAY,  "Break into arrays");
 		translations.put(OPTION_OBFU_FLOW_TRYCATCH,      "Add try catches");
 		translations.put(OPTION_OBFU_FLOW_GOTOFLOOD,     "Add redundant gotos");
+		translations.put(OPTION_OBFU_FLOW_MATH,          "Add redundant math");
 		translations.put(OPTION_OBFU_ANTI_SYNTHETIC,     "Mark as synthetic");
 		translations.put(OPTION_OBFU_ANTI_DECOMPILE_VULNS,"Anti-decompiler tricks");
 		//
