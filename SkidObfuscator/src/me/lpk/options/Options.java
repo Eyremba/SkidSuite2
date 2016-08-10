@@ -3,6 +3,9 @@ package me.lpk.options;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.lpk.gui.NewGui;
+import me.lpk.gui.panel.SettingsBox;
+import me.lpk.gui.panel.SettingsPanel;
 import me.lpk.lang.Lang;
 
 public class Options {
@@ -18,5 +21,18 @@ public class Options {
 	
 	public static boolean getDefaultState(String setting){
 		return defaultEnabledStates.containsKey(setting) && defaultEnabledStates.get(setting).booleanValue();
+	}
+	
+	public static Map<String, Boolean> fromGui(NewGui gui) {
+		Map<String, Boolean> values = new HashMap<String, Boolean>();
+		for (SettingsPanel panel : gui.getSettingPanels()) {
+			for (String group : panel.getGroupNames()) {
+				SettingsBox settingBox = panel.getGroup(group);
+				for (String setting : settingBox.getSettings()) {
+					values.put(setting, settingBox.isSettingActive(setting));
+				}
+			}
+		}
+		return values;
 	}
 }

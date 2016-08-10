@@ -4,6 +4,9 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -12,10 +15,13 @@ import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
 import javax.swing.UIManager;
 
+import me.lpk.Skidfuscate;
 import me.lpk.gui.drop.IDropUser;
 import me.lpk.gui.drop.JarDropHandler;
 import me.lpk.gui.panel.ObfuscationPanel;
 import me.lpk.gui.panel.OptimizationPanel;
+import me.lpk.gui.panel.SettingsPanel;
+import me.lpk.options.Options;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -28,12 +34,14 @@ public class NewGui implements IDropUser {
 	private final static int ID_LOAD_TARGET = 1;
 
 	private JFrame frmSkidfuscator;
-	private JPanel 
+	private final JPanel 
 			pnlMain = new JPanel(),
-			pnlInputs = new JPanel(), 
+			pnlInputs = new JPanel();
+	private final SettingsPanel 
 			pnlObfuscation = new ObfuscationPanel(), 
 			pnlOptimization = new OptimizationPanel();
-	
+	private final List<SettingsPanel> settingsPanels = new ArrayList<SettingsPanel>();
+	private final Skidfuscate instance = Skidfuscate.get();
 
 	/**
 	 * Launch the application.
@@ -80,12 +88,14 @@ public class NewGui implements IDropUser {
 
 		addDropZones(pnlInputs);
 		sddOther(pnlInputs);
+		settingsPanels.add(pnlObfuscation);
+		settingsPanels.add(pnlOptimization);
 		
 		tabbedPane.addTab("Main", null, pnlMain, "Main");
 		tabbedPane.addTab("Inputs", null, pnlInputs, "Where the inputs are chosen");
 		tabbedPane.addTab("Obfuscation", null, pnlObfuscation, "Options for obfuscation");
 		tabbedPane.addTab("Optimization", null, pnlOptimization, "Options for optimization");
-		//tabbedPane.setSelectedIndex(1);
+		tabbedPane.setSelectedIndex(1);
 	}
 
 	private void sddOther(JPanel pnlInputs2) {
@@ -94,6 +104,7 @@ public class NewGui implements IDropUser {
 
 	private void addDropZones(JPanel pnl) {
 		TransferHandler dropHandler_TargetJar = new JarDropHandler(this, ID_LOAD_TARGET);
+		TransferHandler dropHandler_LibraryJar = new JarDropHandler(this, ID_LOAD_LIBRARY);
 		JSplitPane splitDrag = new JSplitPane();
 		JLabel lblDragAJar = new JLabel("Drag program here");
 		JLabel lblDragALibrary = new JLabel("Drag libraries here");
@@ -104,6 +115,7 @@ public class NewGui implements IDropUser {
 		lblDragAJar.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		lblDragAJar.setBackground(new Color(240, 240, 240));
 		lblDragAJar.setHorizontalAlignment(SwingConstants.CENTER);
+		lblDragALibrary.setTransferHandler(dropHandler_LibraryJar);
 		lblDragAJar.setTransferHandler(dropHandler_TargetJar);
 		splitDrag.setLeftComponent(lblDragAJar);
 		splitDrag.setRightComponent(lblDragALibrary);
@@ -123,9 +135,13 @@ public class NewGui implements IDropUser {
 	@Override
 	public void onJarLoad(int id, File jar) {
 		if (id == ID_LOAD_TARGET) {
-
+			instance.parse(jar, Options.fromGui(this));
 		} else if (id == ID_LOAD_LIBRARY) {
-
+			instance.addLibrary(jar);
 		}
+	}
+
+	public List<SettingsPanel> getSettingPanels() {
+		return settingsPanels;
 	}
 }
