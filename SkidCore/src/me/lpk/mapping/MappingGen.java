@@ -144,14 +144,14 @@ public class MappingGen {
 	 * @return
 	 */
 	public static Map<String, MappedClass> mappingsFromNodes(Map<String, ClassNode> nodes) {
-		Map<String, MappedClass> mappedClasses = new HashMap<String, MappedClass>();
+		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>();
 		for (ClassNode node : nodes.values()) {
-			mappedClasses = generateClassMapping(node, nodes, mappedClasses);
+			mappings = generateClassMapping(node, nodes, mappings);
 		}
-		for (String name : mappedClasses.keySet()) {
-			mappedClasses = linkMappings(mappedClasses.get(name), mappedClasses);
+		for (String name : mappings.keySet()) {
+			mappings = linkMappings(mappings.get(name), mappings);
 		}
-		return mappedClasses;
+		return mappings;
 	}
 
 	/**
@@ -162,11 +162,11 @@ public class MappingGen {
 	 * @return
 	 */
 	public static Map<String, MappedClass> mappingsFromNodesNoLinking(Map<String, ClassNode> nodes) {
-		Map<String, MappedClass> mappedClasses = new HashMap<String, MappedClass>();
+		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>();
 		for (ClassNode node : nodes.values()) {
-			mappedClasses = generateClassMapping(node, nodes, mappedClasses);
+			mappings = generateClassMapping(node, nodes, mappings);
 		}
-		return mappedClasses;
+		return mappings;
 	}
 
 	/**
@@ -174,36 +174,35 @@ public class MappingGen {
 	 * 
 	 * @param node
 	 * @param nodes
-	 * @param mappedClasses
+	 * @param mappings
 	 */
-	private static Map<String, MappedClass> generateClassMapping(ClassNode node, Map<String, ClassNode> nodes, Map<String, MappedClass> mappedClasses) {
-		boolean hasParents = !node.superName.equals("java/lang/Object");
+	private static Map<String, MappedClass> generateClassMapping(ClassNode node, Map<String, ClassNode> nodes, Map<String, MappedClass> mappings) {
+		boolean hasParents = node.name.equals("java/lang/Object") && !node.superName.equals("java/lang/Object");
 		boolean hasInterfaces = node.interfaces.size() > 0;
 		if (hasParents) {
-			boolean parentRenamed = mappedClasses.containsKey(node.superName);
+			boolean parentRenamed = mappings.containsKey(node.superName);
 			ClassNode parentNode = nodes.get(node.superName);
 			if (parentNode != null && !parentRenamed) {
 				boolean conflict = ParentUtils.isLoop(node, nodes, 0);
-				if (conflict){
-					// Really ugly hack for when class super names loop. 
+				if (conflict) {
+					// Really ugly hack for when class super names loop.
 					// Only happens on a few obfuscated samples
 					parentNode.superName = "java/lang/Object";
-				}
-				else {
-					generateClassMapping(parentNode, nodes, mappedClasses);
+				} else {
+					generateClassMapping(parentNode, nodes, mappings);
 				}
 			}
 		}
 		if (hasInterfaces) {
 			for (String interfaze : node.interfaces) {
-				boolean interfaceRenamed = mappedClasses.containsKey(interfaze);
+				boolean interfaceRenamed = mappings.containsKey(interfaze);
 				ClassNode interfaceNode = nodes.get(interfaze);
 				if (interfaceNode != null && !interfaceRenamed) {
-					generateClassMapping(interfaceNode, nodes, mappedClasses);
+					generateClassMapping(interfaceNode, nodes, mappings);
 				}
 			}
 		}
-		boolean isRenamed = mappedClasses.containsKey(node.name);
+		boolean isRenamed = mappings.containsKey(node.name);
 		if (!isRenamed) {
 			MappedClass mappedClass = new MappedClass(node, node.name);
 			for (FieldNode fn : node.fields) {
@@ -212,35 +211,35 @@ public class MappingGen {
 			for (MethodNode mn : node.methods) {
 				mappedClass.addMethod(new MappedMember(mappedClass, mn, mappedClass.getMethods().size(), mn.desc, mn.name));
 			}
-			mappedClasses.put(node.name, mappedClass);
+			mappings.put(node.name, mappedClass);
 		}
-		return mappedClasses;
+		return mappings;
 	}
 
 	/**
 	 * Iterates through entries in the given map and matches together parent and
 	 * child classes.
 	 * 
-	 * @param mappedClasses
+	 * @param mappings
 	 * @return
 	 */
-	public static Map<String, MappedClass> linkMappings(MappedClass mappedClass, Map<String, MappedClass> mappedClasses) {
+	public static Map<String, MappedClass> linkMappings(MappedClass mappedClass, Map<String, MappedClass> mappings) {
 		// Setting up parent structure
 		if (!mappedClass.hasParent()) {
 			// No parent, check to see if one can be found
-			MappedClass parentMappedClass = mappedClasses.get(mappedClass.getNode().superName);
+			MappedClass parentMappedClass = mappings.get(mappedClass.getNode().superName);
 			if (parentMappedClass != null) {
+				mappings = linkMappings(parentMappedClass, mappings);
 				parentMappedClass.addChild(mappedClass);
-				mappedClasses = linkMappings(parentMappedClass, mappedClasses);
 			}
 		}
 		// Adding interfaces
 		if (mappedClass.getInterfaces().size() == 0) {
 			for (String interfaze : mappedClass.getNode().interfaces) {
-				MappedClass mappedInterface = mappedClasses.get(interfaze);
+				MappedClass mappedInterface = mappings.get(interfaze);
 				if (mappedInterface != null) {
+					mappings = linkMappings(mappedInterface, mappings);
 					mappedInterface.addInterfaceImplementation(mappedClass);
-					mappedClasses = linkMappings(mappedInterface, mappedClasses);
 				}
 			}
 		}
@@ -289,10 +288,10 @@ public class MappingGen {
 			}
 			// Adding inner classes
 			if (outerClass != null) {
-				MappedClass outer = mappedClasses.get(outerClass);
+				MappedClass outer = mappings.get(outerClass);
 				if (outer != null) {
 					outer.addInnerClass(mappedClass);
-					mappedClasses = linkMappings(outer, mappedClasses);
+					mappings = linkMappings(outer, mappings);
 				}
 			}
 		}
@@ -301,12 +300,12 @@ public class MappingGen {
 			if (method.getOverride() != null) {
 				continue;
 			}
-			MappedMember methodOverriden = ParentUtils.findMethodParent(method.getOwner(), method.getOriginalName(), method.getDesc());
+			MappedMember methodOverriden = ParentUtils.findMethodParent(mappedClass, method.getOriginalName(), method.getDesc());
 			if (methodOverriden != null) {
 				method.setOverride(methodOverriden);
 			}
 		}
-		mappedClasses.put(mappedClass.getOriginalName(), mappedClass);
-		return mappedClasses;
+		mappings.put(mappedClass.getOriginalName(), mappedClass);
+		return mappings;
 	}
 }

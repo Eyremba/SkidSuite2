@@ -80,14 +80,14 @@ public class SkidRemapper extends Remapper {
 
 	@Override
 	public String mapMethodName(String owner, String name, String desc) {
-		MappedClass mc = renamed.get(owner);
 		if (me.lpk.mapping.remap.MappingRenamer.isNameWhitelisted(name)) {
 			return super.mapMethodName(owner, name, desc);
 		}
+		MappedClass mc = renamed.get(owner);
 		if (mc == null) {
 			return super.mapMethodName(owner, name, desc);
 		} else {
-			MappedMember mm = ParentUtils.findMethod(mc, name, desc);
+			MappedMember mm = ParentUtils.findMethodInParentInclusive(mc, name, desc);
 			if (mm != null) {
 				return super.mapMethodName(owner, ParentUtils.findMethodOverride(mm).getNewName(), desc);
 			}
@@ -104,7 +104,7 @@ public class SkidRemapper extends Remapper {
 		if (mc == null) {
 			return super.mapInvokeDynamicMethodName(name, desc);
 		} else {
-			MappedMember mm = ParentUtils.findMethod(mc, name, desc);
+			MappedMember mm = ParentUtils.findMethodInParentInclusive(mc, name, desc);
 			if (mm != null) {
 				return super.mapInvokeDynamicMethodName(ParentUtils.findMethodOverride(mm).getNewName(), desc);
 			}
@@ -116,7 +116,7 @@ public class SkidRemapper extends Remapper {
 	public String mapFieldName(String owner, String name, String desc) {
 		MappedClass mc = renamed.get(owner);
 		if (mc != null) {
-			MappedMember field = ParentUtils.findField(mc, name, desc);
+			MappedMember field = ParentUtils.findFieldInParentInclusive(mc, name, desc);
 			if (field != null) {
 				return super.mapFieldName(owner, field.getNewName(), desc);
 			}

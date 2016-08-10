@@ -56,34 +56,32 @@ public class LazySetupMaker {
 	public static LazySetupMaker get(String jarIn, boolean readDefaultLibraries, Collection<File> libs) {
 		Logger.logLow("Loading: " + jarIn + " (Reading Libraries: " + readDefaultLibraries + ")...");
 		File in = new File(jarIn);
-		Map<String, ClassNode> nodes = null;
+		Map<String, ClassNode> nodes = loadNodes(in);
 		Map<String, ClassNode> libNodes = new HashMap<String, ClassNode>();
 		if (readDefaultLibraries) {
 			if (libs == null) {
 				libs = new ArrayList<File>();
-			} else {
-				libs.addAll(getLibraries());
 			}
+			libs.addAll(getLibraries());
 		}
 		if (libs != null && libs.size() > 0) {
 			for (File lib : libs) {
 				try {
-					libNodes.putAll(JarUtils.loadClasses(lib));
+					for (ClassNode cn : JarUtils.loadClasses(lib).values()){
+						libNodes.put(cn.name, cn);
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
-
-		nodes = loadNodes(in);
 		//
 		//
 		Logger.logLow("Generating mappings...");
 		Map<String, MappedClass> mappings = MappingGen.mappingsFromNodesNoLinking(nodes);
-		Map<String, MappedClass> libMappings = new HashMap<String, MappedClass>();
-		if (libNodes.size() > 0) {
+		Map<String, MappedClass> libMappings = new HashMap<String, MappedClass>(MappingGen.mappingsFromNodesNoLinking(libNodes));
+		if (libMappings.size() > 0) {
 			Logger.logLow("Marking library nodes as read-only...");
-			libMappings.putAll(MappingGen.mappingsFromNodesNoLinking(libNodes));
 			for (MappedClass mc : libMappings.values()) {
 				mc.setIsLibrary(true);
 				for (MappedMember mm : mc.getFields()) {
@@ -173,7 +171,7 @@ public class LazySetupMaker {
 
 	public void loadJarsToClasspath() throws IOException {
 		Classpather.addFile(name);
-		for (File file : this.libraries){
+		for (File file : this.libraries) {
 			Classpather.addFile(file);
 		}
 	}

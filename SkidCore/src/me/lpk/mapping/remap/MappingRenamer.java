@@ -149,11 +149,9 @@ public class MappingRenamer {
 	}
 
 	static {
+		
 		// Should let user add additional names to the list
 		// I guess classes like Enum don't have this as parent methods per say, so this will be necessary.
-		Collections.addAll(whitelist, "accept", "actionPerformed", "add", "apply", "clear", "clone", "clone", "compare", "compareTo", "copy", "create", "defineClass",
-				"deserialize", "equals", "equals", "finalize", "findClass", "findResource", "forEach", "get", "getClass", "getName", "getResource", "getResourceAsStream",
-				"handle", "hashCode", "hasNext", "indexOf", "iterator", "name", "next", "ordinal", "put", "read", "remove", "replace", "run", "serialize", "set", "size",
-				"spliterator", "toString", "valueOf", "values", "write");
+		Collections.addAll(whitelist, "contains", "toString", "equals", "clone");
 	}
 }
