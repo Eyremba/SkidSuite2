@@ -12,7 +12,8 @@ public class ObfuscationPanel extends SettingsPanel {
 					Lang.OPTION_OBFU_STRINGS_INTOARRAY));
 		addGroup(createGroup(
 				Lang.translations.get(Lang.GUI_OBFUSCATION_GROUP_FLOW), 
-					Lang.OPTION_OBFU_FLOW_TRYCATCH));
+					Lang.OPTION_OBFU_FLOW_TRYCATCH,
+					Lang.OPTION_OBFU_FLOW_GOTOFLOOD));
 		addGroup(createGroup(
 				Lang.translations.get(Lang.GUI_OBFUSCATION_GROUP_ANTI), 
 					Lang.OPTION_OBFU_ANTI_DECOMPILE_VULNS,

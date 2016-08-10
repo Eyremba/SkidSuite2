@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
+import javax.swing.UIManager;
 
 import me.lpk.gui.drop.IDropUser;
 import me.lpk.gui.drop.JarDropHandler;
@@ -38,6 +39,11 @@ public class NewGui implements IDropUser {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		 try {
+	        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	    }  catch (Exception e) {
+	    	
+	    }
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -73,12 +79,17 @@ public class NewGui implements IDropUser {
 		pnlInputs.setLayout(new BorderLayout(0, 0));
 
 		addDropZones(pnlInputs);
+		sddOther(pnlInputs);
 		
 		tabbedPane.addTab("Main", null, pnlMain, "Main");
 		tabbedPane.addTab("Inputs", null, pnlInputs, "Where the inputs are chosen");
 		tabbedPane.addTab("Obfuscation", null, pnlObfuscation, "Options for obfuscation");
 		tabbedPane.addTab("Optimization", null, pnlOptimization, "Options for optimization");
 		//tabbedPane.setSelectedIndex(1);
+	}
+
+	private void sddOther(JPanel pnlInputs2) {
+		
 	}
 
 	private void addDropZones(JPanel pnl) {
