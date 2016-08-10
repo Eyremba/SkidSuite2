@@ -27,9 +27,7 @@ public class Main {
 	}
 	
 	private static void runAnti(File jar) throws IOException {
-		LazySetupMaker.clearExtraLibraries();
-		Classpather.addFile(jar);
-		LazySetupMaker lsm = LazySetupMaker.get(jar.getAbsolutePath(), false, true);
+		LazySetupMaker lsm = LazySetupMaker.get(jar.getAbsolutePath(), true);
 		for (String className : lsm.getNodes().keySet()) {
 			AntiBase anti = new AntiZKM8();
 			ClassNode node = lsm.getNodes().get(className);

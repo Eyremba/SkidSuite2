@@ -1,5 +1,6 @@
 package me.lpk.util;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -192,12 +193,56 @@ public class ParentUtils {
 
 	public static boolean isLoop(ClassNode node, Map<String, ClassNode> nodes, int i) {
 		ClassNode parentNode = nodes.get(node.superName);
-		if (parentNode == null){
+		if (parentNode == null) {
 			return false;
 		}
-		if (node.name.equals(parentNode.superName)){
+		if (node.name.equals(parentNode.superName)) {
 			return true;
 		}
 		return false;
+	}
+
+	public static MappedClass findCommonParent(MappedClass mc1, MappedClass mc2) {
+		// Are they the same?
+		if (mc1.getNewName().equals(mc2.getNewName())) {
+			return mc1;
+		}
+		// Does m1 extend or implement anything m2 does?
+		for (String parentNames1 : getParents(mc1)) {
+			for (String parentNames2 : getParents(mc1)) {
+				if (parentNames1.equals(parentNames2)) {
+					return getParent(parentNames1, mc1);
+				}
+			}
+		}
+		return null;
+	}
+
+	private static MappedClass getParent(String n, MappedClass m) {
+		while (m != null) {
+			if (m.getNewName().equals(n)){
+				return m;
+			}
+			for (MappedClass i : m.getInterfaces()) {
+				MappedClass p = getParent(n, i);
+				if (p != null){
+					return p;
+				}
+			}
+			m = m.getParent();
+		}
+		return null;
+	}
+
+	private static List<String> getParents(MappedClass m) {
+		List<String> list = new ArrayList<String>();
+		while (m != null) {
+			list.add(m.getNewName());
+			for (MappedClass i : m.getInterfaces()) {
+				list.addAll(getParents(i));
+			}
+			m = m.getParent();
+		}
+		return list;
 	}
 }

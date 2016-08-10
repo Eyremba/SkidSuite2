@@ -30,7 +30,7 @@ public class Main {
 	}
 
 	public static void obfuscating(String jarIn, String jarOut) {
-		LazySetupMaker dat = LazySetupMaker.get(jarIn, false, false);
+		LazySetupMaker dat = LazySetupMaker.get(jarIn, false);
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 		//

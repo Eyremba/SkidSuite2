@@ -316,21 +316,15 @@ public class MainGUIOld implements IDropUser {
 			addLibrary(jar, lstLoadedLibs);
 			return;
 		}
-		// Setup used libraries
-		LazySetupMaker.clearExtraLibraries();
-		for (File lib : libraries) {
-			LazySetupMaker.addExtraLibraryJar(lib);
-		}
-
 		// Create the setup
-		LazySetupMaker lsm = LazySetupMaker.get(jar.getAbsolutePath(), false, true);
+		LazySetupMaker lsm = LazySetupMaker.get(jar.getAbsolutePath(), true, libraries);
 		// Create the output
 		Map<String, byte[]> out = new HashMap<String, byte[]>();
 
 		// Add the program to the classpath if COMPUTE_FRAMES is used.
 		try {
 			if (!chkUseMaxs.isSelected()) {
-				Classpather.addFile(jar);
+				//Classpather.addFile(jar);
 			}
 			out.putAll(JarUtils.loadNonClassEntries(jar));
 		} catch (IOException e1) {

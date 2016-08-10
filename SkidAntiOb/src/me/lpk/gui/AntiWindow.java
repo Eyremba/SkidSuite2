@@ -194,15 +194,7 @@ public class AntiWindow {
 	}
 
 	private void runAnti(File jar) throws IOException {
-		LazySetupMaker.clearExtraLibraries();
-		for (File lib : libraries) {
-			LazySetupMaker.addExtraLibraryJar(lib);
-		}
-		for (File f : LazySetupMaker.getExtraLibs()) {
-			Classpather.addFile(f);
-		}
-		Classpather.addFile(jar);
-		LazySetupMaker lsm = LazySetupMaker.get(jar.getAbsolutePath(), false, true);
+		LazySetupMaker lsm = LazySetupMaker.get(jar.getAbsolutePath(), true);
 		for (String className : lsm.getNodes().keySet()) {
 			AntiBase anti = makeAnti(lsm.getNodes());
 			ClassNode node = lsm.getNodes().get(className);

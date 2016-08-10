@@ -129,13 +129,9 @@ public class WindowCorrelationMapper {
 		// Loading
 		File targetJar = new File(pathTarget);
 		File cleanJar = new File(pathClean);
-		LazySetupMaker targ = LazySetupMaker.get(targetJar.getAbsolutePath(), false, false);
-		LazySetupMaker clen = LazySetupMaker.get(cleanJar.getAbsolutePath(), false, false);
-		try {
-			Classpather.addFile(targetJar);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		LazySetupMaker targ = LazySetupMaker.get(targetJar.getAbsolutePath(), false);
+		LazySetupMaker clen = LazySetupMaker.get(cleanJar.getAbsolutePath(), false);
+		//Classpather.addFile(targetJar);
 
 		System.out.println("Loading classes...");
 		Map<String, ClassNode> targetNodes = targ.getNodes();
