@@ -11,9 +11,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
-import com.google.common.collect.Maps;
-
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.asm.ClassReader;
@@ -355,7 +354,7 @@ public class ShellReplacementModder extends ClassModder {
 	/**
 	 * Instead of reloading the ClassNodes just store them for later.
 	 */
-	private static Map<String, ClassNode> cache = Maps.newHashMap();
+	private static Map<String, ClassNode> cache =  new HashMap<String, ClassNode>();
 
 	/**
 	 * Loads a ClassNode given a internal name. <br>

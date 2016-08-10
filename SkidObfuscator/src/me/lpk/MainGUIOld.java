@@ -28,6 +28,8 @@ import java.awt.Color;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
+import me.lpk.gui.drop.IDropUser;
+import me.lpk.gui.drop.JarDropHandler;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.SkidRemapper;
@@ -46,7 +48,7 @@ import org.objectweb.asm.tree.ClassNode;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 
-public class MainGUI {
+public class MainGUIOld implements IDropUser {
 	private JCheckBox chkUseMaxs, chkOptimization;
 	private JCheckBox chkRemoveSource, chkRemoveInnerOuter, chkRemoveClassAnnotations, chkRemoveClassAttribs, chkRemoveMethods;
 	private JCheckBox chkRemoveParameter, chkRemoveMethodsAnnotations, chkRemoveLocals, chkRemoveLines, chkRemoveFrames, chkRemoveMethodAttribs;
@@ -61,12 +63,24 @@ public class MainGUI {
 	private JTabbedPane tabbedPane;
 	private JPanel pnlObfuscation;
 	private final Optimizer optimizer = new Optimizer();
+	private Set<File> libraries = new HashSet<File>();
+	private JPanel pnlObMainOptions;
+	private JLabel lblObMainOptions;
+	private JCheckBox chkStringObfuscation;
+	private JCheckBox chckbxFlowObfuscation;
+	private JCheckBox chckbxAntidecompile;
+	private JPanel pnlObStringOptions;
+	private JLabel lblObStringOptions;
+	private JCheckBox chckbxNewCheckBox;
+	private JPanel pnlObAnti;
+	private JLabel lblAntidecompileOptions;
+	private JCheckBox chkMakeSynthetic;
 
 	/**
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		MainGUI window = new MainGUI();
+		MainGUIOld window = new MainGUIOld();
 		window.initialize();
 		window.frmSkidshrink.setVisible(true);
 	}
@@ -93,6 +107,59 @@ public class MainGUI {
 
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		frmSkidshrink.getContentPane().add(tabbedPane, BorderLayout.WEST);
+
+		pnlObfuscation = new JPanel();
+		pnlObfuscation.setBackground(SystemColor.controlHighlight);
+		tabbedPane.addTab("Obfuscation", null, pnlObfuscation, null);
+		pnlObfuscation.setLayout(new BoxLayout(pnlObfuscation, BoxLayout.Y_AXIS));
+
+		pnlObMainOptions = new JPanel();
+		pnlObMainOptions.setBackground(SystemColor.controlHighlight);
+		pnlObfuscation.add(pnlObMainOptions);
+		pnlObMainOptions.setLayout(new BoxLayout(pnlObMainOptions, BoxLayout.Y_AXIS));
+
+		lblObMainOptions = new JLabel("Main Options");
+		lblObMainOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
+		pnlObMainOptions.add(lblObMainOptions);
+
+		chkStringObfuscation = new JCheckBox("String Obfuscation");
+		chkStringObfuscation.setBackground(SystemColor.controlHighlight);
+		pnlObMainOptions.add(chkStringObfuscation);
+
+		chckbxAntidecompile = new JCheckBox("Anti-Decompile");
+		chckbxAntidecompile.setBackground(SystemColor.controlHighlight);
+		pnlObMainOptions.add(chckbxAntidecompile);
+
+		chckbxFlowObfuscation = new JCheckBox("Flow Obfuscation");
+		chckbxFlowObfuscation.setBackground(SystemColor.controlHighlight);
+		chckbxFlowObfuscation.setEnabled(false);
+		pnlObMainOptions.add(chckbxFlowObfuscation);
+
+		pnlObStringOptions = new JPanel();
+		pnlObStringOptions.setBackground(SystemColor.controlHighlight);
+		pnlObfuscation.add(pnlObStringOptions);
+		pnlObStringOptions.setLayout(new BoxLayout(pnlObStringOptions, BoxLayout.Y_AXIS));
+
+		lblObStringOptions = new JLabel("String Options");
+		lblObStringOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
+		pnlObStringOptions.add(lblObStringOptions);
+
+		chckbxNewCheckBox = new JCheckBox("Break into array");
+		chckbxNewCheckBox.setBackground(SystemColor.controlHighlight);
+		pnlObStringOptions.add(chckbxNewCheckBox);
+
+		pnlObAnti = new JPanel();
+		pnlObAnti.setBackground(SystemColor.controlHighlight);
+		pnlObfuscation.add(pnlObAnti);
+		pnlObAnti.setLayout(new BoxLayout(pnlObAnti, BoxLayout.Y_AXIS));
+
+		lblAntidecompileOptions = new JLabel("Anti-Decompile Options");
+		pnlObAnti.add(lblAntidecompileOptions);
+		lblAntidecompileOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
+
+		chkMakeSynthetic = new JCheckBox("Declare Synthetic");
+		chkMakeSynthetic.setBackground(SystemColor.controlHighlight);
+		pnlObAnti.add(chkMakeSynthetic);
 
 		JPanel pnlOptimization = new JPanel();
 		tabbedPane.addTab("Optimization", null, pnlOptimization, null);
@@ -181,96 +248,12 @@ public class MainGUI {
 		chkRemoveFrames.setSelected(false);
 		chkRemoveFrames.setBackground(SystemColor.controlHighlight);
 		pnlOpMethodOptions.add(chkRemoveFrames);
-
-		pnlObfuscation = new JPanel();
-		pnlObfuscation.setBackground(SystemColor.controlHighlight);
-		tabbedPane.addTab("Obfuscation", null, pnlObfuscation, null);
-		pnlObfuscation.setLayout(new BoxLayout(pnlObfuscation, BoxLayout.Y_AXIS));
-		
-		pnlObMainOptions = new JPanel();
-		pnlObMainOptions.setBackground(SystemColor.controlHighlight);
-		pnlObfuscation.add(pnlObMainOptions);
-		pnlObMainOptions.setLayout(new BoxLayout(pnlObMainOptions, BoxLayout.Y_AXIS));
-		
-		lblObMainOptions = new JLabel("Main Options");
-		lblObMainOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
-		pnlObMainOptions.add(lblObMainOptions);
-		
-		chkStringObfuscation = new JCheckBox("String Obfuscation");
-		chkStringObfuscation.setBackground(SystemColor.controlHighlight);
-		pnlObMainOptions.add(chkStringObfuscation);
-		
-		chckbxAntidecompile = new JCheckBox("Anti-Decompile");
-		chckbxAntidecompile.setBackground(SystemColor.controlHighlight);
-		pnlObMainOptions.add(chckbxAntidecompile);
-		
-		chckbxFlowObfuscation = new JCheckBox("Flow Obfuscation");
-		chckbxFlowObfuscation.setBackground(SystemColor.controlHighlight);
-		chckbxFlowObfuscation.setEnabled(false);
-		pnlObMainOptions.add(chckbxFlowObfuscation);
-		
-		pnlObStringOptions = new JPanel();
-		pnlObStringOptions.setBackground(SystemColor.controlHighlight);
-		pnlObfuscation.add(pnlObStringOptions);
-		pnlObStringOptions.setLayout(new BoxLayout(pnlObStringOptions, BoxLayout.Y_AXIS));
-		
-		lblObStringOptions = new JLabel("String Options");
-		lblObStringOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
-		pnlObStringOptions.add(lblObStringOptions);
-		
-		chckbxNewCheckBox = new JCheckBox("Break into array");
-		chckbxNewCheckBox.setBackground(SystemColor.controlHighlight);
-		pnlObStringOptions.add(chckbxNewCheckBox);
-		
-		pnlObAnti = new JPanel();
-		pnlObAnti.setBackground(SystemColor.controlHighlight);
-		pnlObfuscation.add(pnlObAnti);
-		pnlObAnti.setLayout(new BoxLayout(pnlObAnti, BoxLayout.Y_AXIS));
-		
-		lblAntidecompileOptions = new JLabel("Anti-Decompile Options");
-		pnlObAnti.add(lblAntidecompileOptions);
-		lblAntidecompileOptions.setFont(new Font("Tahoma", Font.BOLD, 13));
-		
-		chkMakeSynthetic = new JCheckBox("Declare Synthetic");
-		chkMakeSynthetic.setBackground(SystemColor.controlHighlight);
-		pnlObAnti.add(chkMakeSynthetic);
 		JPanel mainPanel = new JPanel();
 		mainPanel.setBackground(new Color(227, 227, 227));
 		mainPanel.setBorder(null);
 		frmSkidshrink.getContentPane().add(mainPanel, BorderLayout.CENTER);
 		mainPanel.setLayout(new BorderLayout(0, 0));
-		TransferHandler handler = new TransferHandler() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public boolean canImport(TransferHandler.TransferSupport info) {
-				return info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
-			}
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public boolean importData(TransferHandler.TransferSupport info) {
-				if (!info.isDrop())
-					return false;
-				Transferable t = info.getTransferable();
-				List<File> data = null;
-				try {
-					data = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-				} catch (Exception e) {
-					return false;
-				}
-				optimizer.update(chkUseMaxs.isSelected(), !chkOptimization.isSelected(), chkRemoveSource.isSelected(), chkRemoveInnerOuter.isSelected(),
-						chkRemoveClassAnnotations.isSelected(), chkRemoveClassAttribs.isSelected(), chkRemoveMethods.isSelected(), chkRemoveParameter.isSelected(),
-						chkRemoveMethodsAnnotations.isSelected(), chkRemoveLocals.isSelected(), chkRemoveLines.isSelected(), chkRemoveFrames.isSelected(),
-						chkRemoveMethodAttribs.isSelected());
-				for (File jar : data) {
-					if (jar.getName().toLowerCase().endsWith(".jar")) {
-						doThings(jar);
-					}
-				}
-				return true;
-			}
-		};
+		TransferHandler handler = new JarDropHandler(this, 0);
 		JPanel pnlDragContainer = new JPanel();
 		pnlDragContainer.setBorder(new BevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		pnlDragContainer.setBackground(SystemColor.scrollbar);
@@ -306,50 +289,10 @@ public class MainGUI {
 		lstLoadedLibs.setModel(model2);
 		pnlLibraries.add(lstLoadedLibs, BorderLayout.EAST);
 		splitDrag.setDividerLocation(frmSkidshrink.getWidth() / 2);
-		TransferHandler handler2 = new TransferHandler() {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			public boolean canImport(TransferHandler.TransferSupport info) {
-				return info.isDataFlavorSupported(DataFlavor.javaFileListFlavor);
-			}
-
-			@SuppressWarnings("unchecked")
-			@Override
-			public boolean importData(TransferHandler.TransferSupport info) {
-				if (!info.isDrop())
-					return false;
-				Transferable t = info.getTransferable();
-				List<File> data = null;
-				try {
-					data = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
-				} catch (Exception e) {
-					return false;
-				}
-				for (File jar : data) {
-					if (jar.getName().toLowerCase().endsWith(".jar")) {
-						addLibrary(jar, lstLoadedLibs);
-					}
-				}
-				return true;
-			}
-		};
+		TransferHandler handler2 = new JarDropHandler(this, 1);
 		lblDragALibrary.setTransferHandler(handler2);
 		splitDrag.setDividerLocation(frmSkidshrink.getWidth() / 3);
 	}
-
-	private Set<File> libraries = new HashSet<File>();
-	private JPanel pnlObMainOptions;
-	private JLabel lblObMainOptions;
-	private JCheckBox chkStringObfuscation;
-	private JCheckBox chckbxFlowObfuscation;
-	private JCheckBox chckbxAntidecompile;
-	private JPanel pnlObStringOptions;
-	private JLabel lblObStringOptions;
-	private JCheckBox chckbxNewCheckBox;
-	private JPanel pnlObAnti;
-	private JLabel lblAntidecompileOptions;
-	private JCheckBox chkMakeSynthetic;
 
 	public void addLibrary(File jar, JList<String> jlist) {
 		libraries.add(jar);
@@ -357,7 +300,22 @@ public class MainGUI {
 		model.addElement("  " + jar.getName() + "  ");
 	}
 
-	private void doThings(File jar) {
+	@Override
+	public void preLoadJars(int id) {
+		if (id == 0){
+		optimizer.update(chkUseMaxs.isSelected(), !chkOptimization.isSelected(), chkRemoveSource.isSelected(), chkRemoveInnerOuter.isSelected(),
+				chkRemoveClassAnnotations.isSelected(), chkRemoveClassAttribs.isSelected(), chkRemoveMethods.isSelected(), chkRemoveParameter.isSelected(),
+				chkRemoveMethodsAnnotations.isSelected(), chkRemoveLocals.isSelected(), chkRemoveLines.isSelected(), chkRemoveFrames.isSelected(),
+				chkRemoveMethodAttribs.isSelected());
+		}
+	}
+
+	@Override
+	public void onJarLoad(int id, File jar) {
+		if (id == 1){
+			addLibrary(jar, lstLoadedLibs);
+			return;
+		}
 		// Setup used libraries
 		LazySetupMaker.clearExtraLibraries();
 		for (File lib : libraries) {
@@ -413,78 +371,10 @@ public class MainGUI {
 				optimizer.shrink(lsm.getMappings().get(cn.name), remover, new SkidRemapper(new HashMap<String, MappedClass>()), cw);
 			}
 		}
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 
 		// TODO: Obfuscation
-		
-		
-		//fucking do this
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
+
+		// fucking do this
 
 		// Finally export ClassNodes to bytes
 		for (ClassNode cn : lsm.getNodes().values()) {
@@ -507,4 +397,5 @@ public class MainGUI {
 		 * System.out.print((100 - i) + "%");
 		 */
 	}
+
 }

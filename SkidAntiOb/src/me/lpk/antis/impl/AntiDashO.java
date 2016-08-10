@@ -56,6 +56,7 @@ public class AntiDashO extends AntiBase {
 					MethodInsnNode min = (MethodInsnNode) ain;
 					ClassNode owner = getNodes().get(min.owner);
 					Object[] args = new Object[t.getArgumentTypes().length];
+					// DashO always has at least 2 args. 
 					if (opIndex < 0 || opIndex >= frames.length || args.length <= 1) {
 						ain = ain.getNext();
 						continue;
