@@ -34,15 +34,15 @@ public class Main {
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 		//
-		boolean tryCatch = true;
+		boolean tryCatch = false;
 		boolean ldc = false;
-		boolean types = true;
+		boolean types = false;
 		boolean varDupes = false;
-		boolean access = true;
+		boolean access = false;
 		boolean string = true;
-		boolean gotos = true;
-		boolean badPop = true;
-		boolean retObjErr = true;
+		boolean gotos = false;
+		boolean badPop = false;
+		boolean retObjErr = false;
 		if (tryCatch) {
 			Logger.logLow("Modifying - Try Catch");
 			for (ClassNode cn : nodes.values()) {
@@ -89,7 +89,7 @@ public class Main {
 		if (string) {
 			Logger.logLow("Modifying - Encryption");
 			for (ClassNode cn : nodes.values()) {
-				Stringer.stringEncrypt(cn, mappings.get(cn.name).getNewName());
+				Stringer.stringEncrypt(cn);
 			}
 		}
 		if (gotos) {
