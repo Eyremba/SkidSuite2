@@ -38,6 +38,27 @@ public class JarUtils {
 		jar.close();
 		return classes;
 	}
+	
+	public static Map<String, ClassNode> loadRT() throws IOException{
+		Map<String, ClassNode> classes = new HashMap<String, ClassNode>();
+		JarFile jar = new JarFile(getRT());
+		// For some reason streaming = entries in messy jars
+		// enumeration = no entries
+		// ...
+		// Whatever. It works now!
+		while(jar.entries().hasMoreElements()) {
+			JarEntry en = jar.entries().nextElement();
+			String name = en.getName();
+			// TODO: Make loading these packages optional.
+			// For now: "It werks for me!"
+			if (name.startsWith("com/oracle") || name.startsWith("com/sun") || name.startsWith("jdk/") || name.startsWith("sun/")){
+				classes = readJar(jar, en, classes);
+			}
+		}
+		jar.close();
+		return classes;
+		
+	}
 
 	/**
 	 * This method is less fussy about the jar integrity.
@@ -131,5 +152,9 @@ public class JarUtils {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public static File getRT() {
+		return new File(System.getProperty("java.home") + File.separator + "lib" + File.separator + "rt.jar");
 	}
 }

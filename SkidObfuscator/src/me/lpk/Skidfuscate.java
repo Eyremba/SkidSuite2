@@ -41,7 +41,7 @@ public class Skidfuscate {
 	}
 
 	public void parse(File jar, Map<String, Boolean> boolOpts, Map<String, String> strOpts) {
-		// Order: Optimize --> Obfuscation --> Renaming
+		// Order: Load --> Optimize --> Obfuscation --> Renaming
 		try {
 			LazySetupMaker dat = LazySetupMaker.get(jar.getAbsolutePath(), true, new ArrayList<File>(libraries.values()));
 			Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
@@ -90,7 +90,7 @@ public class Skidfuscate {
 				doRemapping(mappings, strOpts, nodes.values());
 			}
 			
-			saveJar("Out.jar", jar, nodes, mappings);
+			saveJar(jar.getName().replace(".jar", "-re.jar"), jar, nodes, mappings);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

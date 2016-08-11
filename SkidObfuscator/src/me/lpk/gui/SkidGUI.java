@@ -29,7 +29,7 @@ import java.awt.Color;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-public class NewGui implements IDropUser {
+public class SkidGUI implements IDropUser {
 	private final static int ID_LOAD_LIBRARY = 0;
 	private final static int ID_LOAD_TARGET = 1;
 
@@ -53,7 +53,7 @@ public class NewGui implements IDropUser {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					NewGui window = new NewGui();
+					SkidGUI window = new SkidGUI();
 					window.frmSkidfuscator.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -65,7 +65,7 @@ public class NewGui implements IDropUser {
 	/**
 	 * Create the application.
 	 */
-	public NewGui() {
+	public SkidGUI() {
 		initialize();
 	}
 

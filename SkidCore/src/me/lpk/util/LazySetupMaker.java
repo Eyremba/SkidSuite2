@@ -147,7 +147,7 @@ public class LazySetupMaker {
 	 * @return
 	 */
 	private static List<File> getLibraries() {
-		return getLibraries(false, false);
+		return getLibraries(false);
 	}
 
 	/**
@@ -157,11 +157,8 @@ public class LazySetupMaker {
 	 * @param makeDir
 	 * @return
 	 */
-	private static List<File> getLibraries(boolean makeDir, boolean rt) {
+	private static List<File> getLibraries(boolean makeDir) {
 		List<File> files = new ArrayList<File>();
-		if (rt) {
-			files.add(getRT());
-		}
 		//
 		if (makeDir) {
 			File libDir = new File("libraries");
@@ -173,9 +170,7 @@ public class LazySetupMaker {
 		return files;
 	}
 
-	private static File getRT() {
-		return new File(System.getProperty("java.home") + File.separator + "lib" + File.separator + "rt.jar");
-	}
+	
 
 	public void loadJarsToClasspath() throws IOException {
 		Classpather.addFile(name);
@@ -193,7 +188,7 @@ public class LazySetupMaker {
 		try {
 			Logger.logLow("Setting up LazySetupMaker...");
 			Map<String, ClassNode> libNodes = new HashMap<String, ClassNode>();
-			for (ClassNode cn : JarUtils.loadClasses(getRT()).values()) {
+			for (ClassNode cn : JarUtils.loadRT().values()) {
 				libNodes.put(cn.name, cn);
 			}
 			Map<String, MappedClass> libMappings = new HashMap<String, MappedClass>(MappingGen.mappingsFromNodesNoLinking(libNodes));

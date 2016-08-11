@@ -3,7 +3,7 @@ package me.lpk.options;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.lpk.gui.NewGui;
+import me.lpk.gui.SkidGUI;
 import me.lpk.gui.panel.SettingsBox;
 import me.lpk.gui.panel.SettingsPanel;
 import me.lpk.lang.Lang;
@@ -22,7 +22,7 @@ public class Options {
 		return defaultEnabledStates.containsKey(setting) && defaultEnabledStates.get(setting).booleanValue();
 	}
 	
-	public static Map<String, Boolean> boolsFromGui(NewGui gui) {
+	public static Map<String, Boolean> boolsFromGui(SkidGUI gui) {
 		Map<String, Boolean> values = new HashMap<String, Boolean>();
 		for (SettingsPanel panel : gui.getSettingPanels()) {
 			for (String group : panel.getGroupNames()) {
@@ -34,7 +34,7 @@ public class Options {
 		}
 		return values;
 	}
-	public static Map<String, String> stringsFromGui(NewGui gui) {
+	public static Map<String, String> stringsFromGui(SkidGUI gui) {
 		Map<String, String> values = new HashMap<String, String>();
 		for (SettingsPanel panel : gui.getSettingPanels()) {
 			for (String group : panel.getGroupNames()) {
