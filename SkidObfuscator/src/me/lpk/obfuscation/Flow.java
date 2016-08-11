@@ -7,7 +7,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
@@ -15,11 +14,13 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 
 import me.lpk.util.AccessHelper;
-import me.lpk.util.OpUtils;
 
 public class Flow {
 
-	public static void randomGotos(ClassNode cn, MethodNode mn) {
+	public static void randomGotos(MethodNode mn) {
+		if (mn.name.startsWith("<") || AccessHelper.isAbstract(mn.access)) {
+			return;
+		}
 		int instructs = mn.instructions.size();
 		if (instructs < 4) {
 			// Too short, don't bother.
@@ -55,9 +56,8 @@ public class Flow {
 		}
 		int index = mn.localVariables.size();
 		mn.instructions.insert(start);
-		mn.instructions.add(handler);
-		mn.instructions.add(new InsnNode(Opcodes.NOP));
 		mn.instructions.add(end);
+		mn.instructions.add(handler);
 		mn.instructions.add(new InsnNode(Opcodes.ACONST_NULL));
 		mn.instructions.add(new InsnNode(Opcodes.ATHROW));
 
@@ -68,69 +68,5 @@ public class Flow {
 		mn.exceptions.add(catchType);
 	}
 
-	public static void destroyMath(MethodNode mn) {
-		for (AbstractInsnNode ain : mn.instructions.toArray()) {
-			if (ain.getType() == AbstractInsnNode.INT_INSN && ain.getOpcode() != Opcodes.NEWARRAY) {
-				if (isNear(ain)) {
-					continue;
-				}
-				boolean neg = ain.getNext().getOpcode() == Opcodes.INEG;
-				IntInsnNode iin = (IntInsnNode) ain;
-				int i = randRange(-100, 100);
-				switch (randRange(0, 3)){
-				case 0:
-					iin.operand += i;
-					mn.instructions.insert(iin, new InsnNode(Opcodes.ISUB));
-					mn.instructions.insert(iin, new InsnNode(Opcodes.SWAP));
-					mn.instructions.insertBefore(iin, OpUtils.toInt(i));
-					break;
-				case 1:
-					iin.operand -= i;
-					mn.instructions.insert(iin, new InsnNode(Opcodes.IADD));
-					mn.instructions.insert(iin, new InsnNode(Opcodes.SWAP));
-					mn.instructions.insertBefore(iin, OpUtils.toInt(i));
-					break;
-				case 2:
-					iin.operand += i;
-					mn.instructions.insert(iin, new InsnNode(Opcodes.IADD));
-					mn.instructions.insert(iin, new InsnNode(Opcodes.INEG));
-					mn.instructions.insert(iin, new InsnNode(Opcodes.SWAP));
-					mn.instructions.insertBefore(iin, OpUtils.toInt(i));
-					break;
-				case 3:
-					iin.operand -= i;
-					mn.instructions.insert(iin, new InsnNode(Opcodes.ISUB));
-					mn.instructions.insert(iin, new InsnNode(Opcodes.INEG));
-					mn.instructions.insert(iin, new InsnNode(Opcodes.SWAP));
-					mn.instructions.insertBefore(iin, OpUtils.toInt(i));
-					break;
-				}
-			}
-		}
-		// OpUtils.print(mn.instructions);
-	}
-
-	private static int randRange(int min, int max) {
-		return (int) (min + (Math.random() * (max - min)));
-	}
-
-	private static boolean isNear(AbstractInsnNode ain) {
-		AbstractInsnNode node = ain;
-		int j = 3, ii= 0;
-		while (j != 0 && node.getPrevious() != null){
-			node = node.getPrevious();
-			j--;
-			ii += 2;
-		}
-		int i = 0;
-		while (i < ii && node.getNext() != null) {
-			int o = node.getOpcode();
-			if (o == Opcodes.AALOAD || o == Opcodes.AASTORE || o == Opcodes.ANEWARRAY || o == Opcodes.NEWARRAY || o == Opcodes.CASTORE) {
-				return true;
-			}
-			node = node.getNext();
-			i++;
-		}
-		return false;
-	}
+	
 }

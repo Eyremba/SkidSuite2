@@ -1,11 +1,13 @@
 package me.lpk.obfuscation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -19,10 +21,16 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import me.lpk.util.AccessHelper;
+import me.lpk.util.OpUtils;
 
-public class AntiDecompile {
+public class MiscAnti {
 	public static final String s = getMassive();
 
+	/**
+	 * Inserts a couple of massive LDC's into methods. Slows down javap.
+	 * 
+	 * @param mn
+	 */
 	public static void massiveLdc(MethodNode mn) {
 		if (mn.name.contains("<") || AccessHelper.isAbstract(mn.access)) {
 			return;
@@ -38,7 +46,13 @@ public class AntiDecompile {
 			mn.instructions.insert(new LdcInsnNode(s));
 		}
 	}
-	
+
+	/**
+	 * Duplicates vars. Uglifies opcodes / stack, does not seem to affect
+	 * decompilation.
+	 * 
+	 * @param mn
+	 */
 	public static void duplicateVars(MethodNode mn) {
 		if (AccessHelper.isAbstract(mn.access)) {
 			return;
@@ -59,14 +73,12 @@ public class AntiDecompile {
 		}
 	}
 
-	private static String getMassive() {
-		StringBuffer sb = new StringBuffer();
-		while (sb.length() < 65536 - 1) {
-			sb.append("z");
-		}
-		return sb.toString();
-	}
-
+	/**
+	 * Messes with a few decompilers when used in combination with other
+	 * features. Apparently POP2 is hard to work with.
+	 * 
+	 * @param mn
+	 */
 	public static void badPop(MethodNode mn) {
 		if (AccessHelper.isAbstract(mn.access)) {
 			return;
@@ -83,11 +95,14 @@ public class AntiDecompile {
 	}
 
 	/**
-	 * Destroys Fernflower
+	 * Inserts a method that returns an object. Uses it as an exeption in code
+	 * that is beyond the return operand (never executed). Makes Fernflower fail
+	 * to decompile methods.
+	 * 
 	 * @param cn
 	 */
 	public static void retObjErr(ClassNode cn) {
-		String mthdN = "getFukt", mthdR = "()Ljava/lang/Object;";
+		String mthdN = "REEEEEEEEE", mthdR = "()Ljava/lang/Object;";
 		String catchType = "java/lang/Exception";
 		for (MethodNode mn : cn.methods) {
 			if (mn.name.contains("<") || AccessHelper.isAbstract(mn.access) || mn.instructions.size() < 4) {
@@ -108,8 +123,8 @@ public class AntiDecompile {
 			int index = mn.localVariables.size();
 			LocalVariableNode exVarInvoke = new LocalVariableNode("excptnInvoke", "L" + catchType + ";", null, beforeInvoke, afterInvoke, index);
 			LocalVariableNode exVarThrow = new LocalVariableNode("excptnThrow", "L" + catchType + ";", null, beforeAthrow, afterAthrow, index + 1);
-			TryCatchBlockNode tryBlockInvoke = new TryCatchBlockNode(beforeInvoke,afterInvoke, handler, null);
-			TryCatchBlockNode tryBlockThrow = new TryCatchBlockNode(beforeAthrow,afterAthrow, handler, null);
+			TryCatchBlockNode tryBlockInvoke = new TryCatchBlockNode(beforeInvoke, afterInvoke, handler, null);
+			TryCatchBlockNode tryBlockThrow = new TryCatchBlockNode(beforeAthrow, afterAthrow, handler, null);
 			mn.instructions.insertBefore(last, beforeInvoke);
 			mn.instructions.insertBefore(last, new MethodInsnNode(Opcodes.INVOKESTATIC, cn.name, mthdN, mthdR, false));
 			mn.instructions.insertBefore(last, afterInvoke);
@@ -123,7 +138,7 @@ public class AntiDecompile {
 			mn.localVariables.add(exVarInvoke);
 			mn.localVariables.add(exVarThrow);
 
-			if (!mn.exceptions.contains(catchType)){
+			if (!mn.exceptions.contains(catchType)) {
 				mn.exceptions.add(catchType);
 			}
 		}
@@ -136,7 +151,14 @@ public class AntiDecompile {
 		cn.methods.add(objMethod);
 
 	}
-	
+
+	/**
+	 * Adds a try catch around an entire method.
+	 * 
+	 * @param mn
+	 * @param catchType
+	 * @param handleType
+	 */
 	public static void addTryCatch(MethodNode mn, String catchType, String handleType) {
 		if (mn.name.startsWith("<") || AccessHelper.isAbstract(mn.access)) {
 			return;
@@ -160,5 +182,117 @@ public class AntiDecompile {
 		mn.localVariables.add(exVar);
 		mn.tryCatchBlocks.add(tryBlock);
 		mn.exceptions.add(catchType);
+	}
+
+	/**
+	 * Creates a long string.
+	 * 
+	 * @return
+	 */
+	private static String getMassive() {
+		StringBuffer sb = new StringBuffer();
+		while (sb.length() < 65536 - 1) {
+			sb.append("z");
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * Removes the types of all local variables.
+	 * @param nodes
+	 */
+	public static void removeLocalTypes(Collection<ClassNode> nodes) {
+		for (ClassNode cn : nodes) {
+			for (MethodNode mn : cn.methods) {
+				if (mn.localVariables != null) {
+					for (LocalVariableNode lvn : mn.localVariables) {
+						lvn.signature = null;
+						lvn.desc = "Ljava/lang/Object;";
+					}
+				}
+			}
+		}
+	}
+
+	public static void makeSynthetic(Collection<ClassNode> nodes) {
+		for (ClassNode cn : nodes) {
+			if (!AccessHelper.isSynthetic(cn.access)){
+				cn.access |= Opcodes.ACC_SYNTHETIC;
+			}
+			for (MethodNode mn : cn.methods) {
+				if (!AccessHelper.isSynthetic(mn.access)){
+					mn.access |= Opcodes.ACC_SYNTHETIC;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Splits up math operations. 
+	 * @param mn
+	 */
+	public static void breakMath(MethodNode mn) {
+		for (AbstractInsnNode ain : mn.instructions.toArray()) {
+			if (ain.getType() == AbstractInsnNode.INT_INSN && ain.getOpcode() != Opcodes.NEWARRAY) {
+				if (isNear(ain)) {
+					continue;
+				}
+				boolean neg = ain.getNext().getOpcode() == Opcodes.INEG;
+				IntInsnNode iin = (IntInsnNode) ain;
+				int i = randRange(-100, 100);
+				switch (randRange(0, 3)){
+				case 0:
+					iin.operand += i;
+					mn.instructions.insert(iin, new InsnNode(Opcodes.ISUB));
+					mn.instructions.insert(iin, new InsnNode(Opcodes.SWAP));
+					mn.instructions.insertBefore(iin, OpUtils.toInt(i));
+					break;
+				case 1:
+					iin.operand -= i;
+					mn.instructions.insert(iin, new InsnNode(Opcodes.IADD));
+					mn.instructions.insert(iin, new InsnNode(Opcodes.SWAP));
+					mn.instructions.insertBefore(iin, OpUtils.toInt(i));
+					break;
+				case 2:
+					iin.operand += i;
+					mn.instructions.insert(iin, new InsnNode(Opcodes.IADD));
+					mn.instructions.insert(iin, new InsnNode(Opcodes.INEG));
+					mn.instructions.insert(iin, new InsnNode(Opcodes.SWAP));
+					mn.instructions.insertBefore(iin, OpUtils.toInt(i));
+					break;
+				case 3:
+					iin.operand -= i;
+					mn.instructions.insert(iin, new InsnNode(Opcodes.ISUB));
+					mn.instructions.insert(iin, new InsnNode(Opcodes.INEG));
+					mn.instructions.insert(iin, new InsnNode(Opcodes.SWAP));
+					mn.instructions.insertBefore(iin, OpUtils.toInt(i));
+					break;
+				}
+			}
+		}
+	}
+	
+	static int randRange(int min, int max) {
+		return (int) (min + (Math.random() * (max - min)));
+	}
+
+	static boolean isNear(AbstractInsnNode ain) {
+		AbstractInsnNode node = ain;
+		int j = 3, ii= 0;
+		while (j != 0 && node.getPrevious() != null){
+			node = node.getPrevious();
+			j--;
+			ii += 2;
+		}
+		int i = 0;
+		while (i < ii && node.getNext() != null) {
+			int o = node.getOpcode();
+			if (o == Opcodes.AALOAD || o == Opcodes.AASTORE || o == Opcodes.ANEWARRAY || o == Opcodes.NEWARRAY || o == Opcodes.CASTORE) {
+				return true;
+			}
+			node = node.getNext();
+			i++;
+		}
+		return false;
 	}
 }

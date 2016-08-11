@@ -16,7 +16,7 @@ import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
 import me.lpk.mapping.remap.MappingMode;
 import me.lpk.mapping.remap.MappingRenamer;
-import me.lpk.obfuscation.AntiDecompile;
+import me.lpk.obfuscation.MiscAnti;
 import me.lpk.obfuscation.Flow;
 import me.lpk.obfuscation.Stringer;
 import me.lpk.util.AccessHelper;
@@ -55,14 +55,14 @@ public class Main {
 		if (retObjErr) {
 			Logger.logLow("Modifying - Bad Return");
 			for (ClassNode cn : nodes.values()) {
-				AntiDecompile.retObjErr(cn);
+				MiscAnti.retObjErr(cn);
 			}
 		}
 		if (badPop) {
 			Logger.logLow("Modifying - Bad Pop");
 			for (ClassNode cn : nodes.values()) {
 				for (MethodNode mn : cn.methods) {
-					AntiDecompile.badPop(mn);
+					MiscAnti.badPop(mn);
 				}
 			}
 		}
@@ -98,7 +98,7 @@ public class Main {
 			for (ClassNode cn : nodes.values()) {
 				for (MethodNode mn : cn.methods) {
 					for (int i = 0; i < 10; i++) {
-						Flow.randomGotos(cn, mn);
+						Flow.randomGotos( mn);
 					}
 				}
 			}
@@ -107,7 +107,7 @@ public class Main {
 			Logger.logLow("Modifying - Var Dupes");
 			for (ClassNode cn : nodes.values()) {
 				for (MethodNode mn : cn.methods) {
-					AntiDecompile.duplicateVars(mn);
+					MiscAnti.duplicateVars(mn);
 				}
 			}
 		}
@@ -115,7 +115,7 @@ public class Main {
 			Logger.logLow("Modifying - Massive LDC");
 			for (ClassNode cn : nodes.values()) {
 				for (MethodNode mn : cn.methods) {
-					AntiDecompile.massiveLdc(mn);
+					MiscAnti.massiveLdc(mn);
 				}
 			}
 		}
@@ -123,7 +123,7 @@ public class Main {
 			Logger.logLow("Modifying - Math obfuscation");
 			for (ClassNode cn : nodes.values()) {
 				for (MethodNode mn : cn.methods) {
-					Flow.destroyMath(mn);
+					MiscAnti.breakMath(mn);
 				}
 			}
 		}

@@ -16,12 +16,10 @@ public class Lang {
 		OPTION_OPTIM_METHOD_REMOVE_LINES =     "optimize.method.remove.lines",
 		OPTION_OPTIM_METHOD_REMOVE_ATTRIB =    "optimize.method.remove.attributes",
 		OPTION_OPTIM_METHOD_REMOVE_FRAMES =    "optimize.method.remove.frames",
-		OPTION_OBFU_MAIN_STRINGS =             "obfuscate.enabled.strings",
-		OPTION_OBFU_MAIN_ANTIDECOMPILE =       "obfuscate.enabled.antidecompile",
-		OPTION_OBFU_MAIN_FLOW =                "obfuscate.enabled.flow",
 		OPTION_OBFU_STRINGS_INTOARRAY =        "obfuscate.strings.intoarray",
 		OPTION_OBFU_ANTI_SYNTHETIC =           "obfuscate.anti.synthetic",
 		OPTION_OBFU_ANTI_DECOMPILE_VULNS =     "obfuscate.anti.decompilevulns",
+		OPTION_OBFU_ANTI_OBJECT_LOCALS =       "obfuscate.anti.localobject",
 		OPTION_OBFU_FLOW_TRYCATCH =            "obfuscate.flow.synthetic",
 		OPTION_OBFU_FLOW_GOTOFLOOD =           "obfuscate.flow.gotoflood",
 		OPTION_OBFU_FLOW_MATH =                "obfuscate.flow.math",
@@ -52,14 +50,12 @@ public class Lang {
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_ATTRIB,    "Remove attributes");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_FRAMES,    "Remove frames");
 		//
-		translations.put(OPTION_OBFU_MAIN_STRINGS,       "Use string obfuscation");
-		translations.put(OPTION_OBFU_MAIN_ANTIDECOMPILE, "Use decompile vulns");
-		translations.put(OPTION_OBFU_MAIN_FLOW,          "Use flow control");
 		translations.put(OPTION_OBFU_STRINGS_INTOARRAY,  "Break into arrays");
 		translations.put(OPTION_OBFU_FLOW_TRYCATCH,      "Add try catches");
 		translations.put(OPTION_OBFU_FLOW_GOTOFLOOD,     "Add redundant gotos");
 		translations.put(OPTION_OBFU_FLOW_MATH,          "Add redundant math");
 		translations.put(OPTION_OBFU_ANTI_SYNTHETIC,     "Mark as synthetic");
+		translations.put(OPTION_OBFU_ANTI_OBJECT_LOCALS,  "Remove variable types");
 		translations.put(OPTION_OBFU_ANTI_DECOMPILE_VULNS,"Anti-decompiler tricks");
 		translations.put(OPTION_OBFU_RENAME_ALPHABET_CLASS,     "Class Renaming alphabet");
 		translations.put(OPTION_OBFU_RENAME_ALPHABET_METHOD,    "Method Renaming alphabet");
@@ -69,7 +65,7 @@ public class Lang {
 		//
 		translations.put(GUI_OBFUSCATION_GROUP_STRING,   "String Settings");
 		translations.put(GUI_OBFUSCATION_GROUP_FLOW,     "Flow Settings");
-		translations.put(GUI_OBFUSCATION_GROUP_ANTI,     "Anti-Decompiler Settings");
+		translations.put(GUI_OBFUSCATION_GROUP_ANTI,     "Misc Settings");
 		translations.put(GUI_OBFUSCATION_GROUP_RENAME,   "Renaming");
 		//
 		translations.put(GUI_OPTIM_GROUP_CLASS,     "Class Settings");

@@ -20,7 +20,6 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import me.lpk.util.AccessHelper;
 import me.lpk.util.OpUtils;
-import me.lpk.util.Strings;
 
 public class Stringer {
 	/**
@@ -31,7 +30,7 @@ public class Stringer {
 		Map<String, Integer> randInts = new HashMap<String, Integer>();
 		Map<String, String> stringOldAndNew = new HashMap<String, String>();
 		Set<String> strings = new HashSet<String>();
-		String key = Strings.genKey(15);
+		String key = genKey(15);
 		for (MethodNode mn : cn.methods) {
 			for (String s : getStrings(mn)) {
 				if (s.length() > 0) {
@@ -42,7 +41,7 @@ public class Stringer {
 		if (strings.size() == 0) {
 			return;
 		}
-		MethodNode decrypt = new MethodNode(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, Strings.genKey(30), "([CLjava/lang/String;I)Ljava/lang/String;", null, null);
+		MethodNode decrypt = new MethodNode(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, genKey(30), "([CLjava/lang/String;I)Ljava/lang/String;", null, null);
 		createDecryptMethod(decrypt, true);
 		cn.methods.add(decrypt);
 		for (String oldText : strings) {
@@ -253,6 +252,18 @@ public class Stringer {
 			}
 		}
 		return list;
+	}
+	
+	public static String genKey(int len) {
+		return genKey(len, 600,900);
+	}
+	
+	public static String genKey(int len, int rangeMin, int rangeMax) {
+		String s = "";
+		while (s.length() < len) {
+			s = s + ((char) (rangeMin +( Math.random() * (rangeMax - rangeMin))));
+		}
+		return s;
 	}
 
 }

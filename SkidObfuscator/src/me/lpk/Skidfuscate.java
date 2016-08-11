@@ -18,7 +18,10 @@ import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
 import me.lpk.mapping.remap.MappingRenamer;
 import me.lpk.mapping.remap.impl.ModeSimple;
+import me.lpk.obfuscation.Flow;
+import me.lpk.obfuscation.MiscAnti;
 import me.lpk.obfuscation.ModeSkidfuscate;
+import me.lpk.obfuscation.Stringer;
 import me.lpk.util.Classpather;
 import me.lpk.util.JarUtils;
 import me.lpk.util.LazySetupMaker;
@@ -49,7 +52,40 @@ public class Skidfuscate {
 				Logger.logLow("Remapping classes...");
 				doRemapping(mappings, strOpts, nodes.values());
 			}
-
+			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_OBJECT_LOCALS).booleanValue()) {
+				MiscAnti.removeLocalTypes(nodes.values());
+			}
+			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_SYNTHETIC).booleanValue()) {
+				MiscAnti.makeSynthetic(nodes.values());
+			}
+			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_DECOMPILE_VULNS).booleanValue()) {
+				for (ClassNode cn : nodes.values()) {
+					for (MethodNode mn : cn.methods) {
+						MiscAnti.duplicateVars(mn);
+						MiscAnti.badPop(mn);
+					}
+					MiscAnti.retObjErr(cn);
+				}
+			}
+			if (boolOpts.get(Lang.OPTION_OBFU_FLOW_GOTOFLOOD).booleanValue()) {
+				for (ClassNode cn : nodes.values()) {
+					for (MethodNode mn : cn.methods) {
+						Flow.randomGotos(mn);
+					}
+				}
+			}
+			if (boolOpts.get(Lang.OPTION_OBFU_STRINGS_INTOARRAY).booleanValue()) {
+				for (ClassNode cn : nodes.values()) {
+					Stringer.stringEncrypt(cn);
+				}
+			}
+			if (boolOpts.get(Lang.OPTION_OBFU_FLOW_TRYCATCH).booleanValue()) {
+				for (ClassNode cn : nodes.values()) {
+					for (MethodNode mn : cn.methods) {
+						Flow.addTryCatch(mn, "java/lang/Exception", null);
+					}
+				}
+			}
 			saveJar("Out.jar", jar, nodes, mappings);
 		} catch (Exception e) {
 			e.printStackTrace();
