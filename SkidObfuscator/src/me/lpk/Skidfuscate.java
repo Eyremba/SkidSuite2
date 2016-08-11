@@ -17,12 +17,11 @@ import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
 import me.lpk.mapping.remap.MappingRenamer;
-import me.lpk.mapping.remap.impl.ModeSimple;
 import me.lpk.obfuscation.Flow;
 import me.lpk.obfuscation.MiscAnti;
 import me.lpk.obfuscation.ModeSkidfuscate;
 import me.lpk.obfuscation.Stringer;
-import me.lpk.util.Classpather;
+import me.lpk.optimization.Optimizer;
 import me.lpk.util.JarUtils;
 import me.lpk.util.LazySetupMaker;
 
@@ -42,16 +41,15 @@ public class Skidfuscate {
 	}
 
 	public void parse(File jar, Map<String, Boolean> boolOpts, Map<String, String> strOpts) {
+		// Order: Optimize --> Obfuscation --> Renaming
 		try {
 			LazySetupMaker dat = LazySetupMaker.get(jar.getAbsolutePath(), true, new ArrayList<File>(libraries.values()));
-
 			Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 			Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 
-			if (boolOpts.get(Lang.OPTION_OBFU_RENAME_ENABLED).booleanValue()) {
-				Logger.logLow("Remapping classes...");
-				doRemapping(mappings, strOpts, nodes.values());
-			}
+			Optimizer optimizer = new Optimizer(boolOpts);
+			optimizer.optimize(jar, nodes, mappings);
+			
 			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_OBJECT_LOCALS).booleanValue()) {
 				MiscAnti.removeLocalTypes(nodes.values());
 			}
@@ -86,6 +84,12 @@ public class Skidfuscate {
 					}
 				}
 			}
+			
+			if (boolOpts.get(Lang.OPTION_OBFU_RENAME_ENABLED).booleanValue()) {
+				Logger.logLow("Remapping classes...");
+				doRemapping(mappings, strOpts, nodes.values());
+			}
+			
 			saveJar("Out.jar", jar, nodes, mappings);
 		} catch (Exception e) {
 			e.printStackTrace();
