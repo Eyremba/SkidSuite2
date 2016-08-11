@@ -26,11 +26,12 @@ public class SimpleRemover extends Remover {
 
 		ClassNode initNode = nodes.get(mainClass);
 		if (initNode == null) {
-			JOptionPane.showMessageDialog(null, "Main class '" + mainClass + "' is not in the Jar!", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
-		}
+			JOptionPane.showMessageDialog(null, "Main class '" + mainClass + "' was not detected. No removal will occur.", "Error", JOptionPane.ERROR_MESSAGE);
+			keep.addAll(nodes.keySet());
+		}else {
 		keep.add(mainClass);
 		keep.addAll(checkIsUsed(initNode, nodes));
+		}
 	}
 
 	/**

@@ -84,7 +84,6 @@ public class Skidfuscate {
 					}
 				}
 			}
-			
 			if (boolOpts.get(Lang.OPTION_OBFU_RENAME_ENABLED).booleanValue()) {
 				Logger.logLow("Remapping classes...");
 				doRemapping(mappings, strOpts, nodes.values());
@@ -104,6 +103,7 @@ public class Skidfuscate {
 	 * @param nodes
 	 */
 	private void doRemapping(Map<String, MappedClass> mappings, Map<String, String> strOpts, Collection<ClassNode> nodes) {
+		// TODO: Other modes for different situations. Make one that only obfuscated private / protected things. Good for keeping big libraries small.
 		ModeSkidfuscate mode = new ModeSkidfuscate(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS), strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD),
 				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD));
 		MappingRenamer.remapClasses(mappings, mode);
