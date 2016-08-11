@@ -18,10 +18,26 @@ public abstract class SettingsPanel extends JPanel {
 		setup();
 	}
 	
-	public SettingsBox createGroup(String group, String... vars){
+	public SettingsBox createGroup(String group){
+		return new SettingsBox(group);
+	}
+	
+	public SettingsBox createBoolGroup(String group, String... vars){
 		SettingsBox box = new SettingsBox(group);
 		for (String setting : vars){
 			box.addSetting(setting, Options.getDefaultState(setting));
+		}
+		return box;
+	}
+	
+	public SettingsBox createTextGroup(String group, String... vars){
+		SettingsBox box = new SettingsBox(group);
+		int i = 0;
+		while (i < vars.length){
+			String lbl = vars[i];
+			String val = vars[i+1];
+			box.addSetting(lbl, val);
+			i+=2;
 		}
 		return box;
 	}

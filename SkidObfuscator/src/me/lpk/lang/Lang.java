@@ -6,9 +6,6 @@ import java.util.Map;
 public class Lang {
 	public static final Map<String, String> translations = new HashMap<String, String>();
 	public static final String 
-		OPTION_MAIN_OPTIMIZE =                 "main.enabled.optimization",
-		OPTION_MAIN_OBFUSCATE =                "main.enabled.obfuscation",
-		OPTION_MAIN_RECOMPILE_MAXS =           "main.compilemaxs",
 		OPTION_OPTIM_CLASS_REMOVE_SRC =        "optimize.class.remove.src",
 		OPTION_OPTIM_CLASS_REMOVE_ANNO =       "optimize.class.remove.annotations",
 		OPTION_OPTIM_CLASS_REMOVE_ATRIB =      "optimize.class.remove.attributes",
@@ -28,20 +25,22 @@ public class Lang {
 		OPTION_OBFU_FLOW_TRYCATCH =            "obfuscate.flow.synthetic",
 		OPTION_OBFU_FLOW_GOTOFLOOD =           "obfuscate.flow.gotoflood",
 		OPTION_OBFU_FLOW_MATH =                "obfuscate.flow.math",
+		OPTION_OBFU_RENAME_ALPHABET_CLASS =    "obfuscate.rename.alphabet.class",
+		OPTION_OBFU_RENAME_ALPHABET_METHOD =   "obfuscate.rename.alphabet.method",  
+		OPTION_OBFU_RENAME_ALPHABET_FIELD =    "obfuscate.rename.alphabet.field",  
+		OPTION_OBFU_RENAME_ALPHABET_LOCALS =    "obfuscate.rename.alphabet.locals",  
+		OPTION_OBFU_RENAME_ENABLED  =          "obfuscate.rename.enabled",
 		//
 		GUI_OBFUSCATION_GROUP_STRING = "gui.groups.obfuscate.strings",
 		GUI_OBFUSCATION_GROUP_FLOW =   "gui.groups.obfuscate.flow",
 		GUI_OBFUSCATION_GROUP_ANTI =   "gui.groups.obfuscate.anti",
+		GUI_OBFUSCATION_GROUP_RENAME =   "gui.groups.obfuscate.rename",
 		GUI_OPTIM_GROUP_CLASS =        "gui.groups.optimize.class",
 		GUI_OPTIM_GROUP_METHOD =       "gui.groups.optimize.method"
 		;
 	
 	static {
 		/* TODO: Loading from language files */
-		translations.put(OPTION_MAIN_OPTIMIZE,       "Use optimization");
-		translations.put(OPTION_MAIN_OBFUSCATE,      "Use obfuscation");
-		translations.put(OPTION_MAIN_RECOMPILE_MAXS, "Compile with -noverify");
-		//
 		translations.put(OPTION_OPTIM_CLASS_REMOVE_SRC,   "Remove sourcename");
 		translations.put(OPTION_OPTIM_CLASS_REMOVE_ANNO,  "Remove annotations");
 		translations.put(OPTION_OPTIM_CLASS_REMOVE_ATRIB, "Remove attributes");
@@ -62,10 +61,16 @@ public class Lang {
 		translations.put(OPTION_OBFU_FLOW_MATH,          "Add redundant math");
 		translations.put(OPTION_OBFU_ANTI_SYNTHETIC,     "Mark as synthetic");
 		translations.put(OPTION_OBFU_ANTI_DECOMPILE_VULNS,"Anti-decompiler tricks");
+		translations.put(OPTION_OBFU_RENAME_ALPHABET_CLASS,     "Class Renaming alphabet");
+		translations.put(OPTION_OBFU_RENAME_ALPHABET_METHOD,    "Method Renaming alphabet");
+		translations.put(OPTION_OBFU_RENAME_ALPHABET_FIELD,     "Field Renaming alphabet");
+		translations.put(OPTION_OBFU_RENAME_ALPHABET_LOCALS,    "Local Renaming alphabet");
+		translations.put(OPTION_OBFU_RENAME_ENABLED,     "Rename classes & members");
 		//
 		translations.put(GUI_OBFUSCATION_GROUP_STRING,   "String Settings");
 		translations.put(GUI_OBFUSCATION_GROUP_FLOW,     "Flow Settings");
 		translations.put(GUI_OBFUSCATION_GROUP_ANTI,     "Anti-Decompiler Settings");
+		translations.put(GUI_OBFUSCATION_GROUP_RENAME,   "Renaming");
 		//
 		translations.put(GUI_OPTIM_GROUP_CLASS,     "Class Settings");
 		translations.put(GUI_OPTIM_GROUP_METHOD,     "Method Settings");

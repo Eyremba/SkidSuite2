@@ -7,12 +7,12 @@ public class OptimizationPanel extends SettingsPanel {
 
 	@Override
 	public void setup() {
-		addGroup(createGroup( Lang.translations.get(Lang.GUI_OPTIM_GROUP_CLASS), 
+		addGroup(createBoolGroup( Lang.translations.get(Lang.GUI_OPTIM_GROUP_CLASS), 
 			Lang.OPTION_OPTIM_CLASS_REMOVE_ANNO,
 			Lang.OPTION_OPTIM_CLASS_REMOVE_ATRIB,
 			Lang.OPTION_OPTIM_CLASS_REMOVE_METHODS,
 			Lang.OPTION_OPTIM_CLASS_REMOVE_SRC));
-		addGroup(createGroup(Lang.translations.get(Lang.GUI_OPTIM_GROUP_CLASS), 
+		addGroup(createBoolGroup(Lang.translations.get(Lang.GUI_OPTIM_GROUP_CLASS), 
 			Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO,
 			Lang.OPTION_OPTIM_METHOD_REMOVE_ATTRIB,
 			Lang.OPTION_OPTIM_METHOD_REMOVE_LINES,

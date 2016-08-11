@@ -25,7 +25,9 @@ public class MappingRenamer {
 	 */
 	public static Map<String, MappedClass> remapClasses(Map<String, MappedClass> mappings, MappingMode mode) {
 		for (MappedClass mc : mappings.values()) {
-			remapClass(mc, mappings, mode);
+			if (!mc.isLibrary()) {
+				remapClass(mc, mappings, mode);
+			}
 		}
 		return mappings;
 	}
@@ -40,7 +42,7 @@ public class MappingRenamer {
 	 * @return
 	 */
 	public static Map<String, MappedClass> remapClass(MappedClass mc, Map<String, MappedClass> mappings, MappingMode mode) {
-		if (mc.isLibrary()){
+		if (mc.isLibrary()) {
 			return mappings;
 		}
 		if (mc.hasParent()) {
@@ -149,9 +151,10 @@ public class MappingRenamer {
 	}
 
 	static {
-		
+
 		// Should let user add additional names to the list
-		// I guess classes like Enum don't have this as parent methods per say, so this will be necessary.
+		// I guess classes like Enum don't have this as parent methods per say,
+		// so this will be necessary.
 		Collections.addAll(whitelist, "contains", "toString", "equals", "clone");
 	}
 }

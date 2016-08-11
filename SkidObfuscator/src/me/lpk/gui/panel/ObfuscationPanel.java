@@ -7,15 +7,22 @@ public class ObfuscationPanel extends SettingsPanel {
 
 	@Override
 	public void setup() {
-		addGroup(createGroup(
+		SettingsBox renaming = createGroup(Lang.translations.get(Lang.GUI_OBFUSCATION_GROUP_RENAME));
+			renaming.addSetting(Lang.OPTION_OBFU_RENAME_ENABLED, false);
+			renaming.addSetting(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_");
+			renaming.addSetting(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_");
+			renaming.addSetting(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_");
+			renaming.addSetting(Lang.OPTION_OBFU_RENAME_ALPHABET_LOCALS, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_");
+		addGroup(renaming);
+		addGroup(createBoolGroup(
 				Lang.translations.get(Lang.GUI_OBFUSCATION_GROUP_STRING), 
 					Lang.OPTION_OBFU_STRINGS_INTOARRAY));
-		addGroup(createGroup(
+		addGroup(createBoolGroup(
 				Lang.translations.get(Lang.GUI_OBFUSCATION_GROUP_FLOW), 
 					Lang.OPTION_OBFU_FLOW_TRYCATCH,
 					Lang.OPTION_OBFU_FLOW_GOTOFLOOD,
 					Lang.OPTION_OBFU_FLOW_MATH));
-		addGroup(createGroup(
+		addGroup(createBoolGroup(
 				Lang.translations.get(Lang.GUI_OBFUSCATION_GROUP_ANTI), 
 					Lang.OPTION_OBFU_ANTI_DECOMPILE_VULNS,
 					Lang.OPTION_OBFU_ANTI_SYNTHETIC));

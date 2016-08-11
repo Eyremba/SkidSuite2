@@ -38,31 +38,7 @@ public class AntiDecompile {
 			mn.instructions.insert(new LdcInsnNode(s));
 		}
 	}
-
-	public static void types(MethodNode mn) {
-		String data = "[]{}()";
-		if (mn.localVariables != null) {
-			for (LocalVariableNode variable : mn.localVariables) {
-				String name = "";
-				while (name.length() < 6) {
-					int in = (int) Math.round(Math.random() * (data.length() - 1));
-					name += data.substring(in, in + 1);
-				}
-				variable.name = name;
-			}
-		}
-		if (mn.parameters != null) {
-			for (ParameterNode param : mn.parameters) {
-				String name = "";
-				while (name.length() < 6) {
-					int in = (int) Math.round(Math.random() * (data.length() - 1));
-					name += data.substring(in, in + 1);
-				}
-				param.name = name;
-			}
-		}
-	}
-
+	
 	public static void duplicateVars(MethodNode mn) {
 		if (AccessHelper.isAbstract(mn.access)) {
 			return;

@@ -103,14 +103,6 @@ public class Main {
 				}
 			}
 		}
-		if (types) {
-			Logger.logLow("Modifying - Type Overload");
-			for (ClassNode cn : nodes.values()) {
-				for (MethodNode mn : cn.methods) {
-					AntiDecompile.types(mn);
-				}
-			}
-		}
 		if (varDupes) {
 			Logger.logLow("Modifying - Var Dupes");
 			for (ClassNode cn : nodes.values()) {

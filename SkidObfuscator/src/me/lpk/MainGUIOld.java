@@ -33,7 +33,7 @@ import me.lpk.gui.drop.JarDropHandler;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.SkidRemapper;
-import me.lpk.optimization.Optimizer;
+import me.lpk.optimization.OptimizerOLD;
 import me.lpk.optimization.SimpleRemover;
 import me.lpk.optimization.Remover;
 import me.lpk.util.Classpather;
@@ -62,7 +62,7 @@ public class MainGUIOld implements IDropUser {
 	private JList<String> lstLoadedLibs;
 	private JTabbedPane tabbedPane;
 	private JPanel pnlObfuscation;
-	private final Optimizer optimizer = new Optimizer();
+	private final OptimizerOLD optimizer = new OptimizerOLD();
 	private Set<File> libraries = new HashSet<File>();
 	private JPanel pnlObMainOptions;
 	private JLabel lblObMainOptions;

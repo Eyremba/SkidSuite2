@@ -34,9 +34,7 @@ public class NewGui implements IDropUser {
 	private final static int ID_LOAD_TARGET = 1;
 
 	private JFrame frmSkidfuscator;
-	private final JPanel 
-			pnlMain = new JPanel(),
-			pnlInputs = new JPanel();
+	private final JPanel  pnlInputs = new JPanel();
 	private final SettingsPanel 
 			pnlObfuscation = new ObfuscationPanel(), 
 			pnlOptimization = new OptimizationPanel();
@@ -83,23 +81,16 @@ public class NewGui implements IDropUser {
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		frmSkidfuscator.getContentPane().add(tabbedPane, BorderLayout.CENTER);
-		
 		pnlInputs.setLayout(new BorderLayout(0, 0));
 
 		addDropZones(pnlInputs);
-		sddOther(pnlInputs);
 		settingsPanels.add(pnlObfuscation);
 		settingsPanels.add(pnlOptimization);
 		
-		tabbedPane.addTab("Main", null, pnlMain, "Main");
 		tabbedPane.addTab("Inputs", null, pnlInputs, "Where the inputs are chosen");
 		tabbedPane.addTab("Obfuscation", null, pnlObfuscation, "Options for obfuscation");
 		tabbedPane.addTab("Optimization", null, pnlOptimization, "Options for optimization");
 		tabbedPane.setSelectedIndex(1);
-	}
-
-	private void sddOther(JPanel pnlInputs2) {
-		
 	}
 
 	private void addDropZones(JPanel pnl) {
@@ -135,7 +126,7 @@ public class NewGui implements IDropUser {
 	@Override
 	public void onJarLoad(int id, File jar) {
 		if (id == ID_LOAD_TARGET) {
-			instance.parse(jar, Options.fromGui(this));
+			instance.parse(jar, Options.boolsFromGui(this), Options.stringsFromGui(this));
 		} else if (id == ID_LOAD_LIBRARY) {
 			instance.addLibrary(jar);
 		}

@@ -16,7 +16,7 @@ import org.objectweb.asm.optimizer.MethodOptimizer;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
 
-public class Optimizer {
+public class OptimizerOLD {
 
 	private boolean removeSource, removeInnerOuters, removeClassAnnos, removeClassAttribs;
 	private boolean removeParameterData, removeMethodAnnos, removeLocalData, removeLines, removeFrames, removeMethodAttribs;
