@@ -25,6 +25,7 @@ import me.lpk.mapping.MappingGen;
  * @author Matt
  */
 public class LazySetupMaker {
+	private static Map<String, MappedClass> rtMappings;
 	private final String name;
 	private final Map<String, ClassNode> nodes;
 	private final Map<String, MappedClass> mappings;
@@ -67,7 +68,7 @@ public class LazySetupMaker {
 		if (libs != null && libs.size() > 0) {
 			for (File lib : libs) {
 				try {
-					for (ClassNode cn : JarUtils.loadClasses(lib).values()){
+					for (ClassNode cn : JarUtils.loadClasses(lib).values()) {
 						libNodes.put(cn.name, cn);
 					}
 				} catch (IOException e) {
@@ -95,6 +96,7 @@ public class LazySetupMaker {
 		//
 		//
 		Logger.logLow("Merging target and library mappings...");
+		mappings.putAll(rtMappings);
 		if (libNodes.size() > 0) {
 			mappings.putAll(libMappings);
 		}
@@ -145,7 +147,7 @@ public class LazySetupMaker {
 	 * @return
 	 */
 	private static List<File> getLibraries() {
-		return getLibraries(false);
+		return getLibraries(false, false);
 	}
 
 	/**
@@ -155,9 +157,11 @@ public class LazySetupMaker {
 	 * @param makeDir
 	 * @return
 	 */
-	private static List<File> getLibraries(boolean makeDir) {
+	private static List<File> getLibraries(boolean makeDir, boolean rt) {
 		List<File> files = new ArrayList<File>();
-		files.add(new File(System.getProperty("java.home") + File.separator + "lib" + File.separator + "rt.jar"));
+		if (rt) {
+			files.add(getRT());
+		}
 		//
 		if (makeDir) {
 			File libDir = new File("libraries");
@@ -169,10 +173,48 @@ public class LazySetupMaker {
 		return files;
 	}
 
+	private static File getRT() {
+		return new File(System.getProperty("java.home") + File.separator + "lib" + File.separator + "rt.jar");
+	}
+
 	public void loadJarsToClasspath() throws IOException {
 		Classpather.addFile(name);
 		for (File file : this.libraries) {
 			Classpather.addFile(file);
 		}
+	}
+
+	/**
+	 * Loads RT the first time around. When this is loaded and saved once, it
+	 * makes using LazySetupMaker much quicker than doing it every time. It'd be
+	 * even better to save this to a local file or something.
+	 */
+	static {
+		try {
+			Logger.logLow("Setting up LazySetupMaker...");
+			Map<String, ClassNode> libNodes = new HashMap<String, ClassNode>();
+			for (ClassNode cn : JarUtils.loadClasses(getRT()).values()) {
+				libNodes.put(cn.name, cn);
+			}
+			Map<String, MappedClass> libMappings = new HashMap<String, MappedClass>(MappingGen.mappingsFromNodesNoLinking(libNodes));
+
+			for (MappedClass mc : libMappings.values()) {
+				mc.setIsLibrary(true);
+				for (MappedMember mm : mc.getFields()) {
+					mm.setIsLibrary(true);
+				}
+				for (MappedMember mm : mc.getMethods()) {
+					mm.setIsLibrary(true);
+				}
+			}
+			for (MappedClass mc : libMappings.values()) {
+				MappingGen.linkMappings(mc, libMappings);
+			}
+			rtMappings = libMappings;
+		} catch (IOException e) {
+			e.printStackTrace();
+			rtMappings = new HashMap<String, MappedClass>();
+		}
+		Logger.logLow("Finished setting up LazySetupMaker!");
 	}
 }
