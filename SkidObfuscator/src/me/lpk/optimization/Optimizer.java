@@ -55,6 +55,7 @@ public class Optimizer {
 		String mainClass = JarUtils.getManifestMainClass(jar);
 		Logger.logLow("Found main class: " + mainClass);
 		Logger.logLow("Searching for unused classes...");
+		boolean removeMethods = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_METHODS, false);
 		// TODO: Make remover that removes un-used methods
 		Remover remover = new SimpleRemover();
 		// Make a new map that does not contain library nodes.
@@ -65,27 +66,31 @@ public class Optimizer {
 				mapForRemoval.put(name, nodes.get(name));
 			}
 		}
-		remover.getUsedClasses(mainClass, mapForRemoval);
-		Set<String> keep = remover.getKeptClasses();
-		List<String> allClasses = new ArrayList<String>();
-		for (String name : nodes.keySet()) {
-			allClasses.add(name);
-		}
-		Logger.logLow("Removing unused classes [" + (mapForRemoval.size() - keep.size()) + " marked]...");
-		for (String name : allClasses) {
-			if (!keep.contains(name)) {
-				nodes.remove(name);
-				mappings.remove(name);
+		List<String> names = new ArrayList<String>();
+		if (removeMethods) {
+			remover.getUsedClasses(mainClass, mapForRemoval);
+			Set<String> keep = remover.getKeptClasses();
+			Logger.logLow("Removing unused classes [" + (mapForRemoval.size() - keep.size()) + " marked]...");
+			for (String name : nodes.keySet()) {
+				if (!keep.contains(name)) {
+					nodes.remove(name);
+					mappings.remove(name);
+				}
 			}
+			names.addAll(keep);
+		} else {
+			names.addAll(nodes.keySet());
 		}
-		Logger.logLow("Optimizing remaining classes...");
-		for (String name : keep) {
+		Logger.logLow("Optimizing classes...");
+		for (String name : names) {
 			try {
 				MappedClass mc = mappings.get(name);
 				if (mc == null) {
 					continue;
 				}
-				MappingClassWriter cw = new MappingClassWriter(mappings, ClassWriter.COMPUTE_FRAMES);
+				// TODO: Instead of doing visitor, see if doing it via Tree API
+				// is easier
+				ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 				ClassVisitor remapper = new ClassOptimizerImpl(remover, mc, cw, new SkidRemapper(new HashMap<String, MappedClass>()));
 				mc.getNode().accept(remapper);
 			} catch (Exception e) {

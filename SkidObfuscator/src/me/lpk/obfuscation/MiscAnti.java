@@ -109,9 +109,10 @@ public class MiscAnti {
 				continue;
 			}
 			AbstractInsnNode last = mn.instructions.getLast();
-			while (last.getType() == AbstractInsnNode.FRAME) {
-				last = last.getPrevious();
-			}
+			/*
+			 * while (last.getType() == AbstractInsnNode.FRAME) { last =
+			 * last.getPrevious(); }
+			 */
 			LabelNode beforeInvoke = new LabelNode();
 			LabelNode afterInvoke = new LabelNode();
 			LabelNode beforeAthrow = new LabelNode();
@@ -131,6 +132,7 @@ public class MiscAnti {
 			mn.instructions.insertBefore(last, new TypeInsnNode(Opcodes.CHECKCAST, "java/lang/NullPointerException"));
 			mn.instructions.insertBefore(last, beforeAthrow);
 			mn.instructions.insertBefore(last, new InsnNode(Opcodes.ATHROW));
+			//mn.instructions.insertBefore(last, new InsnNode(Opcodes.POP));
 			mn.instructions.insertBefore(last, afterAthrow);
 			mn.instructions.insertBefore(last, handler);
 			mn.tryCatchBlocks.add(tryBlockInvoke);
@@ -199,6 +201,7 @@ public class MiscAnti {
 
 	/**
 	 * Removes the types of all local variables.
+	 * 
 	 * @param nodes
 	 */
 	public static void removeLocalTypes(Collection<ClassNode> nodes) {
@@ -216,11 +219,11 @@ public class MiscAnti {
 
 	public static void makeSynthetic(Collection<ClassNode> nodes) {
 		for (ClassNode cn : nodes) {
-			if (!AccessHelper.isSynthetic(cn.access)){
+			if (!AccessHelper.isSynthetic(cn.access)) {
 				cn.access |= Opcodes.ACC_SYNTHETIC;
 			}
 			for (MethodNode mn : cn.methods) {
-				if (!AccessHelper.isSynthetic(mn.access)){
+				if (!AccessHelper.isSynthetic(mn.access)) {
 					mn.access |= Opcodes.ACC_SYNTHETIC;
 				}
 			}
@@ -228,7 +231,8 @@ public class MiscAnti {
 	}
 
 	/**
-	 * Splits up math operations. 
+	 * Splits up math operations.
+	 * 
 	 * @param mn
 	 */
 	public static void breakMath(MethodNode mn) {
@@ -240,7 +244,7 @@ public class MiscAnti {
 				boolean neg = ain.getNext().getOpcode() == Opcodes.INEG;
 				IntInsnNode iin = (IntInsnNode) ain;
 				int i = randRange(-100, 100);
-				switch (randRange(0, 3)){
+				switch (randRange(0, 3)) {
 				case 0:
 					iin.operand += i;
 					mn.instructions.insert(iin, new InsnNode(Opcodes.ISUB));
@@ -271,15 +275,15 @@ public class MiscAnti {
 			}
 		}
 	}
-	
+
 	static int randRange(int min, int max) {
 		return (int) (min + (Math.random() * (max - min)));
 	}
 
 	static boolean isNear(AbstractInsnNode ain) {
 		AbstractInsnNode node = ain;
-		int j = 3, ii= 0;
-		while (j != 0 && node.getPrevious() != null){
+		int j = 3, ii = 0;
+		while (j != 0 && node.getPrevious() != null) {
 			node = node.getPrevious();
 			j--;
 			ii += 2;

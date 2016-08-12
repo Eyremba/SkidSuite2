@@ -22,6 +22,7 @@ import me.lpk.gui.panel.ObfuscationPanel;
 import me.lpk.gui.panel.OptimizationPanel;
 import me.lpk.gui.panel.SettingsPanel;
 import me.lpk.options.Options;
+import me.lpk.util.LazySetupMaker;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -34,10 +35,8 @@ public class SkidGUI implements IDropUser {
 	private final static int ID_LOAD_TARGET = 1;
 
 	private JFrame frmSkidfuscator;
-	private final JPanel  pnlInputs = new JPanel();
-	private final SettingsPanel 
-			pnlObfuscation = new ObfuscationPanel(), 
-			pnlOptimization = new OptimizationPanel();
+	private final JPanel pnlInputs = new JPanel();
+	private final SettingsPanel pnlObfuscation = new ObfuscationPanel(), pnlOptimization = new OptimizationPanel();
 	private final List<SettingsPanel> settingsPanels = new ArrayList<SettingsPanel>();
 	private final Skidfuscate instance = Skidfuscate.get();
 
@@ -45,21 +44,26 @@ public class SkidGUI implements IDropUser {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
-		 try {
-	        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-	    }  catch (Exception e) {
-	    	
-	    }
-		EventQueue.invokeLater(new Runnable() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+		}
+		// In this order, the GUI shows up and lets the user interact with it.
+		// While it's slow due to LazySetupMaker being run in the background it's
+		// better than a solid 5 second hang with no interaction allowed.
+		new Runnable() {
+			@Override
 			public void run() {
-				try {
-					SkidGUI window = new SkidGUI();
-					window.frmSkidfuscator.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				SkidGUI window = new SkidGUI();
+				window.frmSkidfuscator.setVisible(true);
 			}
-		});
+		}.run();
+		new Runnable() {
+			@Override
+			public void run() {
+				LazySetupMaker.setup();
+			}
+		}.run();
 	}
 
 	/**
@@ -86,11 +90,11 @@ public class SkidGUI implements IDropUser {
 		addDropZones(pnlInputs);
 		settingsPanels.add(pnlObfuscation);
 		settingsPanels.add(pnlOptimization);
-		
+
 		tabbedPane.addTab("Inputs", null, pnlInputs, "Where the inputs are chosen");
 		tabbedPane.addTab("Obfuscation", null, pnlObfuscation, "Options for obfuscation");
 		tabbedPane.addTab("Optimization", null, pnlOptimization, "Options for optimization");
-		tabbedPane.setSelectedIndex(1);
+		// tabbedPane.setSelectedIndex(1);
 	}
 
 	private void addDropZones(JPanel pnl) {

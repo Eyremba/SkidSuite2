@@ -25,7 +25,8 @@ import me.lpk.mapping.MappingGen;
  * @author Matt
  */
 public class LazySetupMaker {
-	private static Map<String, MappedClass> rtMappings;
+	private static volatile Map<String, MappedClass> rtMappings;
+	private static volatile boolean setup, bypassSetup;
 	private final String name;
 	private final Map<String, ClassNode> nodes;
 	private final Map<String, MappedClass> mappings;
@@ -50,11 +51,19 @@ public class LazySetupMaker {
 		this.libMappings = libMappings;
 	}
 
-	public static LazySetupMaker get(String jarIn, boolean readDefaultLibraries) {
+	public static LazySetupMaker get(String jarIn, boolean readDefaultLibraries) throws LSMException {
 		return get(jarIn, readDefaultLibraries, null);
 	}
 
-	public static LazySetupMaker get(String jarIn, boolean readDefaultLibraries, Collection<File> libs) {
+	public static LazySetupMaker get(String jarIn, boolean readDefaultLibraries, Collection<File> libs) throws LSMException {
+		boolean ignoredSetup = false;
+		if (!setup) {
+			if (!bypassSetup) {
+				throw new LSMException("LazySetupMaker has not been setup!");
+			} else {
+				ignoredSetup = true;
+			}
+		}
 		Logger.logLow("Loading: " + jarIn + " (Reading Libraries: " + readDefaultLibraries + ")...");
 		File in = new File(jarIn);
 		Map<String, ClassNode> nodes = loadNodes(in);
@@ -96,7 +105,9 @@ public class LazySetupMaker {
 		//
 		//
 		Logger.logLow("Merging target and library mappings...");
-		mappings.putAll(rtMappings);
+		if (!ignoredSetup) {
+			mappings.putAll(rtMappings);
+		}
 		if (libNodes.size() > 0) {
 			mappings.putAll(libMappings);
 		}
@@ -170,8 +181,6 @@ public class LazySetupMaker {
 		return files;
 	}
 
-	
-
 	public void loadJarsToClasspath() throws IOException {
 		Classpather.addFile(name);
 		for (File file : this.libraries) {
@@ -180,12 +189,24 @@ public class LazySetupMaker {
 	}
 
 	/**
+	 * This bypasses the setup process. This will skip a 5 or so second wait
+	 * time but it may result in less accurate output. <i> Do not do this is
+	 * classes or class members are being renamed.</i>
+	 */
+	public static void setBypassSetup() {
+		bypassSetup = true;
+	}
+
+	/**
 	 * Loads RT the first time around. When this is loaded and saved once, it
 	 * makes using LazySetupMaker much quicker than doing it every time. It'd be
 	 * even better to save this to a local file or something.
 	 */
-	static {
+	public static void setup() {
 		try {
+			if (setup){
+				return;
+			}
 			Logger.logLow("Setting up LazySetupMaker...");
 			Map<String, ClassNode> libNodes = new HashMap<String, ClassNode>();
 			for (ClassNode cn : JarUtils.loadRT().values()) {
@@ -206,10 +227,19 @@ public class LazySetupMaker {
 				MappingGen.linkMappings(mc, libMappings);
 			}
 			rtMappings = libMappings;
+			setup = true;
 		} catch (IOException e) {
 			e.printStackTrace();
 			rtMappings = new HashMap<String, MappedClass>();
 		}
 		Logger.logLow("Finished setting up LazySetupMaker!");
+	}
+
+	static class LSMException extends Exception {
+		public LSMException(String reason) {
+			super(reason);
+		}
+
+		private static final long serialVersionUID = 54L;
 	}
 }

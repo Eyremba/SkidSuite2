@@ -25,11 +25,12 @@ import me.lpk.util.LazySetupMaker;
 
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		obfuscating("In.jar", "Out.jar");
 	}
 
-	public static void obfuscating(String jarIn, String jarOut) {
+	public static void obfuscating(String jarIn, String jarOut) throws Exception {
+		LazySetupMaker.setBypassSetup();
 		LazySetupMaker dat = LazySetupMaker.get(jarIn, false);
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());

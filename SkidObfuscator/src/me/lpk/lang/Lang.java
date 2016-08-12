@@ -28,6 +28,7 @@ public class Lang {
 		OPTION_OBFU_RENAME_ALPHABET_FIELD =    "obfuscate.rename.alphabet.field",  
 		OPTION_OBFU_RENAME_ALPHABET_LOCALS =    "obfuscate.rename.alphabet.locals",  
 		OPTION_OBFU_RENAME_ENABLED  =          "obfuscate.rename.enabled",
+		OPTION_OBFU_RENAME_PRIVATE_ONLY  =          "obfuscate.rename.privonly",
 		//
 		GUI_OBFUSCATION_GROUP_STRING = "gui.groups.obfuscate.strings",
 		GUI_OBFUSCATION_GROUP_FLOW =   "gui.groups.obfuscate.flow",
@@ -61,7 +62,8 @@ public class Lang {
 		translations.put(OPTION_OBFU_RENAME_ALPHABET_METHOD,    "Method Renaming alphabet");
 		translations.put(OPTION_OBFU_RENAME_ALPHABET_FIELD,     "Field Renaming alphabet");
 		translations.put(OPTION_OBFU_RENAME_ALPHABET_LOCALS,    "Local Renaming alphabet");
-		translations.put(OPTION_OBFU_RENAME_ENABLED,     "Rename classes & members");
+		translations.put(OPTION_OBFU_RENAME_ENABLED,     		"Rename classes & members");
+		translations.put(OPTION_OBFU_RENAME_PRIVATE_ONLY,       "Only rename private members");
 		//
 		translations.put(GUI_OBFUSCATION_GROUP_STRING,   "String Settings");
 		translations.put(GUI_OBFUSCATION_GROUP_FLOW,     "Flow Settings");

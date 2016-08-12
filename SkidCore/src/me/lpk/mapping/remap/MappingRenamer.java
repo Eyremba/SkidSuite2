@@ -59,6 +59,11 @@ public class MappingRenamer {
 			mc.setNewName(mode.getClassName(mc.getNode()));
 		} else {
 			// Handling naming of inner class names
+			MappedClass outter = mc.getOuterClass();
+			String newName = mode.getClassName(mc.getNode());
+			String post = newName.contains("/") ? newName.substring(newName.lastIndexOf("/") + 1, newName.length()) : newName;
+			mc.setNewName(outter.getNewName() + "$" + post);
+			/*
 			if (mc.getOriginalName().contains("$")) {
 				String post = mc.getOriginalName().substring(mc.getOriginalName().indexOf("$") + 1);
 				mc.setNewName(mc.getOuterClass().getNewName() + "$" + post);
@@ -72,6 +77,7 @@ public class MappingRenamer {
 				}
 				mc.setNewName(mc.getOuterClass().getNewName() + "$" + index);
 			}
+			*/
 		}
 		for (MappedMember mm : mc.getFields()) {
 			// Rename fields
@@ -88,6 +94,8 @@ public class MappingRenamer {
 			if (parentMember == null || parentMember.equals(mm)) {
 				// No parent found. Not currently renamed.
 				if (ParentUtils.callsSuper(mm.getMethodNode())) {
+					// TODO: Check if this is even neeeded
+					//
 					// Don't rename the method, but mark it as if we did.
 					// Parent can't be found but it DOES call a parent.
 					mm.setRenamedOverride(true);

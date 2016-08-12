@@ -21,12 +21,13 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			runAnti(new File("ZKMNew.jar"));
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private static void runAnti(File jar) throws IOException {
+	private static void runAnti(File jar) throws Exception {
+		LazySetupMaker.setBypassSetup();
 		LazySetupMaker lsm = LazySetupMaker.get(jar.getAbsolutePath(), true);
 		for (String className : lsm.getNodes().keySet()) {
 			AntiBase anti = new AntiZKM8();

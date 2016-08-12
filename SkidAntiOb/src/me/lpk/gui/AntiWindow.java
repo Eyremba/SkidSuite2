@@ -144,7 +144,7 @@ public class AntiWindow {
 					if (jar.getName().toLowerCase().endsWith(".jar")) {
 						try {
 							runAnti(jar);
-						} catch (IOException e) {
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
@@ -193,7 +193,8 @@ public class AntiWindow {
 		splitPane.setDividerLocation((frame.getWidth() / 6) * 2);
 	}
 
-	private void runAnti(File jar) throws IOException {
+	private void runAnti(File jar) throws Exception {
+		LazySetupMaker.setBypassSetup();
 		LazySetupMaker lsm = LazySetupMaker.get(jar.getAbsolutePath(), true);
 		for (String className : lsm.getNodes().keySet()) {
 			AntiBase anti = makeAnti(lsm.getNodes());

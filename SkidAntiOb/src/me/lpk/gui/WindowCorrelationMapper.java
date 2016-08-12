@@ -19,8 +19,8 @@ import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
 import me.lpk.mapping.MappingGen;
 import me.lpk.mapping.MappingProcessor;
+import me.lpk.mapping.loaders.EnigmaLoader;
 import me.lpk.mapping.remap.impl.ModeNone;
-import me.lpk.util.Classpather;
 import me.lpk.util.JarUtils;
 import me.lpk.util.LazySetupMaker;
 
@@ -107,7 +107,11 @@ public class WindowCorrelationMapper {
 		});
 		btnCorrelate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				go(txtTargetJar.getText(), txtCleanJar.getText());
+				try {
+					go(txtTargetJar.getText(), txtCleanJar.getText());
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
 			}
 		});
 		txtCleanJar.setColumns(10);
@@ -125,10 +129,11 @@ public class WindowCorrelationMapper {
 		frmCorrelationMapper.getContentPane().add(splitPane);
 	}
 
-	public void go(String pathTarget, String pathClean) {
+	public void go(String pathTarget, String pathClean) throws Exception {
 		// Loading
 		File targetJar = new File(pathTarget);
 		File cleanJar = new File(pathClean);
+		LazySetupMaker.setBypassSetup();
 		LazySetupMaker targ = LazySetupMaker.get(targetJar.getAbsolutePath(), false);
 		LazySetupMaker clen = LazySetupMaker.get(cleanJar.getAbsolutePath(), false);
 		//Classpather.addFile(targetJar);
@@ -157,7 +162,7 @@ public class WindowCorrelationMapper {
 		System.out.println("Done!");
 	}
 
-	private void correlate(Map<String, MappedClass> mappedClasses, Map<String, MappedClass> baseClasses) {
+	private void correlate(Map<String, MappedClass> mappings, Map<String, MappedClass> baseClasses) {
 		HashMap<String, String> h = new HashMap<String, String>();
 		String[] clean = txtrCleanNames.getText().split("\n");
 		String[] target = txtrTargetNames.getText().split("\n");
@@ -165,7 +170,7 @@ public class WindowCorrelationMapper {
 			h.put(target[i], clean[i]);
 		}
 		for (String obfu : h.keySet()) {
-			MappedClass targetClass = mappedClasses.get(obfu);
+			MappedClass targetClass = mappings.get(obfu);
 			MappedClass cleanClass = baseClasses.get(h.get(obfu));
 			if (targetClass == null) {
 				System.err.println("NULL 1: " + obfu + ":" + h.get(obfu));
@@ -175,50 +180,34 @@ public class WindowCorrelationMapper {
 					continue;
 				}
 			}
-			mappedClasses = CorrelationMapper.correlate(targetClass, cleanClass, mappedClasses, baseClasses);
+			mappings = CorrelationMapper.correlate(targetClass, cleanClass, mappings, baseClasses);
 		}
 	}
 
-	private static void saveMappings(Map<String, MappedClass> mappedClasses, String string) {
-		StringBuilder sb = new StringBuilder();
-		for (MappedClass clazz : mappedClasses.values()) {
-			sb.append("CLASS " + clazz.getOriginalName() + " " + clazz.getNewName() + "\n");
-			for (MappedMember f : clazz.getFields()) {
-				sb.append("\tFIELD " + f.getOriginalName() + " " + f.getNewName() + " " + f.getDesc() + "\n");
-			}
-			for (MappedMember m : clazz.getMethods()) {
-				if (m.getOriginalName().contains("<")) {
-					continue;
-				}
-				sb.append("\tMETHOD " + m.getOriginalName() + " " + m.getNewName() + " " + m.getDesc() + "\n");
-			}
-		}
-		try {
-			FileUtils.write(new File(string), sb.toString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	private static void saveMappings(Map<String, MappedClass> mappings, String string) {
+		EnigmaLoader enigma = new EnigmaLoader();
+		enigma.save(mappings, new File(string));
 	}
 
-	private static Map<String, MappedClass> resetRemapped(Map<String, MappedClass> mappedClasses) {
-		for (String name : mappedClasses.keySet()) {
-			MappedClass mc = mappedClasses.get(name);
+	private static Map<String, MappedClass> resetRemapped(Map<String, MappedClass> mappings) {
+		for (String name : mappings.keySet()) {
+			MappedClass mc = mappings.get(name);
 			mc.setRenamedOverride(false);
-			mappedClasses.put(name, mc);
+			mappings.put(name, mc);
 		}
-		return mappedClasses;
+		return mappings;
 	}
 
-	private static void saveJar(File nonEntriesJar, Map<String, ClassNode> nodes, Map<String, MappedClass> mappedClasses) {
+	private static void saveJar(File nonEntriesJar, Map<String, ClassNode> nodes, Map<String, MappedClass> mappings) {
 		Map<String, byte[]> out = null;
-		out = MappingProcessor.process(nodes, mappedClasses, true);
+		out = MappingProcessor.process(nodes, mappings, true);
 		try {
 			out.putAll(JarUtils.loadNonClassEntries(nonEntriesJar));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		int renamed = 0;
-		for (MappedClass mc : mappedClasses.values()) {
+		for (MappedClass mc : mappings.values()) {
 			if (mc.isTruelyRenamed()) {
 				renamed++;
 			}

@@ -9,6 +9,7 @@ public class ObfuscationPanel extends SettingsPanel {
 	public void setup() {
 		SettingsBox renaming = createGroup(Lang.translations.get(Lang.GUI_OBFUSCATION_GROUP_RENAME));
 			renaming.addSetting(Lang.OPTION_OBFU_RENAME_ENABLED, false);
+			renaming.addSetting(Lang.OPTION_OBFU_RENAME_PRIVATE_ONLY, false);
 			renaming.addSetting(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_");
 			renaming.addSetting(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_");
 			renaming.addSetting(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_");

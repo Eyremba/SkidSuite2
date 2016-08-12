@@ -23,14 +23,13 @@ public class SimpleRemover extends Remover {
 
 	@Override
 	public void getUsedClasses(String mainClass, Map<String, ClassNode> nodes) {
-
 		ClassNode initNode = nodes.get(mainClass);
 		if (initNode == null) {
 			JOptionPane.showMessageDialog(null, "Main class '" + mainClass + "' was not detected. No removal will occur.", "Error", JOptionPane.ERROR_MESSAGE);
 			keep.addAll(nodes.keySet());
-		}else {
-		keep.add(mainClass);
-		keep.addAll(checkIsUsed(initNode, nodes));
+		} else {
+			keep.add(mainClass);
+			keep.addAll(checkIsUsed(initNode, nodes));
 		}
 	}
 
@@ -119,7 +118,6 @@ public class SimpleRemover extends Remover {
 		}
 		return keep;
 	}
-
 
 	@Override
 	public boolean isMethodUsed(String className, String mthdKey) {

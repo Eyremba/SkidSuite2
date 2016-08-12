@@ -16,6 +16,7 @@ import me.lpk.lang.Lang;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
+import me.lpk.mapping.loaders.EnigmaLoader;
 import me.lpk.mapping.remap.MappingMode;
 import me.lpk.mapping.remap.MappingRenamer;
 import me.lpk.obfuscation.Flow;
@@ -45,13 +46,14 @@ public class Skidfuscate {
 	public void parse(File jar, Map<String, Boolean> boolOpts, Map<String, String> strOpts) {
 		// Order: Load --> Optimize --> Obfuscation --> Renaming
 		try {
+			Logger.logLow("Loading & mapping from jar...");
 			LazySetupMaker dat = LazySetupMaker.get(jar.getAbsolutePath(), true, new ArrayList<File>(libraries.values()));
 			Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 			Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 
 			Optimizer optimizer = new Optimizer(boolOpts);
 			optimizer.optimize(jar, nodes, mappings);
-			
+
 			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_OBJECT_LOCALS).booleanValue()) {
 				MiscAnti.removeLocalTypes(nodes.values());
 			}
@@ -88,10 +90,14 @@ public class Skidfuscate {
 			}
 			if (boolOpts.get(Lang.OPTION_OBFU_RENAME_ENABLED).booleanValue()) {
 				Logger.logLow("Remapping classes...");
-				doRemapping(mappings, strOpts, nodes.values());
+				doRemapping(mappings, strOpts, boolOpts, nodes.values());
 			}
-			
+
+			Logger.logLow("Saving mappings...");
+			new EnigmaLoader().save(mappings, new File(jar.getName().replace(".jar", ".enigma")));
+			Logger.logLow("Saving jar...");
 			saveJar(jar.getName().replace(".jar", "-re.jar"), jar, nodes, mappings);
+			Logger.logLow("Done!");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -104,10 +110,10 @@ public class Skidfuscate {
 	 * @param strOpts
 	 * @param nodes
 	 */
-	private void doRemapping(Map<String, MappedClass> mappings, Map<String, String> strOpts, Collection<ClassNode> nodes) {
-		// TODO: Other modes for different situations. Make one that only obfuscated private / protected things. Good for keeping big libraries small.
+	private void doRemapping(Map<String, MappedClass> mappings, Map<String, String> strOpts, Map<String, Boolean> boolOpts, Collection<ClassNode> nodes) {
+		// TODO: Other modes for different situations.
 		MappingModeImpl mode = new ModeSkidfuscate(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS), strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD),
-				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), true);
+				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), boolOpts.get(Lang.OPTION_OBFU_RENAME_PRIVATE_ONLY).booleanValue());
 		MappingRenamer.remapClasses(mappings, mode);
 		for (ClassNode cn : nodes) {
 			for (MethodNode mn : cn.methods) {
@@ -137,13 +143,12 @@ public class Skidfuscate {
 	 */
 	private static void saveJar(String name, File nonEntriesJar, Map<String, ClassNode> nodes, Map<String, MappedClass> mappedClasses) {
 		Map<String, byte[]> out = null;
-		out = MappingProcessor.process(nodes, mappedClasses, true);
+		out = MappingProcessor.process(nodes, mappedClasses, false);
 		try {
 			out.putAll(JarUtils.loadNonClassEntries(nonEntriesJar));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Saving...");
 		JarUtils.saveAsJar(out, name);
 	}
 }
