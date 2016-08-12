@@ -16,11 +16,13 @@ import me.lpk.lang.Lang;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
+import me.lpk.mapping.remap.MappingMode;
 import me.lpk.mapping.remap.MappingRenamer;
 import me.lpk.obfuscation.Flow;
 import me.lpk.obfuscation.MiscAnti;
-import me.lpk.obfuscation.ModeSkidfuscate;
 import me.lpk.obfuscation.Stringer;
+import me.lpk.obfuscation.rename.MappingModeImpl;
+import me.lpk.obfuscation.rename.ModeSkidfuscate;
 import me.lpk.optimization.Optimizer;
 import me.lpk.util.JarUtils;
 import me.lpk.util.LazySetupMaker;
@@ -104,8 +106,8 @@ public class Skidfuscate {
 	 */
 	private void doRemapping(Map<String, MappedClass> mappings, Map<String, String> strOpts, Collection<ClassNode> nodes) {
 		// TODO: Other modes for different situations. Make one that only obfuscated private / protected things. Good for keeping big libraries small.
-		ModeSkidfuscate mode = new ModeSkidfuscate(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS), strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD),
-				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD));
+		MappingModeImpl mode = new ModeSkidfuscate(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS), strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD),
+				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), true);
 		MappingRenamer.remapClasses(mappings, mode);
 		for (ClassNode cn : nodes) {
 			for (MethodNode mn : cn.methods) {

@@ -1,4 +1,4 @@
-package me.lpk.obfuscation;
+package me.lpk.obfuscation.rename;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,12 +8,14 @@ import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
 import me.lpk.mapping.remap.MappingMode;
+import me.lpk.util.AccessHelper;
 
-public class ModeSkidfuscate extends MappingMode {
+public class ModeSkidfuscate extends MappingModeImpl {
 	/**
 	 * Alphabets
 	 */
 	private final String c, f, m;
+	private final boolean privateOnly;
 	/**
 	 * Current classnode.
 	 */
@@ -29,21 +31,31 @@ public class ModeSkidfuscate extends MappingMode {
 	private int classes;
 
 	public ModeSkidfuscate(String c, String f, String m) {
+		this(c, f, m, false);
+	}
+
+	public ModeSkidfuscate(String c, String f, String m, boolean p) {
 		this.c = c;
 		this.f = f;
 		this.m = m;
+		privateOnly = p;
 	}
 
 	@Override
 	public String getClassName(ClassNode cn) {
+		current = cn;
 		for (MethodNode mn : cn.methods) {
 			if (mn.name.equals("main") && mn.desc.equals("([Ljava/lang/String;)V")) {
 				return cn.name;
 			}
 		}
-		String name = getName(c, classes);
+		String name = cn.name;
+		if (privateOnly && !AccessHelper.isPublic(cn.access) && cn.name.contains("/")) {
+			name = cn.name.substring(0, cn.name.lastIndexOf("/")) + getName(c, classes);
+		} else {
+			name = getName(c, classes);
+		}
 		classes++;
-		current = cn;
 		descs.clear();
 		return name;
 	}
@@ -52,6 +64,9 @@ public class ModeSkidfuscate extends MappingMode {
 	public String getMethodName(MethodNode mn) {
 		if (mn.desc.equals("([Ljava/lang/String;)V") && mn.name.equals("main")) {
 			return "main";
+		}
+		if (privateOnly && AccessHelper.isPublic(mn.access)) {
+			return mn.name;
 		}
 		// For some odd reason, there seems to be random instances where it goes
 		// "Nope, never seen this sig before. But yeah I've seen it before"
@@ -71,6 +86,9 @@ public class ModeSkidfuscate extends MappingMode {
 
 	@Override
 	public String getFieldName(FieldNode fn) {
+		if (privateOnly && AccessHelper.isPublic(fn.access)) {
+			return fn.name;
+		}
 		if (!descs.containsKey(fn.desc)) {
 			descs.put(fn.desc, 0);
 		} else {

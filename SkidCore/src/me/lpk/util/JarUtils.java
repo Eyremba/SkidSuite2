@@ -37,6 +37,7 @@ public class JarUtils {
 		// Or if the jar is really big, enumeration = infinite hang
 		// ...
 		// Whatever. It works now!
+		str.forEach(z -> readJar(jar, z, classes, null));
 		jar.close();
 		return classes;
 	}
@@ -44,6 +45,9 @@ public class JarUtils {
 	public static Map<String, ClassNode> loadRT() throws IOException {
 		Map<String, ClassNode> classes = new HashMap<String, ClassNode>();
 		JarFile jar = new JarFile(getRT());
+		Stream<JarEntry> str = jar.stream();
+		// TODO: Make ignoring these packages optional
+		str.forEach(z -> readJar(jar, z, classes, Arrays.asList("com/sun/", "com/oracle/", "jdk/", "sun/")));
 		jar.close();
 		return classes;
 	}
@@ -60,6 +64,7 @@ public class JarUtils {
 		String name = en.getName();
 		try (InputStream jis = jar.getInputStream(en)) {
 			if (name.endsWith(".class")) {
+				if (ignored != null && ignored.contains(name)) {
 					return classes;
 				}
 				byte[] bytes = IOUtils.toByteArray(jis);
