@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -32,32 +34,18 @@ public class JarUtils {
 		Stream<JarEntry> str = jar.stream();
 		// For some reason streaming = entries in messy jars
 		// enumeration = no entries
+		// Or if the jar is really big, enumeration = infinite hang
 		// ...
 		// Whatever. It works now!
-		str.forEach(z -> readJar(jar, z, classes));
 		jar.close();
 		return classes;
 	}
-	
-	public static Map<String, ClassNode> loadRT() throws IOException{
+
+	public static Map<String, ClassNode> loadRT() throws IOException {
 		Map<String, ClassNode> classes = new HashMap<String, ClassNode>();
 		JarFile jar = new JarFile(getRT());
-		// For some reason streaming = entries in messy jars
-		// enumeration = no entries
-		// ...
-		// Whatever. It works now!
-		while(jar.entries().hasMoreElements()) {
-			JarEntry en = jar.entries().nextElement();
-			String name = en.getName();
-			// TODO: Make loading these packages optional.
-			// For now: "It werks for me!"
-			if (name.startsWith("com/oracle") || name.startsWith("com/sun") || name.startsWith("jdk/") || name.startsWith("sun/")){
-				classes = readJar(jar, en, classes);
-			}
-		}
 		jar.close();
 		return classes;
-		
 	}
 
 	/**
@@ -68,10 +56,12 @@ public class JarUtils {
 	 * @param classes
 	 * @return
 	 */
-	private static Map<String, ClassNode> readJar(JarFile jar, JarEntry en, Map<String, ClassNode> classes) {
+	private static Map<String, ClassNode> readJar(JarFile jar, JarEntry en, Map<String, ClassNode> classes, List<String> ignored) {
 		String name = en.getName();
-		try (InputStream jis = jar.getInputStream(en)){
+		try (InputStream jis = jar.getInputStream(en)) {
 			if (name.endsWith(".class")) {
+					return classes;
+				}
 				byte[] bytes = IOUtils.toByteArray(jis);
 				String cafebabe = String.format("%02X%02X%02X%02X", bytes[0], bytes[1], bytes[2], bytes[3]);
 				if (cafebabe.toLowerCase().equals("cafebabe")) {
