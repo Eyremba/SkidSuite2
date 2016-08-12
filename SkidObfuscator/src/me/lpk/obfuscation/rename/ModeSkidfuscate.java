@@ -50,12 +50,16 @@ public class ModeSkidfuscate extends MappingModeImpl {
 			}
 		}
 		String name = cn.name;
-		if (privateOnly && !AccessHelper.isPublic(cn.access) && cn.name.contains("/")) {
-			name = cn.name.substring(0, cn.name.lastIndexOf("/")) + getName(c, classes);
+		if (privateOnly && cn.name.contains("/")) {
+			if (!AccessHelper.isPublic(cn.access)) {
+				name = cn.name.substring(0, cn.name.lastIndexOf("/") + 1) + getName(c, classes);
+				classes++;
+			}
 		} else {
 			name = getName(c, classes);
+			classes++;
 		}
-		classes++;
+
 		descs.clear();
 		return name;
 	}
@@ -65,7 +69,7 @@ public class ModeSkidfuscate extends MappingModeImpl {
 		if (mn.desc.equals("([Ljava/lang/String;)V") && mn.name.equals("main")) {
 			return "main";
 		}
-		if (privateOnly && AccessHelper.isPublic(mn.access)) {
+		if (privateOnly && !AccessHelper.isPrivate(mn.access)) {
 			return mn.name;
 		}
 		// For some odd reason, there seems to be random instances where it goes
@@ -86,7 +90,7 @@ public class ModeSkidfuscate extends MappingModeImpl {
 
 	@Override
 	public String getFieldName(FieldNode fn) {
-		if (privateOnly && AccessHelper.isPublic(fn.access)) {
+		if (privateOnly && !AccessHelper.isPrivate(fn.access)) {
 			return fn.name;
 		}
 		if (!descs.containsKey(fn.desc)) {
