@@ -1,5 +1,8 @@
 package me.lpk.mapping;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -17,9 +20,15 @@ public class MappedMember extends MappedObject {
 	 */
 	private final int index;
 	/**
-	 * The MappedMember (Method) which this member overrides.
+	 * The list of MappedMembers that this member overrides.
 	 */
-	private MappedMember override;
+	private List<MappedMember> overrides = new ArrayList<MappedMember>();
+	/**
+	 * The list of MappedMembers that override this member.
+	 * 
+	 * TODO: Think of a better name
+	 */
+	private List<MappedMember> overridesMe = new ArrayList<MappedMember>();
 
 	public MappedMember(MappedClass owner, Object memberNode, int index, String desc, String nameOriginal) {
 		super(desc, nameOriginal, nameOriginal);
@@ -92,22 +101,50 @@ public class MappedMember extends MappedObject {
 	}
 
 	/**
-	 * Returns true if the member has an override.
+	 * Returns true if the member overrides another.
 	 * 
 	 * @return
 	 */
 	public boolean doesOverride() {
-		return override != null;
+		return overrides.size() > 0;
 	}
 
 	/**
-	 * Gets the MappedMember object of the overridden (method) member. May be
-	 * null.
+	 * Returns true if the member is overriden.
 	 * 
 	 * @return
 	 */
-	public MappedMember getOverride() {
-		return override;
+	public boolean isOverriden() {
+		return overridesMe.size() > 0;
+	}
+
+	/**
+	 * Gets the first MappedMember this member overrides. May be null.
+	 * 
+	 * @return
+	 */
+	public MappedMember getFirstOverride() {
+		return doesOverride() ? overrides.get(0) : null;
+	}
+
+	/**
+	 * Gets the list of MappedMembers that are overriden by this.
+	 * 
+	 * @return
+	 */
+	public List<MappedMember> getOverrides() {
+		return overrides;
+	}
+
+	/**
+	 * Gets the list of MappedMembers that override this.
+	 * 
+	 * TODO: think of a better name
+	 * 
+	 * @return
+	 */
+	public List<MappedMember> getMyOverrides() {
+		return overridesMe;
 	}
 
 	/**
@@ -115,8 +152,9 @@ public class MappedMember extends MappedObject {
 	 * 
 	 * @param override
 	 */
-	public void setOverride(MappedMember override) {
-		this.override = override;
+	public void addOverride(MappedMember override) {
+		overrides.add(override);
+		override.overridesMe.add(this);
 	}
 
 }

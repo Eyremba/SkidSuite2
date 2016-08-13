@@ -109,13 +109,38 @@ public class ParentUtils {
 	 * @param mm
 	 * @return
 	 */
+	public static MappedMember findMethodOverrideOld(MappedMember mm) {
+		if (mm.doesOverride()) {
+			// Overridden method's parent == given method's parent.
+			if (mm.getFirstOverride().getOwner().getOriginalName().equals(mm.getOwner().getOriginalName())) {
+				return mm;
+			}
+			return findMethodOverride(mm.getFirstOverride());
+		}
+		return mm;
+	}
+	
+	/**
+	 * Finds the parent-most overridden member.
+	 * 
+	 * @param mm
+	 * @return
+	 */
 	public static MappedMember findMethodOverride(MappedMember mm) {
 		if (mm.doesOverride()) {
 			// Overridden method's parent == given method's parent.
-			if (mm.getOverride().getOwner().getOriginalName().equals(mm.getOwner().getOriginalName())) {
-				return mm;
+			for (MappedMember mm2 : mm.getOverrides()){
+				if (mm2.getOwner().getOriginalName().equals(mm.getOwner().getOriginalName())) {
+					return mm;
+				}
 			}
-			return findMethodOverride(mm.getOverride());
+			for (MappedMember mm2 : mm.getOverrides()){
+				MappedMember mm3 =  findMethodOverride(mm2);
+				if (mm3 != mm2){
+					return mm3;
+				}
+			}
+
 		}
 		return mm;
 	}

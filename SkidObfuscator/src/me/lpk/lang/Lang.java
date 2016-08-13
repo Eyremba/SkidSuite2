@@ -9,7 +9,7 @@ public class Lang {
 		OPTION_OPTIM_CLASS_REMOVE_SRC =        "optimize.class.remove.src",
 		OPTION_OPTIM_CLASS_REMOVE_ANNO =       "optimize.class.remove.annotations",
 		OPTION_OPTIM_CLASS_REMOVE_ATRIB =      "optimize.class.remove.attributes",
-		OPTION_OPTIM_CLASS_REMOVE_METHODS =    "optimize.class.remove.methods",
+		OPTION_OPTIM_CLASS_REMOVE_MEMBERS =    "optimize.class.remove.methods",
 		OPTION_OPTIM_METHOD_REMOVE_PARAMNAME = "optimize.method.remove.param",
 		OPTION_OPTIM_METHOD_REMOVE_ANNO =      "optimize.method.remove.annotations",
 		OPTION_OPTIM_METHOD_REMOVE_LOCALDATA = "optimize.method.remove.localdata",
@@ -45,7 +45,7 @@ public class Lang {
 		translations.put(OPTION_OPTIM_CLASS_REMOVE_ATRIB, "Remove attributes");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_PARAMNAME, "Remove parameter names");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_ANNO,      "Remove annotations");
-		translations.put(OPTION_OPTIM_CLASS_REMOVE_METHODS,    "Remove unused methods");
+		translations.put(OPTION_OPTIM_CLASS_REMOVE_MEMBERS,    "Remove unused members");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_LOCALDATA, "Remove variable data");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_LINES,     "Remove line numbers");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_ATTRIB,    "Remove attributes");

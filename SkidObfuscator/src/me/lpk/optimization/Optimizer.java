@@ -3,6 +3,7 @@ package me.lpk.optimization;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +27,6 @@ import me.lpk.lang.Lang;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
-import me.lpk.mapping.MappingClassWriter;
 import me.lpk.mapping.SkidRemapper;
 import me.lpk.util.JarUtils;
 
@@ -55,7 +55,7 @@ public class Optimizer {
 		String mainClass = JarUtils.getManifestMainClass(jar);
 		Logger.logLow("Found main class: " + mainClass);
 		Logger.logLow("Searching for unused classes...");
-		boolean removeMethods = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_METHODS, false);
+		boolean removeMethods = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_MEMBERS, Boolean.FALSE).booleanValue();
 		// TODO: Make remover that removes un-used methods
 		Remover remover = new SimpleRemover();
 		// Make a new map that does not contain library nodes.
@@ -70,11 +70,13 @@ public class Optimizer {
 		if (removeMethods) {
 			remover.getUsedClasses(mainClass, mapForRemoval);
 			Set<String> keep = remover.getKeptClasses();
-			Logger.logLow("Removing unused classes [" + (mapForRemoval.size() - keep.size()) + " marked]...");
-			for (String name : nodes.keySet()) {
+			Logger.logLow("Removing unused classes [" + (keep.size() - mapForRemoval.size()) + " marked]...");
+			Set<String> set = new HashSet<String>(nodes.keySet());
+			for (String name : set) {
 				if (!keep.contains(name)) {
 					nodes.remove(name);
 					mappings.remove(name);
+					System.out.println("Removed: " + name );
 				}
 			}
 			names.addAll(keep);

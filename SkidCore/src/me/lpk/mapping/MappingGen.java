@@ -297,12 +297,12 @@ public class MappingGen {
 		}
 		// Adding method overrides
 		for (MappedMember method : mappedClass.getMethods()) {
-			if (method.getOverride() != null) {
+			if (method.getFirstOverride() != null) {
 				continue;
 			}
 			MappedMember methodOverriden = ParentUtils.findMethodParent(mappedClass, method.getOriginalName(), method.getDesc());
 			if (methodOverriden != null) {
-				method.setOverride(methodOverriden);
+				method.addOverride(methodOverriden);
 			}
 		}
 		mappings.put(mappedClass.getOriginalName(), mappedClass);

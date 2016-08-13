@@ -122,16 +122,25 @@ public class SRGLoader extends MappingLoader {
 		}
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
 			for (MappedClass mc : mappings.values()) {
+				if (mc.isLibrary()){
+					continue;
+				}
 				if (mc.isTruelyRenamed()) {
 					bw.write("CL: " + mc.getOriginalName() + " " + mc.getNewName() + "\n");
 				}
 			}
 			for (MappedClass mc : mappings.values()) {
+				if (mc.isLibrary()){
+					continue;
+				}
 				for (MappedMember mm : mc.getFields()) {
 					bw.write("FD: " + mc.getOriginalName() + "/" + mm.getOriginalName() + " " + mc.getNewName() + "/" + mm.getNewName() + "\n");
 				}
 			}
 			for (MappedClass mc : mappings.values()) {
+				if (mc.isLibrary()){
+					continue;
+				}
 				for (MappedMember mm : mc.getMethods()) {
 					bw.write("MD: " + mc.getOriginalName() + "/" + mm.getOriginalName() + " " + mm.getDesc() + " " + mc.getNewName() + "/" + mm.getNewName() + " "
 							+ StringUtils.fixDesc(mm.getDesc(), mappings) + "\n");

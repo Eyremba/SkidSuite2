@@ -93,7 +93,6 @@ public class ClassRemapper extends ClassVisitor {
 
 	@Override
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-		// TODO should innerName be changed?
 		super.visitInnerClass(remapper.mapType(name), outerName == null ? null : remapper.mapType(outerName), innerName, access);
 	}
 

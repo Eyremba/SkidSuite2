@@ -114,7 +114,7 @@ public class Skidfuscate {
 		// TODO: Other modes for different situations.
 		MappingModeImpl mode = new ModeSkidfuscate(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS), strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD),
 				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), boolOpts.get(Lang.OPTION_OBFU_RENAME_PRIVATE_ONLY).booleanValue());
-		MappingRenamer.remapClasses(mappings, mode);
+		new MappingRenamer().remapClasses(mappings, mode);
 		for (ClassNode cn : nodes) {
 			for (MethodNode mn : cn.methods) {
 				int i = 0;

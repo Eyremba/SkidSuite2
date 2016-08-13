@@ -134,6 +134,9 @@ public class EnigmaLoader extends MappingLoader {
 		}
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
 			for (MappedClass mc : mappings.values()) {
+				if (mc.isLibrary()){
+					continue;
+				}
 				String renamed = mc.isTruelyRenamed() ? " " + mc.getNewName() : "";
 				bw.write("CLASS " + mc.getOriginalName() + renamed + "\n");
 				for (MappedMember mm : mc.getFields()) {

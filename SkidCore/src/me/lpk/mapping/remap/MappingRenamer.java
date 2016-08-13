@@ -1,7 +1,9 @@
 package me.lpk.mapping.remap;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,6 +16,7 @@ import me.lpk.util.ParentUtils;
 
 public class MappingRenamer {
 	private static final Set<String> whitelist = new HashSet<String>();
+	private final List<String> remapped = new ArrayList<String>();
 
 	/**
 	 * Updates the information of the given map of MappedClasses according to
@@ -23,7 +26,7 @@ public class MappingRenamer {
 	 * @param mode
 	 * @return
 	 */
-	public static Map<String, MappedClass> remapClasses(Map<String, MappedClass> mappings, MappingMode mode) {
+	public Map<String, MappedClass> remapClasses(Map<String, MappedClass> mappings, MappingMode mode) {
 		for (MappedClass mc : mappings.values()) {
 			if (!mc.isLibrary()) {
 				remapClass(mc, mappings, mode);
@@ -41,8 +44,8 @@ public class MappingRenamer {
 	 * @param mode
 	 * @return
 	 */
-	public static Map<String, MappedClass> remapClass(MappedClass mc, Map<String, MappedClass> mappings, MappingMode mode) {
-		if (mc.isLibrary()) {
+	public Map<String, MappedClass> remapClass(MappedClass mc, Map<String, MappedClass> mappings, MappingMode mode) {
+		if (mc.isLibrary() || remapped.contains(mc.getOriginalName())) {
 			return mappings;
 		}
 		if (mc.hasParent()) {
@@ -56,7 +59,7 @@ public class MappingRenamer {
 		}
 		if (!mc.isInnerClass()) {
 			// Handling naming of normal class
-			mc.setNewName(mode.getClassName(mc.getNode()));
+			 mc.setNewName(mode.getClassName(mc.getNode()));
 		} else {
 			// Handling naming of inner class names
 			MappedClass outter = mc.getOuterClass();
@@ -64,20 +67,14 @@ public class MappingRenamer {
 			String post = newName.contains("/") ? newName.substring(newName.lastIndexOf("/") + 1, newName.length()) : newName;
 			mc.setNewName(outter.getNewName() + "$" + post);
 			/*
-			if (mc.getOriginalName().contains("$")) {
-				String post = mc.getOriginalName().substring(mc.getOriginalName().indexOf("$") + 1);
-				mc.setNewName(mc.getOuterClass().getNewName() + "$" + post);
-			} else {
-				int index = 0;
-				for (String name : mc.getOuterClass().getInnerClassMap().keySet()) {
-					index += 1;
-					if (name.equals(mc.getOriginalName())) {
-						break;
-					}
-				}
-				mc.setNewName(mc.getOuterClass().getNewName() + "$" + index);
-			}
-			*/
+			 * if (mc.getOriginalName().contains("$")) { String post =
+			 * mc.getOriginalName().substring(mc.getOriginalName().indexOf("$")
+			 * + 1); mc.setNewName(mc.getOuterClass().getNewName() + "$" +
+			 * post); } else { int index = 0; for (String name :
+			 * mc.getOuterClass().getInnerClassMap().keySet()) { index += 1; if
+			 * (name.equals(mc.getOriginalName())) { break; } }
+			 * mc.setNewName(mc.getOuterClass().getNewName() + "$" + index); }
+			 */
 		}
 		for (MappedMember mm : mc.getFields()) {
 			// Rename fields
@@ -108,10 +105,32 @@ public class MappingRenamer {
 				// Rename and override current entry.
 				mm.setNewName(parentMember.getNewName());
 			}
+			// Make sure if override structure is convoluted it's all named
+			// correctly regardless.
+			if (mm.doesOverride() && !mm.isOverriden()){
+				fixOverrideNames(mm, parentMember);
+			}
 			MethodNode mn = mm.getMethodNode();
 			updateStrings(mn, mappings);
 		}
+		remapped.add(mc.getOriginalName());
 		return mappings;
+	}
+
+	/**
+	 * Ensures all methods in the override structure have the same name. This is
+	 * only needed for cases like: http://pastebin.com/CpeD6wgN <br>
+	 * TODO: Determine if this step is even needed for each input and ignore it
+	 * if it's not needed.
+	 * 
+	 * @param mm
+	 * @param override
+	 */
+	private static void fixOverrideNames(MappedMember mm, MappedMember override) {
+		for (MappedMember mm2 : mm.getOverrides()) {
+			fixOverrideNames(mm2, override);
+		}
+		mm.setNewName(override.getNewName());
 	}
 
 	/**

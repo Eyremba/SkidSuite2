@@ -25,7 +25,7 @@ public class AntiStringer extends AntiBase {
 
 	@Override
 	public ClassNode scan(ClassNode node) {
-		// TODO:
+		// TODO: Fix new stringer
 		// final int hashCode =
 		// (SharedSecrets.getJavaLangAccess().getConstantPool(Class.forName(stackTrace[2].getClassName())).getSize()
 		// + stackTrace[2].getClassName() + stackTrace[2].getMethodName() +

@@ -641,6 +641,4 @@ public abstract class AdviceAdapter extends GeneratorAdapter implements Opcodes 
      */
     protected void onMethodExit(int opcode) {
     }
-
-    // TODO onException, onMethodCall
 }

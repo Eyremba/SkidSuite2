@@ -145,6 +145,9 @@ public class ProguardLoader extends MappingLoader {
 		}
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
 			for (MappedClass mc : mappings.values()) {
+				if (mc.isLibrary()){
+					continue;
+				}
 				bw.write(mc.getOriginalName().replace("/", ".") + " -> " + mc.getNewName().replace("/", ".") + ":\n");
 				for (MappedMember mm : mc.getFields()) {
 					bw.write("    " + toProguardFieldDesc(mm.getDesc()) + mm.getOriginalName() + " -> " + mm.getNewName());
