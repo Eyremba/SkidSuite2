@@ -230,7 +230,8 @@ public class MappingGen {
 			MappedClass parentMappedClass = mappings.get(mc.getNode().superName);
 			if (parentMappedClass != null) {
 				mappings = linkMappings(parentMappedClass, mappings);
-				parentMappedClass.addChild(mc, false);
+				parentMappedClass.addChild(mc);
+				mc.setParent(parentMappedClass);
 			}
 		}
 		// Adding interfaces
@@ -240,6 +241,7 @@ public class MappingGen {
 				if (mappedInterface != null) {
 					mappings = linkMappings(mappedInterface, mappings);
 					mc.addInterface(mappedInterface);
+					mappedInterface.addChild(mc);
 				}
 			}
 		}
@@ -291,6 +293,7 @@ public class MappingGen {
 				MappedClass outer = mappings.get(outerClass);
 				if (outer != null) {
 					outer.addInnerClass(mc);
+					mc.setOuterClass(outer);
 					mappings = linkMappings(outer, mappings);
 				}
 			}

@@ -188,12 +188,7 @@ public class MappedClass extends MappedObject {
 	 * 
 	 * @param child
 	 */
-	public void addChild(MappedClass child, boolean amIAnInterface) {
-		if (amIAnInterface){
-			child.addInterface(this);
-		}else{
-			child.setParent(this);
-		}
+	public void addChild(MappedClass child) {
 		children.put(child.getOriginalName(), child);
 	}
 
@@ -205,7 +200,6 @@ public class MappedClass extends MappedObject {
 	 */
 	public void addInterface(MappedClass interfaze) {
 		interfaces.add(interfaze);
-		interfaze.addChild(this, true);
 	}
 
 	/**
@@ -214,7 +208,6 @@ public class MappedClass extends MappedObject {
 	 * @param child
 	 */
 	public void addInnerClass(MappedClass child) {
-		child.setOuterClass(this);
 		inners.put(child.getOriginalName(), child);
 	}
 
