@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -214,7 +215,7 @@ public class MappingGen {
 		}
 		return mappings;
 	}
-
+	
 	/**
 	 * Iterates through entries in the given map and matches together parent and
 	 * child classes.
@@ -222,35 +223,35 @@ public class MappingGen {
 	 * @param mappings
 	 * @return
 	 */
-	public static Map<String, MappedClass> linkMappings(MappedClass mappedClass, Map<String, MappedClass> mappings) {
+	public static Map<String, MappedClass> linkMappings(MappedClass mc, Map<String, MappedClass> mappings) {
 		// Setting up parent structure
-		if (!mappedClass.hasParent()) {
+		if (!mc.hasParent()) {
 			// No parent, check to see if one can be found
-			MappedClass parentMappedClass = mappings.get(mappedClass.getNode().superName);
+			MappedClass parentMappedClass = mappings.get(mc.getNode().superName);
 			if (parentMappedClass != null) {
 				mappings = linkMappings(parentMappedClass, mappings);
-				parentMappedClass.addChild(mappedClass);
+				parentMappedClass.addChild(mc, false);
 			}
 		}
 		// Adding interfaces
-		if (mappedClass.getInterfaces().size() == 0) {
-			for (String interfaze : mappedClass.getNode().interfaces) {
+		if (mc.getInterfaces().size() == 0) {
+			for (String interfaze : mc.getNode().interfaces) {
 				MappedClass mappedInterface = mappings.get(interfaze);
 				if (mappedInterface != null) {
 					mappings = linkMappings(mappedInterface, mappings);
-					mappedInterface.addInterfaceImplementation(mappedClass);
+					mc.addInterface(mappedInterface);
 				}
 			}
 		}
 		// Setting up outer/inner class structure
-		if (mappedClass.getOuterClass() == null) {
-			boolean outerClassASM = mappedClass.getNode().outerClass != null;
-			boolean outerClassName = mappedClass.getOriginalName().contains("$");
+		if (mc.getOuterClass() == null) {
+			boolean outerClassASM = mc.getNode().outerClass != null;
+			boolean outerClassName = mc.getOriginalName().contains("$");
 			String outerClass = null;
 			if (outerClassASM) {
-				outerClass = mappedClass.getNode().outerClass;
+				outerClass = mc.getNode().outerClass;
 			} else if (outerClassName) {
-				outerClass = mappedClass.getOriginalName().substring(0, mappedClass.getOriginalName().indexOf("$"));
+				outerClass = mc.getOriginalName().substring(0, mc.getOriginalName().indexOf("$"));
 				if (outerClass.endsWith("/")) {
 					// TODO: Do this better, account for obfuscations that
 					// purposefully put $'s in names
@@ -260,9 +261,9 @@ public class MappingGen {
 				}
 			} else {
 				int synths = 0, synthID = -1;
-				for (int fieldKey = 0; fieldKey < mappedClass.getFields().size(); fieldKey++) {
+				for (int fieldKey = 0; fieldKey < mc.getFields().size(); fieldKey++) {
 					// Check for synthetic fields
-					FieldNode fn = mappedClass.getFields().get(fieldKey).getFieldNode();
+					FieldNode fn = mc.getFields().get(fieldKey).getFieldNode();
 					if (fn == null) {
 						continue;
 					}
@@ -276,7 +277,7 @@ public class MappingGen {
 				if (synths == 1) {
 					// If there is a single synthetic field referencing a class,
 					// it's probably an anonymous inner class.
-					FieldNode fn = mappedClass.getFields().get(synthID).getFieldNode();
+					FieldNode fn = mc.getFields().get(synthID).getFieldNode();
 					if (fn != null && fn.desc.contains(";")) {
 						List<String> matches = RegexUtils.matchDescriptionClasses(fn.desc);
 						if (matches.size() > 0) {
@@ -289,22 +290,53 @@ public class MappingGen {
 			if (outerClass != null) {
 				MappedClass outer = mappings.get(outerClass);
 				if (outer != null) {
-					outer.addInnerClass(mappedClass);
+					outer.addInnerClass(mc);
 					mappings = linkMappings(outer, mappings);
 				}
 			}
 		}
 		// Adding method overrides
-		for (MappedMember method : mappedClass.getMethods()) {
+		for (MappedMember method : mc.getMethods()) {
 			if (method.getFirstOverride() != null) {
 				continue;
 			}
-			MappedMember methodOverriden = ParentUtils.findMethodParent(mappedClass, method.getOriginalName(), method.getDesc());
-			if (methodOverriden != null) {
-				method.addOverride(methodOverriden);
+			addOverrides(mc, method);
+		}
+		mappings.put(mc.getOriginalName(), mc);
+		if (mc.getOriginalName().equals("org/apache/commons/io/output/StringBuilderWriter")){
+			System.out.println("\tInterfaces: " + mc.getInterfaces().size());
+			System.out.println("\tParent: " + mc.getParent().getOriginalName());
+			for (MappedMember m : mc.getMethods()) {
+				System.out.println("\t\t " + m.getOriginalName() + ":" + m.isLibrary() + ":" + (m.doesOverride() ? m.getFirstOverride().isLibrary() : "o"));
 			}
 		}
-		mappings.put(mappedClass.getOriginalName(), mappedClass);
 		return mappings;
+	}
+	
+	private static void addOverrides(MappedClass mappedClass, MappedMember method) {
+		// Skip if already searched for methods
+		List<MappedMember> methodOverridens = new ArrayList<MappedMember>();
+		MappedClass parent = mappedClass.getParent();
+		// Search the parent
+		if (parent != null) {
+			MappedMember parentMethod = ParentUtils.findMethod(parent, method.getOriginalName(), method.getDesc());
+			if (parentMethod != null) {
+				methodOverridens.add(parentMethod);
+			}
+		}
+		// Search interfaces
+		for (MappedClass interfacee : mappedClass.getInterfaces()) {
+			MappedMember interfaceMethod = ParentUtils.findMethod(interfacee, method.getOriginalName(), method.getDesc());
+			if (interfaceMethod != null) {
+				methodOverridens.add(interfaceMethod);
+			}
+		}
+		// Add each override. Add overrides for the overriden.
+		for (MappedMember mmm : methodOverridens) {
+			addOverrides(mmm.getOwner(), mmm);
+			if (!method.getOverrides().contains(mmm)) {
+				method.addOverride(mmm);
+			}
+		}
 	}
 }

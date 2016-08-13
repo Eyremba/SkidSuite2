@@ -188,28 +188,24 @@ public class MappedClass extends MappedObject {
 	 * 
 	 * @param child
 	 */
-	public void addChild(MappedClass child) {
-		child.setParent(this);
+	public void addChild(MappedClass child, boolean amIAnInterface) {
+		if (amIAnInterface){
+			child.addInterface(this);
+		}else{
+			child.setParent(this);
+		}
 		children.put(child.getOriginalName(), child);
 	}
 
-	/**
-	 * Adds a child instance to the class as an interface.
-	 * 
-	 * @param child
-	 */
-	public void addInterfaceImplementation(MappedClass child) {
-		child.addInterface(this);
-		children.put(child.getOriginalName(), child);
-	}
 
 	/**
 	 * Adds an interface to the class.
 	 * 
 	 * @param interfaze
 	 */
-	private void addInterface(MappedClass interfaze) {
+	public void addInterface(MappedClass interfaze) {
 		interfaces.add(interfaze);
+		interfaze.addChild(this, true);
 	}
 
 	/**
@@ -340,26 +336,5 @@ public class MappedClass extends MappedObject {
 	 */
 	public boolean hasParent() {
 		return parent != null;
-	}
-
-	/**
-	 * Checks if a given parent is a parent of the current MappedClass.
-	 * 
-	 * @param parent
-	 * @return
-	 */
-	public boolean hasParent(MappedClass parent) {
-		if (parent.equals(this)) {
-			return true;
-		}
-		for (MappedClass interfaze : interfaces) {
-			if (interfaze.equals(parent)) {
-				return true;
-			}
-		}
-		if (hasParent()) {
-			return this.parent.hasParent(parent);
-		}
-		return false;
 	}
 }

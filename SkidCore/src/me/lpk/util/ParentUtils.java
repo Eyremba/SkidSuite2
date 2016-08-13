@@ -62,22 +62,23 @@ public class ParentUtils {
 	 * @param desc
 	 * @return
 	 */
-	public static MappedMember findMethodParent(MappedClass owner, String name, String desc) {
+	public static List<MappedMember> findMethodParent(MappedClass owner, String name, String desc) {
+		 List<MappedMember> list = new ArrayList<MappedMember>();
 		// Check for interfaces in the method's class.
 		for (MappedClass interfaceClass : owner.getInterfaces()) {
 			MappedMember mm = findMethodInParentInclusive(interfaceClass, name, desc);
 			if (mm != null) {
-				return mm;
+				list.add(mm);
 			}
 		}
 		// Check the parents
 		if (owner.getParent() != null) {
 			MappedMember mm = findMethodInParentInclusive(owner.getParent(), name, desc);
 			if (mm != null) {
-				return mm;
+				list.add(mm);
 			}
 		}
-		return null;
+		return list;
 	}
 
 	public static MappedMember findMethodInParentInclusive(MappedClass owner, String name, String desc) {
@@ -102,24 +103,7 @@ public class ParentUtils {
 		}
 		return null;
 	}
-
-	/**
-	 * Finds the parent-most overridden member.
-	 * 
-	 * @param mm
-	 * @return
-	 */
-	public static MappedMember findMethodOverrideOld(MappedMember mm) {
-		if (mm.doesOverride()) {
-			// Overridden method's parent == given method's parent.
-			if (mm.getFirstOverride().getOwner().getOriginalName().equals(mm.getOwner().getOriginalName())) {
-				return mm;
-			}
-			return findMethodOverride(mm.getFirstOverride());
-		}
-		return mm;
-	}
-
+	
 	/**
 	 * Finds the parent-most overridden member.
 	 * 
@@ -291,7 +275,7 @@ public class ParentUtils {
 
 	private static MappedClass getParent(String n, MappedClass m) {
 		while (m != null) {
-			if (m.getNewName().equals(n)) {
+			if (m.getOriginalName().equals(n)) {
 				return m;
 			}
 			for (MappedClass i : m.getInterfaces()) {
@@ -308,12 +292,16 @@ public class ParentUtils {
 	private static List<String> getParents(MappedClass m) {
 		List<String> list = new ArrayList<String>();
 		while (m != null) {
-			list.add(m.getNewName());
+			list.add(m.getOriginalName());
 			for (MappedClass i : m.getInterfaces()) {
 				list.addAll(getParents(i));
 			}
 			m = m.getParent();
 		}
 		return list;
+	}
+
+	public static boolean isChild(MappedClass parent, MappedClass mc) {
+		return findCommonParent(mc, parent) == parent;
 	}
 }

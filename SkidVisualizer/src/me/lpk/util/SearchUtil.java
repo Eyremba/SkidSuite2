@@ -120,7 +120,7 @@ public class SearchUtil {
 			if (mc.equals(parent)) {
 				continue;
 			}
-			if (mc.hasParent(parent)) {
+			if (ParentUtils.isChild(parent, mc)) {
 				results.add(new SearchResultEntry(mc.getNode()));
 			}
 		}
