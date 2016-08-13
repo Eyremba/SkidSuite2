@@ -20,6 +20,7 @@ import me.lpk.obfuscation.MiscAnti;
 import me.lpk.obfuscation.Flow;
 import me.lpk.obfuscation.Stringer;
 import me.lpk.util.AccessHelper;
+import me.lpk.util.Classpather;
 import me.lpk.util.JarUtils;
 import me.lpk.util.LazySetupMaker;
 
@@ -30,18 +31,19 @@ public class Main {
 	}
 
 	public static void obfuscating(String jarIn, String jarOut) throws Exception {
-		LazySetupMaker.setBypassSetup();
+		//Classpather.addFile(jarIn);
+		//LazySetupMaker.setBypassSetup();
+		LazySetupMaker.setup();
 		LazySetupMaker dat = LazySetupMaker.get(jarIn, false);
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 		//
 		boolean tryCatch = false;
 		boolean ldc = false;
-		boolean math = true;
-		boolean types = false;
+		boolean math = false;
 		boolean varDupes = false;
 		boolean access = false;
-		boolean string = true;
+		boolean string = false;
 		boolean gotos = false;
 		boolean badPop = false;
 		boolean retObjErr = false;

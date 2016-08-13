@@ -64,15 +64,19 @@ public class JarUtils {
 		String name = en.getName();
 		try (InputStream jis = jar.getInputStream(en)) {
 			if (name.endsWith(".class")) {
-				if (ignored != null && ignored.contains(name)) {
-					return classes;
+				if (ignored != null) {
+					for (String s : ignored) {
+						if (name.startsWith(s)) {
+							return classes;
+						}
+					}
 				}
 				byte[] bytes = IOUtils.toByteArray(jis);
 				String cafebabe = String.format("%02X%02X%02X%02X", bytes[0], bytes[1], bytes[2], bytes[3]);
 				if (cafebabe.toLowerCase().equals("cafebabe")) {
 					try {
 						final ClassNode cn = ASMUtils.getNode(bytes);
-						if (cn != null && cn.superName != null) {
+						if (cn != null && (cn.name.equals("java/lang/Object") ? true : cn.superName != null)) {
 							for (MethodNode mn : cn.methods) {
 								mn.owner = cn.name;
 							}

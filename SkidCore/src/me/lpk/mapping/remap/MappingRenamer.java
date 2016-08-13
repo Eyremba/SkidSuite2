@@ -130,7 +130,7 @@ public class MappingRenamer {
 		for (MappedMember mm2 : mm.getOverrides()) {
 			fixOverrideNames(mm2, override);
 		}
-		mm.setNewName(override.getNewName());
+		mm.setNewName(override.isLibrary() ? override.getOriginalName() : override.getNewName());
 	}
 
 	/**
@@ -182,6 +182,6 @@ public class MappingRenamer {
 		// Should let user add additional names to the list
 		// I guess classes like Enum don't have this as parent methods per say,
 		// so this will be necessary.
-		Collections.addAll(whitelist, "contains", "toString", "equals", "clone");
+		Collections.addAll(whitelist, "contains", "toString", "equals", "clone", "run", "start");
 	}
 }

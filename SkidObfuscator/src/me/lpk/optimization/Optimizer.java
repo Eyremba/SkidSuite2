@@ -76,7 +76,6 @@ public class Optimizer {
 				if (!keep.contains(name)) {
 					nodes.remove(name);
 					mappings.remove(name);
-					System.out.println("Removed: " + name );
 				}
 			}
 			names.addAll(keep);

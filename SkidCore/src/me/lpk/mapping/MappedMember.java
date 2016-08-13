@@ -154,7 +154,20 @@ public class MappedMember extends MappedObject {
 	 */
 	public void addOverride(MappedMember override) {
 		overrides.add(override);
-		override.overridesMe.add(this);
+		override.addMemberThatOverridesMe(this);
+	}
+
+	/**
+	 * Adds a member to the list that shows methods overriding this. <br>
+	 * TODO: Better name for this method
+	 * 
+	 * @param overrider
+	 */
+	private void addMemberThatOverridesMe(MappedMember overrider) {
+		if (overrider.isLibrary()) {
+			setIsLibrary(true);
+		}
+		overridesMe.add(overrider);
 	}
 
 }

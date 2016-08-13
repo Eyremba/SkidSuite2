@@ -177,7 +177,7 @@ public class MappingGen {
 	 * @param mappings
 	 */
 	private static Map<String, MappedClass> generateClassMapping(ClassNode node, Map<String, ClassNode> nodes, Map<String, MappedClass> mappings) {
-		boolean hasParents = node.name.equals("java/lang/Object") && !node.superName.equals("java/lang/Object");
+		boolean hasParents = !node.name.equals("java/lang/Object");
 		boolean hasInterfaces = node.interfaces.size() > 0;
 		if (hasParents) {
 			boolean parentRenamed = mappings.containsKey(node.superName);
@@ -202,8 +202,7 @@ public class MappingGen {
 				}
 			}
 		}
-		boolean isRenamed = mappings.containsKey(node.name);
-		if (!isRenamed) {
+		if (!mappings.containsKey(node.name)) {
 			MappedClass mappedClass = new MappedClass(node, node.name);
 			for (FieldNode fn : node.fields) {
 				mappedClass.addField(new MappedMember(mappedClass, fn, mappedClass.getFields().size(), fn.desc, fn.name));

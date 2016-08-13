@@ -119,7 +119,7 @@ public class ParentUtils {
 		}
 		return mm;
 	}
-	
+
 	/**
 	 * Finds the parent-most overridden member.
 	 * 
@@ -129,18 +129,21 @@ public class ParentUtils {
 	public static MappedMember findMethodOverride(MappedMember mm) {
 		if (mm.doesOverride()) {
 			// Overridden method's parent == given method's parent.
-			for (MappedMember mm2 : mm.getOverrides()){
+			for (MappedMember mm2 : mm.getOverrides()) {
 				if (mm2.getOwner().getOriginalName().equals(mm.getOwner().getOriginalName())) {
-					return mm;
+					MappedMember mm3 = findMethodOverride(mm2);
+					if (!mm3.doesOverride()) {
+						return mm3;
+					}
 				}
 			}
-			for (MappedMember mm2 : mm.getOverrides()){
-				MappedMember mm3 =  findMethodOverride(mm2);
-				if (mm3 != mm2){
-					return mm3;
-				}
-			}
-
+			/*
+			 * for (MappedMember mm2 : mm.getOverrides()){ if
+			 * (mm2.getOwner().getOriginalName().equals(mm.getOwner().
+			 * getOriginalName())) { return mm; } } for (MappedMember mm2 :
+			 * mm.getOverrides()){ MappedMember mm3 = findMethodOverride(mm2);
+			 * if (mm3 != mm2){ return mm3; } }
+			 */
 		}
 		return mm;
 	}
@@ -277,7 +280,7 @@ public class ParentUtils {
 		}
 		// Does m1 extend or implement anything m2 does?
 		for (String parentNames1 : getParents(mc1)) {
-			for (String parentNames2 : getParents(mc1)) {
+			for (String parentNames2 : getParents(mc2)) {
 				if (parentNames1.equals(parentNames2)) {
 					return getParent(parentNames1, mc1);
 				}
