@@ -89,7 +89,11 @@ public class SkidRemapper extends Remapper {
 		} else {
 			MappedMember mm = ParentUtils.findMethodInParentInclusive(mc, name, desc);
 			if (mm != null) {
-				return super.mapMethodName(owner, ParentUtils.findMethodOverride(mm).getNewName(), desc);
+				if (mm.doesOverride()) {
+					return super.mapMethodName(owner, ParentUtils.findMethodOverride(mm).getNewName(), desc);
+				}else {
+					return super.mapMethodName(owner, mm.getNewName(), desc);
+				}
 			}
 		}
 		return super.mapMethodName(owner, name, desc);

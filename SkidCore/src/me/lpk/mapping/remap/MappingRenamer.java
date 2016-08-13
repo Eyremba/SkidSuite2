@@ -11,7 +11,6 @@ import org.objectweb.asm.tree.MethodNode;
 
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
-import me.lpk.util.AccessHelper;
 import me.lpk.util.ParentUtils;
 
 public class MappingRenamer {
@@ -66,15 +65,6 @@ public class MappingRenamer {
 			String newName = mode.getClassName(mc.getNode());
 			String post = newName.contains("/") ? newName.substring(newName.lastIndexOf("/") + 1, newName.length()) : newName;
 			mc.setNewName(outter.getNewName() + "$" + post);
-			/*
-			 * if (mc.getOriginalName().contains("$")) { String post =
-			 * mc.getOriginalName().substring(mc.getOriginalName().indexOf("$")
-			 * + 1); mc.setNewName(mc.getOuterClass().getNewName() + "$" +
-			 * post); } else { int index = 0; for (String name :
-			 * mc.getOuterClass().getInnerClassMap().keySet()) { index += 1; if
-			 * (name.equals(mc.getOriginalName())) { break; } }
-			 * mc.setNewName(mc.getOuterClass().getNewName() + "$" + index); }
-			 */
 		}
 		for (MappedMember mm : mc.getFields()) {
 			// Rename fields
@@ -88,27 +78,18 @@ public class MappingRenamer {
 			}
 			MappedMember parentMember = ParentUtils.findMethodOverride(mm);
 			// Check and see if theres a parent member to pull names from.
-			if (parentMember == null || parentMember.equals(mm)) {
-				// No parent found. Not currently renamed.
-				if (ParentUtils.callsSuper(mm.getMethodNode())) {
-					// TODO: Check if this is even neeeded
-					//
-					// Don't rename the method, but mark it as if we did.
-					// Parent can't be found but it DOES call a parent.
-					mm.setRenamedOverride(true);
-				} else {
-					// Rename the method.
-					mm.setNewName(mode.getMethodName(mm.getMethodNode()));
-				}
+			if (parentMember.equals(mm)) {
+				// No parent found. Give method a name
+				mm.setNewName(mode.getMethodName(mm.getMethodNode()));
 			} else {
-				// Parent found
-				// Rename and override current entry.
-				mm.setNewName(parentMember.getNewName());
-			}
-			// Make sure if override structure is convoluted it's all named
-			// correctly regardless.
-			if (mm.doesOverride() && !mm.isOverriden()){
-				fixOverrideNames(mm, parentMember);
+				
+				// Parent found. Give method parent's name.
+				mm.setNewName(parentMember.getNewName());				
+				// Make sure if override structure is convoluted it's all named
+				// correctly regardless.
+				if (mm.doesOverride() && !mm.isOverriden()){
+					fixOverrideNames(mm, parentMember);
+				}	
 			}
 			MethodNode mn = mm.getMethodNode();
 			updateStrings(mn, mappings);
@@ -130,7 +111,7 @@ public class MappingRenamer {
 		for (MappedMember mm2 : mm.getOverrides()) {
 			fixOverrideNames(mm2, override);
 		}
-		mm.setNewName(override.isLibrary() ? override.getOriginalName() : override.getNewName());
+		mm.setNewName(override.getNewName());
 	}
 
 	/**
@@ -157,13 +138,6 @@ public class MappingRenamer {
 		}
 		// <init> or <clinit>
 		if (mm.getOriginalName().contains("<")) {
-			return true;
-		}
-		// Synthetic
-		// Do all natural synthetic names contain "$"?
-		// If so TODO: Add "$" name checks.
-		if (AccessHelper.isSynthetic(mm.getMethodNode().access) && !AccessHelper.isPublic(mm.getMethodNode().access)
-				&& !AccessHelper.isProtected(mm.getMethodNode().access)) {
 			return true;
 		}
 		// A method name that shan't be renamed!

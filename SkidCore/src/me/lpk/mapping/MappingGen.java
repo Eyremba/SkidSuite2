@@ -306,13 +306,6 @@ public class MappingGen {
 			addOverrides(mc, method);
 		}
 		mappings.put(mc.getOriginalName(), mc);
-		if (mc.getOriginalName().equals("org/apache/commons/io/output/StringBuilderWriter")){
-			System.out.println("\tInterfaces: " + mc.getInterfaces().size());
-			System.out.println("\tParent: " + mc.getParent().getOriginalName());
-			for (MappedMember m : mc.getMethods()) {
-				System.out.println("\t\t " + m.getOriginalName() + ":" + m.isLibrary() + ":" + (m.doesOverride() ? m.getFirstOverride().isLibrary() : "o"));
-			}
-		}
 		return mappings;
 	}
 	
@@ -339,6 +332,8 @@ public class MappingGen {
 			addOverrides(mmm.getOwner(), mmm);
 			if (!method.getOverrides().contains(mmm)) {
 				method.addOverride(mmm);
+				mmm.addMemberThatOverridesMe(method);
+				method.setIsLibrary(mmm.isLibrary());
 			}
 		}
 	}

@@ -140,10 +140,10 @@ public class EnigmaLoader extends MappingLoader {
 				String renamed = mc.isTruelyRenamed() ? " " + mc.getNewName() : "";
 				bw.write("CLASS " + mc.getOriginalName() + renamed + "\n");
 				for (MappedMember mm : mc.getFields()) {
-					bw.write("\tFIELD " + mm.getOriginalName() + " " + mm.getNewName() + " " + mm.getDesc());
+					bw.write("\tFIELD " + mm.getOriginalName() + " " + mm.getNewName() + " " + mm.getDesc() + "\n");
 				}
 				for (MappedMember mm : mc.getMethods()) {
-					bw.write("\tMETHOD " + mm.getOriginalName() + " " + mm.getNewName() + " " + mm.getDesc());
+					bw.write("\tMETHOD " + mm.getOriginalName() + " " + mm.getNewName() + " " + mm.getDesc() + "\n");
 				}
 			}
 		} catch (IOException e) {

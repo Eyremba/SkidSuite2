@@ -63,7 +63,7 @@ public class ParentUtils {
 	 * @return
 	 */
 	public static List<MappedMember> findMethodParent(MappedClass owner, String name, String desc) {
-		 List<MappedMember> list = new ArrayList<MappedMember>();
+		List<MappedMember> list = new ArrayList<MappedMember>();
 		// Check for interfaces in the method's class.
 		for (MappedClass interfaceClass : owner.getInterfaces()) {
 			MappedMember mm = findMethodInParentInclusive(interfaceClass, name, desc);
@@ -103,7 +103,7 @@ public class ParentUtils {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Finds the parent-most overridden member.
 	 * 
@@ -114,20 +114,8 @@ public class ParentUtils {
 		if (mm.doesOverride()) {
 			// Overridden method's parent == given method's parent.
 			for (MappedMember mm2 : mm.getOverrides()) {
-				if (mm2.getOwner().getOriginalName().equals(mm.getOwner().getOriginalName())) {
-					MappedMember mm3 = findMethodOverride(mm2);
-					if (!mm3.doesOverride()) {
-						return mm3;
-					}
-				}
+				return findMethodOverride(mm2);
 			}
-			/*
-			 * for (MappedMember mm2 : mm.getOverrides()){ if
-			 * (mm2.getOwner().getOriginalName().equals(mm.getOwner().
-			 * getOriginalName())) { return mm; } } for (MappedMember mm2 :
-			 * mm.getOverrides()){ MappedMember mm3 = findMethodOverride(mm2);
-			 * if (mm3 != mm2){ return mm3; } }
-			 */
 		}
 		return mm;
 	}

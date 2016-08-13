@@ -19,6 +19,7 @@ import me.lpk.mapping.MappingProcessor;
 import me.lpk.mapping.loaders.EnigmaLoader;
 import me.lpk.mapping.remap.MappingMode;
 import me.lpk.mapping.remap.MappingRenamer;
+import me.lpk.mapping.remap.impl.ModeSimple;
 import me.lpk.obfuscation.Flow;
 import me.lpk.obfuscation.MiscAnti;
 import me.lpk.obfuscation.Stringer;
@@ -112,20 +113,22 @@ public class Skidfuscate {
 	 */
 	private void doRemapping(Map<String, MappedClass> mappings, Map<String, String> strOpts, Map<String, Boolean> boolOpts, Collection<ClassNode> nodes) {
 		// TODO: Other modes for different situations.
-		MappingModeImpl mode = new ModeSkidfuscate(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS), strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD),
-				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), boolOpts.get(Lang.OPTION_OBFU_RENAME_PRIVATE_ONLY).booleanValue());
+		//ModeSkidfuscate 
+		//ModeSimple
+		MappingMode mode = new ModeSimple(/*strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS), strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD),
+				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), boolOpts.get(Lang.OPTION_OBFU_RENAME_PRIVATE_ONLY).booleanValue()*/);
 		new MappingRenamer().remapClasses(mappings, mode);
 		for (ClassNode cn : nodes) {
 			for (MethodNode mn : cn.methods) {
 				int i = 0;
 				if (mn.parameters != null) {
 					for (ParameterNode pn : mn.parameters) {
-						pn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
+					//	pn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
 					}
 				}
 				if (mn.localVariables != null) {
 					for (LocalVariableNode lvn : mn.localVariables) {
-						lvn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
+					//	lvn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
 					}
 				}
 			}

@@ -154,10 +154,6 @@ public class MappedMember extends MappedObject {
 	 */
 	public void addOverride(MappedMember override) {
 		overrides.add(override);
-		if (override.isLibrary()){
-			setIsLibrary(true);
-		}
-		override.addMemberThatOverridesMe(this);
 	}
 
 	/**
@@ -166,7 +162,7 @@ public class MappedMember extends MappedObject {
 	 * 
 	 * @param overrider
 	 */
-	private void addMemberThatOverridesMe(MappedMember overrider) {
+	public void addMemberThatOverridesMe(MappedMember overrider) {
 		overridesMe.add(overrider);
 	}
 
