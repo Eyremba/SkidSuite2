@@ -1,8 +1,7 @@
 package me.lpk.mapping.remap;
 
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.MethodNode;
+import me.lpk.mapping.MappedClass;
+import me.lpk.mapping.MappedMember;
 
 public abstract class MappingMode {
 	/**
@@ -11,7 +10,7 @@ public abstract class MappingMode {
 	 * @param cn
 	 * @return
 	 */
-	public abstract String getClassName(ClassNode cn);
+	public abstract String getClassName(MappedClass cn);
 
 	/**
 	 * Creates a new name for a given method
@@ -19,7 +18,7 @@ public abstract class MappingMode {
 	 * @param mn
 	 * @return
 	 */
-	public abstract String getMethodName(MethodNode mn);
+	public abstract String getMethodName(MappedMember mn);
 
 	/**
 	 * Creates a new name for a given field
@@ -27,5 +26,5 @@ public abstract class MappingMode {
 	 * @param fn
 	 * @return
 	 */
-	public abstract String getFieldName(FieldNode fn);
+	public abstract String getFieldName(MappedMember fn);
 }

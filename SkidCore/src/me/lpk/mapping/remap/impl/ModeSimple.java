@@ -1,29 +1,29 @@
 package me.lpk.mapping.remap.impl;
 
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import me.lpk.mapping.MappedClass;
+import me.lpk.mapping.MappedMember;
 import me.lpk.mapping.remap.MappingMode;
 
 public class ModeSimple extends MappingMode {
 	private int classIndex, methodIndex, fieldIndex;
 
 	@Override
-	public String getClassName(ClassNode cn) {
-		for (MethodNode mn : cn.methods) {
+	public String getClassName(MappedClass cn) {
+		for (MethodNode mn : cn.getNode().methods) {
 			if (mn.name.equals("main") && mn.desc.equals("([Ljava/lang/String;)V")) {
-				return cn.name;
+				return cn.getOriginalName();
 			}
 		}
 		return "Class" + classIndex++;
 	}
 
 	@Override
-	public String getMethodName(MethodNode mn) {
-		switch (mn.desc) {
+	public String getMethodName(MappedMember mn) {
+		switch (mn.getDesc()) {
 		case "([Ljava/lang/String;)V":
-			if (mn.name.equals("main")) {
+			if (mn.getOriginalName().equals("main")) {
 				return "main";
 			} else {
 				break;
@@ -56,8 +56,8 @@ public class ModeSimple extends MappingMode {
 	}
 
 	@Override
-	public String getFieldName(FieldNode fn) {
-		switch (fn.desc) {
+	public String getFieldName(MappedMember fn) {
+		switch (fn.getDesc()) {
 		case "I":
 			return "int" + fieldIndex++;
 		case "C":
@@ -89,7 +89,7 @@ public class ModeSimple extends MappingMode {
 		case "Ljava/lang/Class;":
 			return "class" + fieldIndex++;
 		}
-		if (fn.desc.startsWith("[")) {
+		if (fn.getDesc().startsWith("[")) {
 			return "array" + fieldIndex++;
 		}
 		return "field" + fieldIndex++;

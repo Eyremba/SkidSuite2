@@ -42,10 +42,10 @@ public class ParentUtils {
 	 * @param desc
 	 * @return
 	 */
-	public static MappedMember findMethod(MappedClass owner, String name, String desc) {
+	public static MappedMember findMethod(MappedClass owner, String name, String desc, boolean originalNames) {
 		// Check the class itself
 		for (MappedMember mm : owner.getMethods()) {
-			if (matches(mm, name, desc)) {
+			if (matches(mm, name, desc, originalNames)) {
 				return mm;
 			}
 		}
@@ -62,18 +62,18 @@ public class ParentUtils {
 	 * @param desc
 	 * @return
 	 */
-	public static List<MappedMember> findMethodParent(MappedClass owner, String name, String desc) {
+	public static List<MappedMember> findMethodParent(MappedClass owner, String name, String desc, boolean originalNames) {
 		List<MappedMember> list = new ArrayList<MappedMember>();
 		// Check for interfaces in the method's class.
 		for (MappedClass interfaceClass : owner.getInterfaces()) {
-			MappedMember mm = findMethodInParentInclusive(interfaceClass, name, desc);
+			MappedMember mm = findMethodInParentInclusive(interfaceClass, name, desc,originalNames);
 			if (mm != null) {
 				list.add(mm);
 			}
 		}
 		// Check the parents
 		if (owner.getParent() != null) {
-			MappedMember mm = findMethodInParentInclusive(owner.getParent(), name, desc);
+			MappedMember mm = findMethodInParentInclusive(owner.getParent(), name, desc,originalNames);
 			if (mm != null) {
 				list.add(mm);
 			}
@@ -81,22 +81,22 @@ public class ParentUtils {
 		return list;
 	}
 
-	public static MappedMember findMethodInParentInclusive(MappedClass owner, String name, String desc) {
+	public static MappedMember findMethodInParentInclusive(MappedClass owner, String name, String desc, boolean originalNames) {
 		for (MappedMember mm : owner.getMethods()) {
-			if (matches(mm, name, desc)) {
+			if (matches(mm, name, desc, originalNames)) {
 				return mm;
 			}
 		}
 		// Check for interfaces in the method's class.
 		for (MappedClass interfaceClass : owner.getInterfaces()) {
-			MappedMember mm = findMethodInParentInclusive(interfaceClass, name, desc);
+			MappedMember mm = findMethodInParentInclusive(interfaceClass, name, desc, originalNames);
 			if (mm != null) {
 				return mm;
 			}
 		}
 		// Check the parents
 		if (owner.getParent() != null) {
-			MappedMember mm = findMethodInParentInclusive(owner.getParent(), name, desc);
+			MappedMember mm = findMethodInParentInclusive(owner.getParent(), name, desc, originalNames);
 			if (mm != null) {
 				return mm;
 			}
@@ -130,18 +130,18 @@ public class ParentUtils {
 	 * @param desc
 	 * @return
 	 */
-	public static MappedMember findFieldInParent(MappedClass owner, String name, String desc) {
+	public static MappedMember findFieldInParent(MappedClass owner, String name, String desc, boolean originalNames) {
 
 		// Check for interfaces in the field's class.
 		for (MappedClass interfaceClass : owner.getInterfaces()) {
-			MappedMember mm = findFieldInParentInclusive(interfaceClass, name, desc);
+			MappedMember mm = findFieldInParentInclusive(interfaceClass, name, desc, originalNames);
 			if (mm != null) {
 				return mm;
 			}
 		}
 		// Check the parents
 		if (owner.getParent() != null) {
-			MappedMember mm = findFieldInParentInclusive(owner.getParent(), name, desc);
+			MappedMember mm = findFieldInParentInclusive(owner.getParent(), name, desc, originalNames);
 			if (mm != null) {
 				return mm;
 			}
@@ -149,23 +149,23 @@ public class ParentUtils {
 		return null;
 	}
 
-	public static MappedMember findFieldInParentInclusive(MappedClass owner, String name, String desc) {
+	public static MappedMember findFieldInParentInclusive(MappedClass owner, String name, String desc, boolean originalNames) {
 		// Check the class itself
 		for (MappedMember mm : owner.getFields()) {
-			if (matches(mm, name, desc)) {
+			if (matches(mm, name, desc, originalNames)) {
 				return mm;
 			}
 		}
 		// Check for interfaces in the field's class.
 		for (MappedClass interfaceClass : owner.getInterfaces()) {
-			MappedMember mm = findFieldInParentInclusive(interfaceClass, name, desc);
+			MappedMember mm = findFieldInParentInclusive(interfaceClass, name, desc, originalNames);
 			if (mm != null) {
 				return mm;
 			}
 		}
 		// Check the parents
 		if (owner.getParent() != null) {
-			MappedMember mm = findFieldInParentInclusive(owner.getParent(), name, desc);
+			MappedMember mm = findFieldInParentInclusive(owner.getParent(), name, desc, originalNames);
 			if (mm != null) {
 				return mm;
 			}
@@ -186,7 +186,7 @@ public class ParentUtils {
 	public static MappedMember findField(MappedClass owner, String name, String desc) {
 		// Check the class itself
 		for (MappedMember mm : owner.getFields()) {
-			if (matches(mm, name, desc)) {
+			if (matches(mm, name, desc, false)) {
 				return mm;
 			}
 		}
@@ -203,8 +203,8 @@ public class ParentUtils {
 	 * @param desc
 	 * @return
 	 */
-	public static boolean matches(MappedMember mm, String name, String desc) {
-		if (mm.getOriginalName().equals(name) && mm.getDesc().equals(desc)) {
+	public static boolean matches(MappedMember mm, String name, String desc, boolean old) {
+		if (name.equals(old ? mm.getOriginalName() : mm.getNewName()) && mm.getDesc().equals(desc)) {
 			return true;
 			/*
 			 * if (mm.getDesc().equals(desc)) { return true; } else { String o =
@@ -231,7 +231,7 @@ public class ParentUtils {
 	 * @return
 	 */
 	public static boolean matches(MappedMember mm, MappedMember mm2, boolean orig) {
-		return matches(mm, orig ? mm2.getOriginalName() : mm2.getNewName(), mm2.getDesc());
+		return matches(mm, orig ? mm2.getOriginalName() : mm2.getNewName(), mm2.getDesc(), false);
 	}
 
 	public static boolean isLoop(ClassNode node, Map<String, ClassNode> nodes, int i) {

@@ -58,17 +58,17 @@ public class MappingRenamer {
 		}
 		if (!mc.isInnerClass()) {
 			// Handling naming of normal class
-			 mc.setNewName(mode.getClassName(mc.getNode()));
+			 mc.setNewName(mode.getClassName(mc));
 		} else {
 			// Handling naming of inner class names
 			MappedClass outter = mc.getOuterClass();
-			String newName = mode.getClassName(mc.getNode());
+			String newName = mode.getClassName(mc);
 			String post = newName.contains("/") ? newName.substring(newName.lastIndexOf("/") + 1, newName.length()) : newName;
 			mc.setNewName(outter.getNewName() + "$" + post);
 		}
 		for (MappedMember mm : mc.getFields()) {
 			// Rename fields
-			mm.setNewName(mode.getFieldName(mm.getFieldNode()));
+			mm.setNewName(mode.getFieldName(mm));
 		}
 		for (MappedMember mm : mc.getMethods()) {
 			// Rename methods
@@ -80,7 +80,7 @@ public class MappingRenamer {
 			// Check and see if theres a parent member to pull names from.
 			if (parentMember.equals(mm)) {
 				// No parent found. Give method a name
-				mm.setNewName(mode.getMethodName(mm.getMethodNode()));
+				mm.setNewName(mode.getMethodName(mm));
 			} else {
 				
 				// Parent found. Give method parent's name.

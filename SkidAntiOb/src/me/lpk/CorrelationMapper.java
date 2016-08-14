@@ -237,7 +237,7 @@ public class CorrelationMapper {
 			}
 		} else {
 			// Normal class
-			String newNameClass = mode.getClassName(mappedClass.getNode());
+			String newNameClass = mode.getClassName(mappedClass);
 			if (parent != null) {
 				// Move next to parent. Organizes packages and is less likely to
 				// cass AccessErrors for non-public methods.
@@ -282,7 +282,7 @@ public class CorrelationMapper {
 		}
 		// Map fields since those don't inherit literally.
 		for (MappedMember mm : mappedClass.getFields()) {
-			mm.setNewName(mode.getFieldName(mm.getFieldNode()));
+			mm.setNewName(mode.getFieldName(mm));
 		}
 		// Map methods
 		for (int key = 0; key < mappedClass.getMethods().size(); key++) {
@@ -297,7 +297,7 @@ public class CorrelationMapper {
 				// mappedClasses, mode);
 				mm.setNewName(ParentUtils.findMethodOverride(mm).getNewName());
 			} else {
-				mm.setNewName(mode.getMethodName(mm.getMethodNode()));
+				mm.setNewName(mode.getMethodName(mm));
 			}
 			mappedClass.getMethods().set(key, mm);
 		}

@@ -296,7 +296,7 @@ public class ASMMode extends DecompileMode {
 		// So cut everything before '.'
 		String methodStr = name.substring(name.indexOf(".") + 1);
 		Map<String, MappedClass> mappings = VisualizerWindow.instance.getMappings();
-		MappedMember member = ParentUtils.findMethod(mappings.get(owner.name), methodStr, desc);
+		MappedMember member = ParentUtils.findMethod(mappings.get(owner.name), methodStr, desc, false);
 		if (member != null) {
 			return member.getMethodNode();
 		}
@@ -335,7 +335,7 @@ public class ASMMode extends DecompileMode {
 		String name = data.substring(0, data.indexOf("("));
 		String desc = data.substring(data.indexOf("("));
 		Map<String, MappedClass> mappings = VisualizerWindow.instance.getMappings();
-		MappedMember member = ParentUtils.findMethod(mappings.get(currNode.name), name, desc);
+		MappedMember member = ParentUtils.findMethod(mappings.get(currNode.name), name, desc, false);
 		if (member != null) {
 			return member.getMethodNode();
 		}

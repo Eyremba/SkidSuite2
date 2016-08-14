@@ -7,8 +7,11 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.MethodNode;
 
+import me.lpk.mapping.MappedClass;
+import me.lpk.mapping.MappedMember;
 import me.lpk.mapping.remap.MappingMode;
 import me.lpk.util.AccessHelper;
+import me.lpk.util.ParentUtils;
 
 public class ModeSkidfuscate extends MappingModeImpl {
 	/**
@@ -17,9 +20,9 @@ public class ModeSkidfuscate extends MappingModeImpl {
 	private final String c, f, m;
 	private final boolean privateOnly;
 	/**
-	 * Current classnode.
+	 * Current class.
 	 */
-	private ClassNode current;
+	private MappedClass current;
 	/**
 	 * Map of descriptions with times they've been named before. Used for making
 	 * as many of the same named things as possible.
@@ -42,8 +45,9 @@ public class ModeSkidfuscate extends MappingModeImpl {
 	}
 
 	@Override
-	public String getClassName(ClassNode cn) {
-		current = cn;
+	public String getClassName(MappedClass mc) {
+		ClassNode cn = mc.getNode();
+		current = mc;
 		for (MethodNode mn : cn.methods) {
 			if (mn.name.equals("main") && mn.desc.equals("([Ljava/lang/String;)V")) {
 				return cn.name;
@@ -65,7 +69,8 @@ public class ModeSkidfuscate extends MappingModeImpl {
 	}
 
 	@Override
-	public String getMethodName(MethodNode mn) {
+	public String getMethodName(MappedMember mm) {
+		MethodNode mn = mm.getMethodNode();
 		if (mn.desc.equals("([Ljava/lang/String;)V") && mn.name.equals("main")) {
 			return "main";
 		}
@@ -75,7 +80,7 @@ public class ModeSkidfuscate extends MappingModeImpl {
 		// For some odd reason, there seems to be random instances where it goes
 		// "Nope, never seen this sig before. But yeah I've seen it before"
 		// This increments it by one breaking that thought train.
-		for (MethodNode mnn : current.methods) {
+		for (MethodNode mnn : current.getNode().methods) {
 			if (mnn.desc.equals(mn.desc)) {
 				descs.put(mn.desc, descs.getOrDefault(mn.desc, 1) + 1);
 			}
@@ -84,12 +89,16 @@ public class ModeSkidfuscate extends MappingModeImpl {
 			descs.put(mn.desc, 0);
 		}
 		String name = getName(m, descs.get(mn.desc));
-		descs.put(mn.desc, descs.get(mn.desc) + 1);
+		while (ParentUtils.findMethodInParentInclusive(current, name, mm.getDesc(), true) != null){
+			name = getName(m, descs.get(mn.desc));
+			descs.put(mn.desc, descs.get(mn.desc) + 1);
+		}
 		return name;
 	}
 
 	@Override
-	public String getFieldName(FieldNode fn) {
+	public String getFieldName(MappedMember mm) {
+		FieldNode fn = mm.getFieldNode();
 		if (privateOnly && !AccessHelper.isPrivate(fn.access)) {
 			return fn.name;
 		}

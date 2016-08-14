@@ -2,10 +2,8 @@ package me.lpk.mapping.remap.impl;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
-import org.objectweb.asm.tree.MethodNode;
-
+import me.lpk.mapping.MappedClass;
+import me.lpk.mapping.MappedMember;
 import me.lpk.mapping.remap.MappingMode;
 import me.lpk.util.Characters;
 
@@ -14,17 +12,17 @@ public class ModeUnicodeEvil extends MappingMode {
 	private Set<String> used = new HashSet<String>();
 
 	@Override
-	public String getClassName(ClassNode cn) {
+	public String getClassName(MappedClass cn) {
 		return randName();
 	}
 
 	@Override
-	public String getMethodName(MethodNode mn) {
+	public String getMethodName(MappedMember mn) {
 		return randName();
 	}
 
 	@Override
-	public String getFieldName(FieldNode fn) {
+	public String getFieldName(MappedMember fn) {
 		return randName();
 	}
 
