@@ -18,15 +18,15 @@ import me.lpk.util.StringUtils;
  * </ul>
  */
 public class SkidRemapper extends Remapper {
-	private final Map<String, MappedClass> renamed;
+	private final Map<String, MappedClass> mappings;
 
 	public SkidRemapper(Map<String, MappedClass> renamed) {
-		this.renamed = renamed;
+		this.mappings = renamed;
 	}
 
 	@Override
 	public String mapDesc(String desc) {
-		return super.mapDesc(StringUtils.fixDesc(desc, renamed));
+		return super.mapDesc(StringUtils.fixDesc(desc, mappings));
 	}
 
 	@Override
@@ -34,13 +34,13 @@ public class SkidRemapper extends Remapper {
 		if (type == null) {
 			return null;
 		}
-		return super.mapType(StringUtils.fixDesc(type, renamed));
+		return super.mapType(StringUtils.fixDesc(type, mappings));
 	}
 
 	@Override
 	public String[] mapTypes(String[] types) {
 		for (int i = 0; i < types.length; i++) {
-			types[i] = StringUtils.fixDesc(types[i], renamed);
+			types[i] = StringUtils.fixDesc(types[i], mappings);
 		}
 		return super.mapTypes(types);
 	}
@@ -55,7 +55,7 @@ public class SkidRemapper extends Remapper {
 			// was invalid.
 			throw new RuntimeException();
 		}
-		return super.mapMethodDesc(StringUtils.fixDesc(desc, renamed));
+		return super.mapMethodDesc(StringUtils.fixDesc(desc, mappings));
 	}
 
 	@Override
@@ -70,10 +70,9 @@ public class SkidRemapper extends Remapper {
 		}
 		String s = signature;
 		try {
-			s = super.mapSignature(StringUtils.fixDesc(signature, renamed), typeSignature);
+			s = super.mapSignature(StringUtils.fixDesc(signature, mappings), typeSignature);
 		} catch (java.lang.StringIndexOutOfBoundsException e) {
 			e.printStackTrace();
-			System.out.println(signature);
 		}
 		return s;
 	}
@@ -83,7 +82,7 @@ public class SkidRemapper extends Remapper {
 		if (me.lpk.mapping.remap.MappingRenamer.isNameWhitelisted(name)) {
 			return super.mapMethodName(owner, name, desc);
 		}
-		MappedClass mc = renamed.get(owner);
+		MappedClass mc = mappings.get(owner);
 		if (mc == null) {
 			return super.mapMethodName(owner, name, desc);
 		} else {
@@ -101,7 +100,7 @@ public class SkidRemapper extends Remapper {
 
 	@Override
 	public String mapInvokeDynamicMethodName(String name, String desc) {
-		MappedClass mc = renamed.get(StringUtils.getMappedFromDesc(renamed, desc));
+		MappedClass mc = mappings.get(StringUtils.getMappedFromDesc(mappings, desc));
 		if (me.lpk.mapping.remap.MappingRenamer.isNameWhitelisted(name)) {
 			return super.mapInvokeDynamicMethodName(name, desc);
 		}
@@ -118,7 +117,7 @@ public class SkidRemapper extends Remapper {
 
 	@Override
 	public String mapFieldName(String owner, String name, String desc) {
-		MappedClass mc = renamed.get(owner);
+		MappedClass mc = mappings.get(owner);
 		if (mc != null) {
 			MappedMember field = ParentUtils.findFieldInParentInclusive(mc, name, desc);
 			if (field != null) {
@@ -130,7 +129,6 @@ public class SkidRemapper extends Remapper {
 
 	@Override
 	public String map(String typeName) {
-		typeName = StringUtils.fixDesc(typeName, renamed);
-		return super.map(typeName);
+		return super.map(StringUtils.fixDesc(typeName, mappings));
 	}
 }

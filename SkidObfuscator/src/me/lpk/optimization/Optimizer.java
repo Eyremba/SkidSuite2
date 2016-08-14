@@ -17,6 +17,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.commons.Remapper;
 import org.objectweb.asm.optimizer.ClassOptimizer;
@@ -89,10 +90,10 @@ public class Optimizer {
 				if (mc == null) {
 					continue;
 				}
-				// TODO: Instead of doing visitor, see if doing it via Tree API
-				// is easier
+				// TODO: Was using ASM's optimizer. Now I'm not.
+				// So I have to remake the FieldVisitor.
 				ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-				ClassVisitor remapper = new ClassOptimizerImpl(remover, mc, cw, new SkidRemapper(new HashMap<String, MappedClass>()));
+				ClassVisitor remapper = new ClassOptimizerImpl(remover, mc, cw);
 				mc.getNode().accept(remapper);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -102,7 +103,7 @@ public class Optimizer {
 
 	public void shrink(MappedClass cn, Remover r, Remapper m, ClassWriter cw) {
 		try {
-			ClassVisitor remapper = new ClassOptimizerImpl(r, cn, cw, m);
+			ClassVisitor remapper = new ClassOptimizerImpl(r, cn, cw);
 			cn.getNode().accept(remapper);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -118,12 +119,12 @@ public class Optimizer {
 		return s;
 	}
 
-	class ClassOptimizerImpl extends ClassOptimizer {
+	class ClassOptimizerImpl extends ClassVisitor {
 		private final Remover rem;
 		private final MappedClass mapped;
 
-		public ClassOptimizerImpl(Remover r, MappedClass mappedClass, ClassWriter cw, Remapper remapper) {
-			super(cw, remapper);
+		public ClassOptimizerImpl(Remover r, MappedClass mappedClass, ClassWriter cw) {
+			super(Opcodes.ASM5, cw);
 			this.rem = r;
 			this.mapped = mappedClass;
 		}
@@ -180,25 +181,19 @@ public class Optimizer {
 
 		@Override
 		public FieldVisitor visitField(final int access, final String name, final String desc, final String signature, final Object value) {
-			// Cancelling what ClassOptimizer does
-			FieldVisitor fv = super.visitField(access, remapper.mapFieldName(mapped.getNewName(), name, desc), remapper.mapDesc(desc),
-					remapper.mapSignature(signature, true), remapper.mapValue(value));
-			return fv == null ? null : createFieldRemapper(fv);
+			// remove signature
+			boolean remove = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, false);
+			return super.visitField(access, name, desc, remove ? null : signature, value);
 		}
 
 		@Override
 		public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
 			// Cancelling what ClassOptimizer does
 			if (rem.isMethodUsed(mapped.getNewName(), name + desc) || isOverride(name, desc)) {
-				return super.visitMethod(access, name, desc, signature, exceptions);
+				boolean remove = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, false);
+				return createMethodVisitor(super.visitMethod(access, name, desc, remove ? null : signature, exceptions));
 			}
 			return null;
-			// String newDesc = remapper.mapMethodDesc(desc);
-			// MethodVisitor mv = super.visitMethod(access,
-			// remapper.mapMethodName(className, name, desc), newDesc,
-			// remapper.mapSignature(signature, false), exceptions == null ?
-			// null : remapper.mapTypes(exceptions));
-			// return mv == null ? null : createMethodRemapper(mv);
 		}
 
 		private boolean isOverride(String name, String desc) {
@@ -209,22 +204,15 @@ public class Optimizer {
 			}
 			return false;
 		}
-
-		@Override
-		public void visitEnd() {
-			// Cancelling what ClassOptimizer does
-			super.visitEnd();
-		}
-
-		@Override
-		protected MethodVisitor createMethodRemapper(MethodVisitor mv) {
-			return new MethodOptimizerImpl(this, mv, remapper);
+		
+		private MethodVisitor createMethodVisitor(MethodVisitor mv) {
+			return new MethodOptimizerImpl(mv);
 		}
 	}
 
-	class MethodOptimizerImpl extends MethodOptimizer {
-		public MethodOptimizerImpl(ClassOptimizer classOptimizer, MethodVisitor mv, Remapper remapper) {
-			super(classOptimizer, mv, remapper);
+	class MethodOptimizerImpl extends MethodVisitor {
+		public MethodOptimizerImpl(MethodVisitor mv) {
+			super(Opcodes.ASM5, mv);
 		}
 
 		@Override
@@ -255,6 +243,7 @@ public class Optimizer {
 
 		@Override
 		public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
+			// remove annotations
 			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO, false) && mv != null) {
 				mv.visitTypeAnnotation(typeRef, typePath, desc, visible);
 			}
@@ -288,7 +277,7 @@ public class Optimizer {
 
 		@Override
 		public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
-			// remove frame info
+			// remove frames
 			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_FRAMES, false) && mv != null) {
 				mv.visitFrame(type, nLocal, local, nStack, stack);
 			}
@@ -299,22 +288,6 @@ public class Optimizer {
 			// remove non standard attributes
 			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ATTRIB, false) && mv != null) {
 				mv.visitAttribute(attr);
-			}
-		}
-
-		@Override
-		public void visitLdcInsn(Object cst) {
-			// Cancelling what MethodOptimizer does
-			if (mv != null) {
-				mv.visitLdcInsn(remapper.mapValue(cst));
-			}
-		}
-
-		@Override
-		public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-			// Cancelling what MethodOptimizer does
-			if (mv != null) {
-				mv.visitMethodInsn(opcode, remapper.mapType(owner), remapper.mapMethodName(owner, name, desc), remapper.mapMethodDesc(desc), itf);
 			}
 		}
 	}

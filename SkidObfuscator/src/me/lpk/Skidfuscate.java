@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -96,6 +97,8 @@ public class Skidfuscate {
 
 			Logger.logLow("Saving mappings...");
 			new EnigmaLoader().save(mappings, new File(jar.getName().replace(".jar", ".enigma")));
+			Logger.logLow("Destroying stack frames...");
+			destroyStackFrames(nodes.values());
 			Logger.logLow("Saving jar...");
 			saveJar(jar.getName().replace(".jar", "-re.jar"), jar, nodes, mappings);
 			Logger.logLow("Done!");
@@ -103,6 +106,19 @@ public class Skidfuscate {
 			e.printStackTrace();
 		}
 	}
+
+	private void destroyStackFrames(Collection<ClassNode> values) {
+		for (ClassNode cn : values){
+			for (MethodNode mn : cn.methods){
+				for (AbstractInsnNode ain : mn.instructions.toArray()){
+					if (ain.getType() == AbstractInsnNode.FRAME){
+						mn.instructions.remove(ain);
+					}
+				}
+			}
+		}
+	}
+
 
 	/**
 	 * Remapps classes, fields, & methods. Then renames local variables.
@@ -113,22 +129,35 @@ public class Skidfuscate {
 	 */
 	private void doRemapping(Map<String, MappedClass> mappings, Map<String, String> strOpts, Map<String, Boolean> boolOpts, Collection<ClassNode> nodes) {
 		// TODO: Other modes for different situations.
-		//ModeSkidfuscate 
-		//ModeSimple
-		MappingMode mode = new ModeSimple(/*strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS), strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD),
-				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), boolOpts.get(Lang.OPTION_OBFU_RENAME_PRIVATE_ONLY).booleanValue()*/);
+		// ModeSkidfuscate
+		// ModeSimple
+		MappingMode mode = new ModeSimple(/*
+											 * strOpts.get(Lang.
+											 * OPTION_OBFU_RENAME_ALPHABET_CLASS
+											 * ), strOpts.get(Lang.
+											 * OPTION_OBFU_RENAME_ALPHABET_FIELD
+											 * ), strOpts.get(Lang.
+											 * OPTION_OBFU_RENAME_ALPHABET_METHOD
+											 * ), boolOpts.get(Lang.
+											 * OPTION_OBFU_RENAME_PRIVATE_ONLY).
+											 * booleanValue()
+											 */);
 		new MappingRenamer().remapClasses(mappings, mode);
 		for (ClassNode cn : nodes) {
 			for (MethodNode mn : cn.methods) {
 				int i = 0;
 				if (mn.parameters != null) {
 					for (ParameterNode pn : mn.parameters) {
-					//	pn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
+						// pn.name =
+						// mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD),
+						// i++);
 					}
 				}
 				if (mn.localVariables != null) {
 					for (LocalVariableNode lvn : mn.localVariables) {
-					//	lvn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
+						// lvn.name =
+						// mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD),
+						// i++);
 					}
 				}
 			}
