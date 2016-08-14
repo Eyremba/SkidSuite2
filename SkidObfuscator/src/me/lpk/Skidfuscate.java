@@ -108,17 +108,16 @@ public class Skidfuscate {
 	}
 
 	private void destroyStackFrames(Collection<ClassNode> values) {
-		for (ClassNode cn : values){
-			for (MethodNode mn : cn.methods){
-				for (AbstractInsnNode ain : mn.instructions.toArray()){
-					if (ain.getType() == AbstractInsnNode.FRAME){
+		for (ClassNode cn : values) {
+			for (MethodNode mn : cn.methods) {
+				for (AbstractInsnNode ain : mn.instructions.toArray()) {
+					if (ain.getType() == AbstractInsnNode.FRAME) {
 						mn.instructions.remove(ain);
 					}
 				}
 			}
 		}
 	}
-
 
 	/**
 	 * Remapps classes, fields, & methods. Then renames local variables.
@@ -131,33 +130,20 @@ public class Skidfuscate {
 		// TODO: Other modes for different situations.
 		// ModeSkidfuscate
 		// ModeSimple
-		MappingMode mode = new ModeSimple(/*
-											 * strOpts.get(Lang.
-											 * OPTION_OBFU_RENAME_ALPHABET_CLASS
-											 * ), strOpts.get(Lang.
-											 * OPTION_OBFU_RENAME_ALPHABET_FIELD
-											 * ), strOpts.get(Lang.
-											 * OPTION_OBFU_RENAME_ALPHABET_METHOD
-											 * ), boolOpts.get(Lang.
-											 * OPTION_OBFU_RENAME_PRIVATE_ONLY).
-											 * booleanValue()
-											 */);
+		MappingModeImpl mode = new ModeSkidfuscate(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_CLASS), strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_FIELD),
+				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), boolOpts.get(Lang.OPTION_OBFU_RENAME_PRIVATE_ONLY).booleanValue());
 		new MappingRenamer().remapClasses(mappings, mode);
 		for (ClassNode cn : nodes) {
 			for (MethodNode mn : cn.methods) {
 				int i = 0;
 				if (mn.parameters != null) {
 					for (ParameterNode pn : mn.parameters) {
-						// pn.name =
-						// mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD),
-						// i++);
+						pn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
 					}
 				}
 				if (mn.localVariables != null) {
 					for (LocalVariableNode lvn : mn.localVariables) {
-						// lvn.name =
-						// mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD),
-						// i++);
+						lvn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
 					}
 				}
 			}

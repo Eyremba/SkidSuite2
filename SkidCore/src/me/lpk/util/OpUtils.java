@@ -19,6 +19,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import me.lpk.log.Logger;
+
 public class OpUtils implements org.objectweb.asm.Opcodes {
 	private static Map<Integer, String> opcodes = new HashMap<Integer, String>(getCodes());
 	private static Map<String, Integer> reopcodes = new HashMap<String, Integer>(getReCodes());
@@ -586,7 +588,7 @@ public class OpUtils implements org.objectweb.asm.Opcodes {
 
 	public static void print(InsnList instructions) {
 		for (AbstractInsnNode ain : instructions.toArray()) {
-			System.out.println(toString(ain));
+			Logger.logLow(toString(ain));
 		}
 	}
 }

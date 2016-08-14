@@ -211,8 +211,6 @@ public class DecompilePanel extends JPanel {
 	public void setIndex(SearchResultEntry result) {
 		if (result.getMethod() != null) {
 			mode.find(result, txtEdit);
-		}else{
-			System.out.println(result.toString());
 		}
 	}
 

@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.objectweb.asm.ClassWriter;
 
-import me.lpk.util.AccessHelper;
 import me.lpk.util.ParentUtils;
 
 /**
@@ -29,12 +28,10 @@ public class MappingClassWriter extends ClassWriter {
 		MappedClass mc1 = mappings.getOrDefault(type1, mappingsInv.get(type1));
 		MappedClass mc2 = mappings.getOrDefault(type2, mappingsInv.get(type2));
 		if (mc1 == null || mc2 == null) {
-			System.out.println("Oh no [" + (mc1 == null) + "," + (mc2 == null) + "]: " + type1 + " & " + type2);
 			return "java/lang/Object";
 		}
 		MappedClass common = ParentUtils.findCommonParent(mc1, mc2);
 		if (common == null) {
-			System.out.println("Oh no, no parent!");
 			return "java/lang/Object";
 		}
 		return common.getOriginalName();

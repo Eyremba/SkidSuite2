@@ -108,10 +108,8 @@ public class MethodSimulatorPanel extends JPanel {
 				} else {
 					afterText = sfAfter.toString();
 				}
-				// System.out.println(indexBefore + " : " + indexAfter);
 				txtBefore.setText("Current stack at @" + indexBefore + ":\n\n" + beforeText);
 				txtAfter.setText("Stack after @" + indexBefore + ":\n\n" + afterText);
-				// }
 			}
 
 		});

@@ -85,7 +85,6 @@ public class StringUtils {
 	public static String replace(String orig, String oldStr, String newStr) {
 		StringBuffer sb = new StringBuffer(orig);
 		while (contains(sb.toString(), oldStr)) {
-			// System.out.println(sb.toString() + ":" + oldStr + ":" + newStr);
 			if (orig.contains("(") && orig.contains(";")) {
 				// orig is most likely a method desc
 				int start = sb.indexOf("L" + oldStr) + 1;

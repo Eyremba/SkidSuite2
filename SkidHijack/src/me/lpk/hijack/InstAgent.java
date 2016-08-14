@@ -2,6 +2,8 @@ package me.lpk.hijack;
 
 import java.lang.instrument.Instrumentation;
 
+import me.lpk.log.Logger;
+
 public class InstAgent {
 	private static Instrumentation instrumentation;
 
@@ -30,7 +32,7 @@ public class InstAgent {
 	private static void setAndAddTransformer(Instrumentation inst) {
 		instrumentation = inst;
 		instrumentation.addTransformer(Refactorer.INSTANCE);
-		System.out.println("Instrumentation: " + "[ Redefinition:" + instrumentation.isRedefineClassesSupported() + ", Retransformation:"
+		Logger.logLow("Instrumentation: " + "[ Redefinition:" + instrumentation.isRedefineClassesSupported() + ", Retransformation:"
 				+ instrumentation.isRetransformClassesSupported() + " ]");
 
 

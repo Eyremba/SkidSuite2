@@ -133,7 +133,7 @@ public class Main {
 		//
 		//
 		saveJar(jarOut, new File(jarIn), nodes, mappings);
-		System.out.println("Finished!");
+		Logger.logLow("Finished!");
 	}
 
 	private static void saveJar(String name, File nonEntriesJar, Map<String, ClassNode> nodes, Map<String, MappedClass> mappedClasses) {
@@ -150,7 +150,7 @@ public class Main {
 				renamed++;
 			}
 		}
-		System.out.println("Saving...  [Ranemed " + renamed + " classes]");
+		Logger.logLow("Saving...  [Ranemed " + renamed + " classes]");
 		JarUtils.saveAsJar(out, name);
 	}
 

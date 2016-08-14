@@ -99,13 +99,6 @@ public class ShellReplacementModder extends ClassModder {
 		if (needsRenaming(cn.superName)) {
 			cn.superName = updateClassName(cn.superName);
 		}
-		System.out.println(cn.name + " extends " + cn.superName);
-		for (FieldNode fn : cn.fields) {
-			System.out.println("\tField:   " + fn.name + "  " + fn.desc);
-		}
-		for (MethodNode mn : cn.methods) {
-			System.out.println("\tMethd:   " + mn.name + mn.desc);
-		}
 	}
 
 	/**
@@ -227,16 +220,13 @@ public class ShellReplacementModder extends ClassModder {
 	 * @return
 	 */
 	private String updateMethodDesc(String desc) {
-		System.out.println("Updating: " + desc);
 		Type methodType = Type.getMethodType(desc);
 		// Iterate args and replace with corrected names.
 		for (Type arg : methodType.getArgumentTypes()) {
 			String argClass = arg.getClassName().replace(".", "/");
-			System.out.println("\tArg: " + argClass);
 			if (needsRenaming(argClass)) {
 				ClassNode acn = getClassNode(argClass);
 				desc = desc.replace(argClass, getRefactoredName(acn));
-				System.out.println("\tArg Renamed: " + getRefactoredName(acn));
 			}
 		}
 		// Replace return type.

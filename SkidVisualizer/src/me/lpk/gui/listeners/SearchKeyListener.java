@@ -31,7 +31,6 @@ public class SearchKeyListener implements KeyListener {
 			List<SearchResultEntry> results = null;
 			switch (VisualizerWindow.instance.getSearchType()) {
 			case "Class":
-				System.out.println(VisualizerWindow.instance.getSearchText() + ":" + VisualizerWindow.instance.getNodes().containsKey(VisualizerWindow.instance.getSearchText()));
 				ClassNode node = VisualizerWindow.instance.getNodes().get(VisualizerWindow.instance.getSearchText());
 				if (node == null){
 					return;
