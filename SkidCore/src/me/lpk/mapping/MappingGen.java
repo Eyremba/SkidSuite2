@@ -106,13 +106,13 @@ public class MappingGen {
 			baseClass.setNewName(newClass.getNewName());
 			for (MappedMember newMember : newClass.getFields()) {
 				MappedMember baseMember = ParentUtils.findField(baseClass, newMember.getOriginalName(), newMember.getDesc());
-				if (baseMember != null && ParentUtils.matches(baseMember, newMember.getOriginalName(), newMember.getDesc(), false)) {
+				if (baseMember != null && ParentUtils.matches(baseMember, newMember.getOriginalName(), newMember.getDesc(), true)) {
 					baseMember.setNewName(newMember.getNewName());
 				}
 			}
 			for (MappedMember newMember : newClass.getMethods()) {
-				MappedMember baseMember = ParentUtils.findMethod(baseClass, newMember.getOriginalName(), newMember.getDesc(), false);
-				if (baseMember != null && ParentUtils.matches(baseMember, newMember.getOriginalName(), newMember.getDesc(), false)) {
+				MappedMember baseMember = ParentUtils.findMethod(baseClass, newMember.getOriginalName(), newMember.getDesc(), true);
+				if (baseMember != null && ParentUtils.matches(baseMember, newMember.getOriginalName(), newMember.getDesc(), true)) {
 					baseMember.setNewName(newMember.getNewName());
 				}
 			}
@@ -315,14 +315,14 @@ public class MappingGen {
 		MappedClass parent = mappedClass.getParent();
 		// Search the parent
 		if (parent != null) {
-			MappedMember parentMethod = ParentUtils.findMethod(parent, method.getOriginalName(), method.getDesc(), false);
+			MappedMember parentMethod = ParentUtils.findMethod(parent, method.getOriginalName(), method.getDesc(), true);
 			if (parentMethod != null) {
 				methodOverridens.add(parentMethod);
 			}
 		}
 		// Search interfaces
 		for (MappedClass interfacee : mappedClass.getInterfaces()) {
-			MappedMember interfaceMethod = ParentUtils.findMethod(interfacee, method.getOriginalName(), method.getDesc(), false);
+			MappedMember interfaceMethod = ParentUtils.findMethod(interfacee, method.getOriginalName(), method.getDesc(), true);
 			if (interfaceMethod != null) {
 				methodOverridens.add(interfaceMethod);
 			}

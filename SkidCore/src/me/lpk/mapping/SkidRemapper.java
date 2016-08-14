@@ -86,13 +86,9 @@ public class SkidRemapper extends Remapper {
 		if (mc == null) {
 			return super.mapMethodName(owner, name, desc);
 		} else {
-			MappedMember mm = ParentUtils.findMethodInParentInclusive(mc, name, desc, false);
+			MappedMember mm = ParentUtils.findMethodInParentInclusive(mc, name, desc, true);
 			if (mm != null) {
-				if (mm.doesOverride()) {
-					return super.mapMethodName(owner, ParentUtils.findMethodOverride(mm).getNewName(), desc);
-				}else {
-					return super.mapMethodName(owner, mm.getNewName(), desc);
-				}
+				return super.mapMethodName(owner, mm.getNewName(), desc);
 			}
 		}
 		return super.mapMethodName(owner, name, desc);
@@ -107,7 +103,7 @@ public class SkidRemapper extends Remapper {
 		if (mc == null) {
 			return super.mapInvokeDynamicMethodName(name, desc);
 		} else {
-			MappedMember mm = ParentUtils.findMethodInParentInclusive(mc, name, desc, false);
+			MappedMember mm = ParentUtils.findMethodInParentInclusive(mc, name, desc, true);
 			if (mm != null) {
 				return super.mapInvokeDynamicMethodName(ParentUtils.findMethodOverride(mm).getNewName(), desc);
 			}
@@ -119,7 +115,7 @@ public class SkidRemapper extends Remapper {
 	public String mapFieldName(String owner, String name, String desc) {
 		MappedClass mc = mappings.get(owner);
 		if (mc != null) {
-			MappedMember field = ParentUtils.findFieldInParentInclusive(mc, name, desc, false);
+			MappedMember field = ParentUtils.findFieldInParentInclusive(mc, name, desc, true);
 			if (field != null) {
 				return super.mapFieldName(owner, field.getNewName(), desc);
 			}

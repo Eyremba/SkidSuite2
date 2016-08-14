@@ -186,7 +186,7 @@ public class ParentUtils {
 	public static MappedMember findField(MappedClass owner, String name, String desc) {
 		// Check the class itself
 		for (MappedMember mm : owner.getFields()) {
-			if (matches(mm, name, desc, false)) {
+			if (matches(mm, name, desc, true)) {
 				return mm;
 			}
 		}
@@ -231,7 +231,7 @@ public class ParentUtils {
 	 * @return
 	 */
 	public static boolean matches(MappedMember mm, MappedMember mm2, boolean orig) {
-		return matches(mm, orig ? mm2.getOriginalName() : mm2.getNewName(), mm2.getDesc(), false);
+		return matches(mm, orig ? mm2.getOriginalName() : mm2.getNewName(), mm2.getDesc(), true);
 	}
 
 	public static boolean isLoop(ClassNode node, Map<String, ClassNode> nodes, int i) {
