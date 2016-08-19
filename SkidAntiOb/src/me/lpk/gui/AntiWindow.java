@@ -22,7 +22,6 @@ import me.lpk.antis.impl.AntiZKM8;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
-import me.lpk.util.Classpather;
 import me.lpk.util.JarUtils;
 import me.lpk.util.LazySetupMaker;
 
@@ -34,7 +33,6 @@ import java.awt.SystemColor;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -86,8 +84,8 @@ public class AntiWindow {
 		panel_1.setLayout(new BorderLayout(0, 0));
 
 		comboObfuscator = new JComboBox<String>();
-		// OB_ALLA, OB_ALLA_P, OB_DASH, OB_STRING, OB_STRING_P, OB_ZKM
-		comboObfuscator.setModel(new DefaultComboBoxModel<String>(new String[] { OB_STRING_P, OB_STRING, OB_ZKM5, OB_ZKM8, OB_ALLA, OB_ALLA_P, OB_DASH }));
+		// OB_ALLA, OB_ALLA_P, OB_DASH, OB_STRING, OB_STRING_P, OB_ZKM5, OB_ZKM8
+		comboObfuscator.setModel(new DefaultComboBoxModel<String>(new String[] {  OB_ALLA, OB_ALLA_P, OB_DASH, OB_STRING, OB_STRING_P, OB_ZKM5, OB_ZKM8 }));
 		panel_1.add(comboObfuscator);
 
 		JLabel lblObfuscatorUsed = new JLabel("Obfuscator Used:  ");
