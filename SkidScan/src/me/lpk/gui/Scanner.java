@@ -15,6 +15,7 @@ import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeSelectionModel;
 
 import org.apache.commons.io.FileUtils;
@@ -96,6 +97,8 @@ public class Scanner {
 		//
 		initialize();
 		frame.setVisible(true);
+		updateTree();
+
 	}
 
 	private void registerMethodHandler(MethodHandler handler) {
@@ -176,8 +179,7 @@ public class Scanner {
 		//
 		// Left side (JTree)
 		JPanel pnlTree = new JPanel();
-		File dir = new File(System.getProperty("user.dir"));
-		treeFiles = new JTree(SwingUtils.sort(getTreeFromDir(dir)));
+		treeFiles = new JTree(new DefaultMutableTreeNode("Loading..."));
 		treeFiles.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 		treeFiles.addTreeSelectionListener(new TreeSelectionListener() {
 			@Override
@@ -218,6 +220,18 @@ public class Scanner {
 		splitPane.setLeftComponent(pnlTree);
 		pnlTree.setLayout(new BorderLayout(0, 0));
 		pnlTree.add(treeFiles, BorderLayout.CENTER);
+		
+	}
+
+	private void updateTree() {
+		new Thread(){
+			@Override
+			public void run() {
+				File dir = new File(System.getProperty("user.dir"));
+				treeFiles.setModel(new DefaultTreeModel(SwingUtils.sort(getTreeFromDir(dir))));
+			}
+			
+		}.start();
 	}
 
 	/**
