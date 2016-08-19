@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 
 import org.objectweb.asm.tree.ClassNode;
@@ -44,9 +45,9 @@ import java.awt.BorderLayout;
 import javax.swing.JTabbedPane;
 
 /**
- * I merged a bunch of things here and for that I am truly sorry for this
- * code's legibility. I'll eventually revamp the whole system anyways and this
- * will disappear.
+ * I merged a bunch of things here and for that I am truly sorry for this code's
+ * legibility. I'll eventually revamp the whole system anyways and this will
+ * disappear.
  */
 public class MappingWindow {
 	private JFileChooser chooser;
@@ -77,6 +78,11 @@ public class MappingWindow {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+		}
+		LazySetupMaker.setBypassSetup();		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -233,9 +239,8 @@ public class MappingWindow {
 		pnlProcessing.add(scrollPane);
 		txtLog = new JTextPane();
 		scrollPane.setViewportView(txtLog);
-		 JComboBox<String> combo = new JComboBox<String>(new String[] {
-		"Proguard", "Enigma", "SRG" });
-		//JComboBox combo = new JComboBox();
+		JComboBox<String> combo = new JComboBox<String>(new String[] { "Proguard", "Enigma", "SRG" });
+		// JComboBox combo = new JComboBox();
 		combo.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -257,7 +262,6 @@ public class MappingWindow {
 
 		combo.setBounds(140, 79, 169, 23);
 		pnlProcessing.add(combo);
-		
 
 		JButton btnLoadMap = new JButton("Load Map");
 		btnLoadMap.setLocation(10, 10);
@@ -289,7 +293,7 @@ public class MappingWindow {
 		pnlConversion.add(btnConvert);
 
 		JComboBox<String> cmboMappingTypes = new JComboBox<String>(new String[] { "Proguard", "Enigma", "SRG" });
-		//JComboBox cmboMappingTypes = new JComboBox();
+		// JComboBox cmboMappingTypes = new JComboBox();
 		cmboMappingTypes.setBounds(140, 40, 626, 20);
 		cmboMappingTypes.addActionListener(new ActionListener() {
 			@Override
@@ -313,13 +317,12 @@ public class MappingWindow {
 
 		txtOutput = new JTextPane();
 		scrollPane2.setViewportView(txtOutput);
-		
+
 		txtKillMe = new JTextField();
 		txtKillMe.setBounds(140, 11, 626, 20);
 		pnlConversion.add(txtKillMe);
 		txtKillMe.setColumns(10);
 	}
-
 
 	private void convert() {
 		txtOutput.setText(txtOutput.getText() + "Converting '" + mapConv.getName() + "' via: " + loader.getClass().getSimpleName() + "\n");
@@ -350,7 +353,7 @@ public class MappingWindow {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void go(String pathTarget, String pathClean) throws Exception {
 		// Loading
 		File targetJar = new File(pathTarget);

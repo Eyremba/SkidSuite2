@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.SwingConstants;
 import javax.swing.TransferHandler;
+import javax.swing.UIManager;
 
 import org.objectweb.asm.tree.ClassNode;
 
@@ -52,6 +53,10 @@ public class AntiWindow {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+		}
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {

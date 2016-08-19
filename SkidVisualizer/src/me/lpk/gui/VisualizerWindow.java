@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 
 import org.objectweb.asm.tree.ClassNode;
 import me.lpk.gui.component.DecompilePanel;
@@ -35,6 +36,10 @@ public class VisualizerWindow extends JFrame {
 	public static VisualizerWindow instance;
 
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+		}
 		new VisualizerWindow().setVisible(true);
 	}
 

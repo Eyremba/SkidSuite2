@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.JTree;
+import javax.swing.UIManager;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -50,6 +51,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JCheckBox;
+import java.awt.Color;
 
 public class Scanner {
 	private final ThreatScanner th = new ThreatScanner();
@@ -70,6 +72,10 @@ public class Scanner {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+		}
 		new Scanner();
 	}
 
@@ -141,9 +147,11 @@ public class Scanner {
 		menuBar.add(mnSettings);
 
 		chckbxAutomaticallyExportScans = new JCheckBox("Automatically Export Scans");
+		chckbxAutomaticallyExportScans.setBackground(Color.WHITE);
 		mnSettings.add(chckbxAutomaticallyExportScans);
 
 		chckbxIncludeCss = new JCheckBox("Include CSS");
+		chckbxIncludeCss.setBackground(Color.WHITE);
 		chckbxIncludeCss.setSelected(true);
 		mnSettings.add(chckbxIncludeCss);
 
@@ -151,11 +159,13 @@ public class Scanner {
 		JMenu mnDetectionsMethod = new JMenu("Detections: Method");
 		for (String s : classHandlers.keySet()){
 			JCheckBox chk = new JCheckBox(s, true);
+			chk.setBackground(Color.WHITE);
 			classHandlerStatus.put(s, chk);
 			mnDetectionsClass.add(chk);
 		}
 		for (String s : methodHandlers.keySet()){
 			JCheckBox chk = new JCheckBox(s, true);
+			chk.setBackground(Color.WHITE);
 			methodHandlerStatus.put(s, chk);
 			mnDetectionsMethod.add(chk);
 		}

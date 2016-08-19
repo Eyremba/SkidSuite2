@@ -206,17 +206,6 @@ public class ParentUtils {
 	public static boolean matches(MappedMember mm, String name, String desc, boolean old) {
 		if (name.equals(old ? mm.getOriginalName() : mm.getNewName()) && mm.getDesc().equals(desc)) {
 			return true;
-			/*
-			 * if (mm.getDesc().equals(desc)) { return true; } else { String o =
-			 * "java/lang/Object"; if (mm.getDesc().contains(o) &&
-			 * !desc.contains(o)) { // Generic info is saved in the signature so
-			 * if there is // data in // the signature, check for generics. if
-			 * (mm.getOwner().getNode().signature != null) { List<String>
-			 * classes = RegexUtils.matchDescriptionClasses(desc); String
-			 * descCopy = desc + ""; for (String detection : classes) { descCopy
-			 * = descCopy.replace(detection, o); } if
-			 * (mm.getDesc().equals(descCopy)) { return true; } } } }
-			 */
 		}
 		return false;
 	}
