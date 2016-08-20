@@ -315,14 +315,14 @@ public class MappingGen {
 		MappedClass parent = mappedClass.getParent();
 		// Search the parent
 		if (parent != null) {
-			MappedMember parentMethod = ParentUtils.findMethod(parent, method.getOriginalName(), method.getDesc(), true);
+			MappedMember parentMethod = ParentUtils.findMethodInParentInclusive(parent, method.getOriginalName(), method.getDesc(), true);
 			if (parentMethod != null) {
 				methodOverridens.add(parentMethod);
 			}
 		}
 		// Search interfaces
 		for (MappedClass interfacee : mappedClass.getInterfaces()) {
-			MappedMember interfaceMethod = ParentUtils.findMethod(interfacee, method.getOriginalName(), method.getDesc(), true);
+			MappedMember interfaceMethod = ParentUtils.findMethodInParentInclusive(interfacee, method.getOriginalName(), method.getDesc(), true);
 			if (interfaceMethod != null) {
 				methodOverridens.add(interfaceMethod);
 			}

@@ -77,16 +77,8 @@ public class ModeSkidfuscate extends MappingModeImpl {
 		if (privateOnly && !AccessHelper.isPrivate(mn.access)) {
 			return mn.name;
 		}
-		// For some odd reason, there seems to be random instances where it goes
-		// "Nope, never seen this sig before. But yeah I've seen it before"
-		// This increments it by one breaking that thought train.
-		for (MethodNode method : current.getNode().methods) {
-			if (method.desc.equals(mn.desc)) {
-				descs.put(mn.desc, descs.getOrDefault(mn.desc, 1) + 1);
-			}
-		}
 		if (!descs.containsKey(mn.desc)) {
-			descs.put(mn.desc, 0);
+			descs.put(mn.desc, 0);//((int)(Math.random() * 100)));
 		}
 		String name = getName(m, descs.get(mn.desc));
 		descs.put(mn.desc, descs.get(mn.desc) + 1);
