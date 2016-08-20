@@ -147,9 +147,7 @@ public class JarUtils {
 	public static String getManifestMainClass(File jar) {
 		try {
 			return new JarFile(jar.getAbsolutePath()).getManifest().getMainAttributes().getValue("Main-class").replace(".", "/");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e) {}
 		return null;
 	}
 

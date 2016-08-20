@@ -20,15 +20,12 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.TypePath;
 import org.objectweb.asm.commons.Remapper;
-import org.objectweb.asm.optimizer.ClassOptimizer;
-import org.objectweb.asm.optimizer.MethodOptimizer;
 import org.objectweb.asm.tree.ClassNode;
 
 import me.lpk.lang.Lang;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
-import me.lpk.mapping.SkidRemapper;
 import me.lpk.util.JarUtils;
 
 /**
@@ -54,9 +51,16 @@ public class Optimizer {
 	public void optimize(File jar, Map<String, ClassNode> nodes, Map<String, MappedClass> mappings) {
 		Logger.logLow("Beginning optimization...");
 		String mainClass = JarUtils.getManifestMainClass(jar);
-		Logger.logLow("Found main class: " + mainClass);
-		Logger.logLow("Searching for unused classes...");
-		boolean removeMethods = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_MEMBERS, Boolean.FALSE).booleanValue();
+		boolean hasMain = mainClass != null;
+		boolean optionRemove = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_MEMBERS, Boolean.FALSE).booleanValue();
+		boolean removeMethods = hasMain && optionRemove;
+
+		if (hasMain){
+			Logger.logLow("Found main class: " + mainClass);
+			Logger.logLow("Searching for unused classes...");
+		}else if (optionRemove){
+			Logger.logLow("Member removal was enabled, but could not find an entry point! Skipping removal.");
+		}
 		// TODO: Make remover that removes un-used methods
 		Remover remover = new SimpleRemover();
 		// Make a new map that does not contain library nodes.
