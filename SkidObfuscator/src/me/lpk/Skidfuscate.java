@@ -138,12 +138,12 @@ public class Skidfuscate {
 				int i = 0;
 				if (mn.parameters != null) {
 					for (ParameterNode pn : mn.parameters) {
-						pn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
+						pn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_LOCALS), i++);
 					}
 				}
 				if (mn.localVariables != null) {
 					for (LocalVariableNode lvn : mn.localVariables) {
-						lvn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), i++);
+						lvn.name = mode.getName(strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_LOCALS), i++);
 					}
 				}
 			}

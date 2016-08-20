@@ -80,8 +80,8 @@ public class ModeSkidfuscate extends MappingModeImpl {
 		// For some odd reason, there seems to be random instances where it goes
 		// "Nope, never seen this sig before. But yeah I've seen it before"
 		// This increments it by one breaking that thought train.
-		for (MethodNode mnn : current.getNode().methods) {
-			if (mnn.desc.equals(mn.desc)) {
+		for (MethodNode method : current.getNode().methods) {
+			if (method.desc.equals(mn.desc)) {
 				descs.put(mn.desc, descs.getOrDefault(mn.desc, 1) + 1);
 			}
 		}
@@ -90,11 +90,11 @@ public class ModeSkidfuscate extends MappingModeImpl {
 		}
 		String name = getName(m, descs.get(mn.desc));
 		descs.put(mn.desc, descs.get(mn.desc) + 1);
-		while (ParentUtils.findMethodInParentInclusive(current, name, mm.getDesc(), true) != null){
+		// Ensure that the new name will not conflict with a renamed member from a parent node
+		while (ParentUtils.findMethodInParentInclusive(current, name, mm.getDesc(), false) != null){
 			name = getName(m, descs.get(mn.desc));
 			descs.put(mn.desc, descs.get(mn.desc) + 1);
 		}
-		
 		return name;
 	}
 
