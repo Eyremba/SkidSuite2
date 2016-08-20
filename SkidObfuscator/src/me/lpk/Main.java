@@ -32,8 +32,8 @@ public class Main {
 
 	public static void obfuscating(String jarIn, String jarOut) throws Exception {
 		//Classpather.addFile(jarIn);
-		//LazySetupMaker.setBypassSetup();
-		LazySetupMaker.setup();
+		LazySetupMaker.setBypassSetup();
+		//LazySetupMaker.setup();
 		LazySetupMaker dat = LazySetupMaker.get(jarIn, false);
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
@@ -47,6 +47,12 @@ public class Main {
 		boolean gotos = false;
 		boolean badPop = false;
 		boolean retObjErr = false;
+		boolean mergeFields = true;
+		if (mergeFields){
+			for (ClassNode cn : nodes.values()) {
+				MiscAnti.mergeFields(cn);
+			}
+		}
 		if (tryCatch) {
 			Logger.logLow("Modifying - Try Catch");
 			for (ClassNode cn : nodes.values()) {
