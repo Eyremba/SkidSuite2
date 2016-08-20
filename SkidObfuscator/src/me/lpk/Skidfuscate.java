@@ -132,6 +132,8 @@ public class Skidfuscate {
 				strOpts.get(Lang.OPTION_OBFU_RENAME_ALPHABET_METHOD), boolOpts.get(Lang.OPTION_OBFU_RENAME_PRIVATE_ONLY).booleanValue());
 		new MappingRenamer().remapClasses(mappings, mode);
 		for (ClassNode cn : nodes) {
+			cn.innerClasses.clear();
+			cn.outerClass = null;
 			for (MethodNode mn : cn.methods) {
 				int i = 0;
 				if (mn.parameters != null) {

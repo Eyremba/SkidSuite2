@@ -90,7 +90,7 @@ public class ModeSkidfuscate extends MappingModeImpl {
 		}
 		String name = getName(m, descs.get(mn.desc));
 		descs.put(mn.desc, descs.get(mn.desc) + 1);
-		while (ParentUtils.findMethodInParentInclusive(current, name, mm.getDesc(), false) != null){
+		while (ParentUtils.findMethodInParentInclusive(current, name, mm.getDesc(), true) != null){
 			name = getName(m, descs.get(mn.desc));
 			descs.put(mn.desc, descs.get(mn.desc) + 1);
 		}
