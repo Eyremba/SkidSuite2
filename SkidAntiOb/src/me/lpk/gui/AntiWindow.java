@@ -148,7 +148,7 @@ public class AntiWindow {
 						try {
 							runAnti(jar);
 						} catch (Exception e) {
-							e.printStackTrace();
+							ErrorDialog.show(e);
 						}
 					}
 				}
