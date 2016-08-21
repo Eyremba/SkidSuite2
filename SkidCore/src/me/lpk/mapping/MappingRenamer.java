@@ -1,4 +1,4 @@
-package me.lpk.mapping.remap;
+package me.lpk.mapping;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,8 +9,7 @@ import java.util.Set;
 
 import org.objectweb.asm.tree.MethodNode;
 
-import me.lpk.mapping.MappedClass;
-import me.lpk.mapping.MappedMember;
+import me.lpk.mapping.remap.MappingMode;
 import me.lpk.util.ParentUtils;
 
 public class MappingRenamer {
@@ -18,8 +17,8 @@ public class MappingRenamer {
 	private final List<String> remapped = new ArrayList<String>();
 
 	/**
-	 * Updates the information of the given map of MappedClasses according to
-	 * the mapping standards given by the MappingMode.
+	 * Gives each MappedClass in a map new names based on rules defined in a
+	 * given MappingMode.
 	 * 
 	 * @param mappings
 	 * @param mode
@@ -35,8 +34,7 @@ public class MappingRenamer {
 	}
 
 	/**
-	 * Updates a given class in the given mappings with names based on the given
-	 * MappingMode.
+	 * Gives a MappedClass based on rules defined in a given MappingMode
 	 * 
 	 * @param mc
 	 * @param mappings
@@ -44,52 +42,63 @@ public class MappingRenamer {
 	 * @return
 	 */
 	public Map<String, MappedClass> remapClass(MappedClass mc, Map<String, MappedClass> mappings, MappingMode mode) {
+		// If already renamed or is a library, MappedClass should not be
+		// renamed. Skip.
 		if (mc.isLibrary() || remapped.contains(mc.getOriginalName())) {
 			return mappings;
 		}
+		// Remap parents before remapping the target class.
 		if (mc.hasParent()) {
 			mappings = remapClass(mc.getParent(), mappings, mode);
 		}
+		// Remap interfaces before remapping the target class.
 		for (MappedClass interfaze : mc.getInterfaces()) {
 			mappings = remapClass(interfaze, mappings, mode);
 		}
+		// Remap outer classes before remapping the target class.
 		if (mc.isInnerClass()) {
 			mappings = remapClass(mc.getOuterClass(), mappings, mode);
 		}
 		if (!mc.isInnerClass()) {
-			// Handling naming of normal class
-			 mc.setNewName(mode.getClassName(mc));
+			// Rename the class
+			mc.setNewName(mode.getClassName(mc));
 		} else {
 			// Handling naming of inner class names
+			// Syntax is: OuterClassName + $ + NewClassName
 			MappedClass outter = mc.getOuterClass();
 			String newName = mode.getClassName(mc);
 			String post = newName.contains("/") ? newName.substring(newName.lastIndexOf("/") + 1, newName.length()) : newName;
 			mc.setNewName(outter.getNewName() + "$" + post);
 		}
+		// Rename fields
 		for (MappedMember mm : mc.getFields()) {
-			// Rename fields
 			mm.setNewName(mode.getFieldName(mm));
 		}
+		// Rename methods
 		for (MappedMember mm : mc.getMethods()) {
-			// Rename methods
-			if (keepName(mm)) {
-				// Skip methods that should not be renamed
+			// Skip methods that should not be renamed.
+			// Library is checked since in the generation phase, members
+			// overriding library methods are in turn marked as library methods
+			// themselves.
+			if (keepName(mm) || mm.isLibrary()) {
 				continue;
 			}
-			MappedMember parentMember = ParentUtils.findMethodOverride(mm);
-			// Check and see if theres a parent member to pull names from.
-			if (parentMember.equals(mm)) {
+			// Check and see if there is an overriding method to pull a name
+			// from.
+			MappedMember override = ParentUtils.findMethodOverride(mm);
+			if (override.equals(mm)) {
 				// No parent found. Give method a name
 				mm.setNewName(mode.getMethodName(mm));
 			} else {
-				
-				// Parent found. Give method parent's name.
-				mm.setNewName(parentMember.getNewName());				
+				// Override found. Give method parent's name.
+				mm.setNewName(override.getNewName());
 				// Make sure if override structure is convoluted it's all named
 				// correctly regardless.
-				if (mm.doesOverride() && !mm.isOverriden()){
-					fixOverrideNames(mm, parentMember);
-				}	
+				// This is only needed when a class extends and implements
+				// multiple classes with shared method names.
+				if (mm.doesOverride() && !mm.isOverriden()) {
+					fixOverrideNames(mm, override);
+				}
 			}
 			MethodNode mn = mm.getMethodNode();
 			updateStrings(mn, mappings);

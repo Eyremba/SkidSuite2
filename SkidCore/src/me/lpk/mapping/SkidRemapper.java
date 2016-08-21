@@ -31,6 +31,7 @@ public class SkidRemapper extends Remapper {
 
 	@Override
 	public String mapType(String type) {
+		// Do not map null types
 		if (type == null) {
 			return null;
 		}
@@ -51,8 +52,7 @@ public class SkidRemapper extends Remapper {
 			return desc;
 		}
 		if (!desc.startsWith("(")) {
-			// Note to self: Keep this here. Helped me realize a desc I had made
-			// was invalid.
+			// In case something goes terribly wrong, make it obvious what the issue is.
 			throw new RuntimeException();
 		}
 		return super.mapMethodDesc(StringUtils.fixDesc(desc, mappings));
@@ -65,25 +65,18 @@ public class SkidRemapper extends Remapper {
 
 	@Override
 	public String mapSignature(String signature, boolean typeSignature) {
+		// Do not map null signatures
 		if (signature == null) {
 			return null;
 		}
-		String s = signature;
-		try {
-			s = super.mapSignature(StringUtils.fixDesc(signature, mappings), typeSignature);
-		} catch (java.lang.StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
-		}
-		return s;
+		return super.mapSignature(StringUtils.fixDesc(signature, mappings), typeSignature);
 	}
 
 	@Override
 	public String mapMethodName(String owner, String name, String desc) {
-		if (me.lpk.mapping.remap.MappingRenamer.isNameWhitelisted(name)) {
-			return super.mapMethodName(owner, name, desc);
-		}
 		MappedClass mc = mappings.get(owner);
 		if (mc == null) {
+			// Default behavior if there is no mapping for the given method.
 			return super.mapMethodName(owner, name, desc);
 		} else {
 			MappedMember mm = ParentUtils.findMethodInParentInclusive(mc, name, desc, true);
@@ -97,10 +90,8 @@ public class SkidRemapper extends Remapper {
 	@Override
 	public String mapInvokeDynamicMethodName(String name, String desc) {
 		MappedClass mc = mappings.get(StringUtils.getMappedFromDesc(mappings, desc));
-		if (me.lpk.mapping.remap.MappingRenamer.isNameWhitelisted(name)) {
-			return super.mapInvokeDynamicMethodName(name, desc);
-		}
 		if (mc == null) {
+			// Default behavior if there is no mapping for the given method.
 			return super.mapInvokeDynamicMethodName(name, desc);
 		} else {
 			MappedMember mm = ParentUtils.findMethodInParentInclusive(mc, name, desc, true);

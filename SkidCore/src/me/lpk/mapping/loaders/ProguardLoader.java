@@ -17,7 +17,7 @@ import org.objectweb.asm.tree.ClassNode;
 
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
-import me.lpk.mapping.MappingGen;
+import me.lpk.mapping.MappingFactory;
 import me.lpk.util.StringUtils;
 
 public class ProguardLoader extends MappingLoader {
@@ -119,7 +119,7 @@ public class ProguardLoader extends MappingLoader {
 		origMapSet.addAll(origNameMap.keySet());
 		for (String className : origMapSet) {
 			MappedClass mappedClass = origNameMap.get(className);
-			origNameMap = MappingGen.linkMappings(mappedClass, origNameMap);
+			origNameMap = MappingFactory.linkMappings(mappedClass, origNameMap);
 		}
 		for (String className : origMapSet) {
 			MappedClass mappedClass = origNameMap.get(className);

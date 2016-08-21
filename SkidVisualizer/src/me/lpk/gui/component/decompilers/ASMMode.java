@@ -259,12 +259,23 @@ public class ASMMode extends DecompileMode {
 	
 	@Override
 	public  void find(SearchResultEntry result, JTextPane txtEdit) {
-		String name = result.getMethod().name;
-		String desc = result.getMethod().desc;
-		int foundIndex = txtEdit.getText().indexOf(name + desc);
+		int j = -1, k = 1;
+		if (result.isMethodResult()){
+			String name = result.getMethod().name;
+			String desc = result.getMethod().desc;
+			j = txtEdit.getText().indexOf(name + desc);
+			k = name.length();
+		}else{
+			String name = result.getField().name;
+			String desc = result.getField().desc;
+			j = txtEdit.getText().indexOf(desc + " " + name);
+			k = name.length();
+		}
+		// Final for the runnable
+		final int foundIndex = j, len = k;
 		if (foundIndex >= 0){
 			txtEdit.setCaretPosition(txtEdit.getText().length() - 1);
-			// Again with the threading shit becase setting the caret positon
+			// Again with the threading shit because setting the caret position
 			// instantly after another set doesn't work.
 			// This delay will force the found result to the top of the page.
 			new Thread() {
@@ -277,7 +288,7 @@ public class ASMMode extends DecompileMode {
 					}
 					txtEdit.setCaretPosition(foundIndex);
 					txtEdit.setSelectionStart(foundIndex);
-					txtEdit.setSelectionEnd(foundIndex + name.length()); 
+					txtEdit.setSelectionEnd(foundIndex + len); 
 				}
 			}.start();
 		}

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.objectweb.asm.tree.ClassNode;
 
+import me.lpk.gui.EnumSearchType;
 import me.lpk.gui.VisualizerWindow;
 import me.lpk.gui.component.SearchResultEntry;
 import me.lpk.util.SearchUtil;
@@ -27,23 +28,40 @@ public class SearchKeyListener implements KeyListener {
 	}
 
 	private void handle(KeyEvent e) {
-		if (VisualizerWindow.instance.getSearchText().length() > 3 || e.getKeyCode() == KeyEvent.VK_ENTER) {
+		// When the user enteres text into the search bar and his enter
+		if (VisualizerWindow.instance.getSearchText().length() > 0 && e.getKeyCode() == KeyEvent.VK_ENTER) {
 			List<SearchResultEntry> results = null;
-			switch (VisualizerWindow.instance.getSearchType()) {
-			case "Class":
-				ClassNode node = VisualizerWindow.instance.getNodes().get(VisualizerWindow.instance.getSearchText());
-				if (node == null){
+			switch (EnumSearchType.byDisplayText(VisualizerWindow.instance.getSearchType())) {
+			case CLASS_NAME:
+				// Populate search results with classes with the search text
+				results = SearchUtil.findClass(VisualizerWindow.instance.getSearchText());
+				break;
+			case CLASS_REF:
+				// Populate search results with references to the class.
+				ClassNode node2 = VisualizerWindow.instance.getNodes().get(VisualizerWindow.instance.getSearchText());
+				if (node2 == null){
 					return;
 				}
-				results = SearchUtil.findReferences(node);
+				results = SearchUtil.findReferences(node2);
 				break;
-			case "Method":
-				results = SearchUtil.findMethods(VisualizerWindow.instance.getSearchText());
+			case METHOD_NAME:
+				// Populate search results with methods matching the given name.
+				results = SearchUtil.findMethods(VisualizerWindow.instance.getSearchText(), false);
 				break;
-			case "Field":
-				results = SearchUtil.findFields(VisualizerWindow.instance.getSearchText());
+			case METHOD_DESC:
+				// Populate search results with methods matching the given desc.
+				results = SearchUtil.findMethods(VisualizerWindow.instance.getSearchText(), true);
 				break;
-			case "LDC":
+			case FIELD_NAME:
+				// Populate search results with fields matching the given name.
+				results = SearchUtil.findFields(VisualizerWindow.instance.getSearchText(), false);
+				break;
+			case FIELD_DESC:
+				// Populate search results with fields matching the given desc.
+				results = SearchUtil.findFields(VisualizerWindow.instance.getSearchText(), true);
+				break;
+			case LDC:
+				// Populate search strings containing the given text.
 				results = SearchUtil.findStringsContaining(VisualizerWindow.instance.getSearchText());
 				break;
 			}
@@ -52,6 +70,16 @@ public class SearchKeyListener implements KeyListener {
 				for (SearchResultEntry result : results) {
 					VisualizerWindow.instance.getResultPanel().addResult(result);
 				}
+				new Thread() {
+					@Override
+					public void run(){
+						try {
+							Thread.sleep(50L);
+							VisualizerWindow.instance.getResultPanel().sort();
+						} catch (Exception e) {
+						}
+					}
+				}.start();
 			}
 		}
 	}

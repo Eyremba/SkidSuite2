@@ -5,57 +5,78 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.io.FileUtils;
 import org.objectweb.asm.tree.ClassNode;
 
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
-import me.lpk.mapping.MappingGen;
+import me.lpk.mapping.MappingFactory;
 
 /**
- * I'm sick of copy pasting the code in the static methods below. Made this so I
- * can just do it quickly.
- * 
- * @author Matt
+ * A container for all things necessary for general usage in SkidSuite.
+ * Contains:
+ * <ul>
+ * <li>Map of ClassNodes
+ * <li>Map of MappedClasses
+ * </ul>
  */
-public class LazySetupMaker {
+public class Setup {
 	private static volatile Map<String, MappedClass> rtMappings;
 	private static volatile boolean setup, bypassSetup;
-	private final String name;
+	private final String jarName;
 	private final Map<String, ClassNode> nodes;
 	private final Map<String, MappedClass> mappings;
 	private final Map<String, ClassNode> libNodes;
 	private final Map<String, MappedClass> libMappings;
-	private final Set<File> libraries = new HashSet<File>();
 
-	public LazySetupMaker(String name, Map<String, ClassNode> nodes, Map<String, MappedClass> mappings) {
-		this.name = name;
+	public Setup(String name, Map<String, ClassNode> nodes, Map<String, MappedClass> mappings) {
+		this.jarName = name;
 		this.nodes = nodes;
 		this.mappings = mappings;
 		this.libNodes = new HashMap<String, ClassNode>();
 		this.libMappings = new HashMap<String, MappedClass>();
 	}
 
-	public LazySetupMaker(String name, Map<String, ClassNode> nodes, Map<String, MappedClass> mappings, Map<String, ClassNode> libNodes,
-			Map<String, MappedClass> libMappings) {
-		this.name = name;
+	public Setup(String name, Map<String, ClassNode> nodes, Map<String, MappedClass> mappings, Map<String, ClassNode> libNodes, Map<String, MappedClass> libMappings) {
+		this.jarName = name;
 		this.nodes = nodes;
 		this.mappings = mappings;
 		this.libNodes = libNodes;
 		this.libMappings = libMappings;
 	}
 
-	public static LazySetupMaker get(String jarIn, boolean readDefaultLibraries) throws LSMException {
-		return get(jarIn, readDefaultLibraries, null);
+	/**
+	 * Given a jar file <i>(Optional: and libraries)</i> generates everything
+	 * needed for general usage in SkidSuite.
+	 * 
+	 * @param jarIn
+	 *            Jar to read from
+	 * @param readFileLibs
+	 *            If libraries from the 'libraries' folder should be read
+	 * @return
+	 * @throws LSMException
+	 */
+	public static Setup get(String jarIn, boolean readFileLibs) throws LSMException {
+		return get(jarIn, readFileLibs, null);
 	}
 
-	public static LazySetupMaker get(String jarIn, boolean readDefaultLibraries, Collection<File> libs) throws LSMException {
+	/**
+	 * Given a jar file <i>(Optional: and libraries)</i> generates everything
+	 * needed for general usage in SkidSuite.
+	 * 
+	 * @param jarIn
+	 *            Jar to read from
+	 * @param readFileLibs
+	 *            If libraries from the 'libraries' folder should be read
+	 * @param libs
+	 *            Additional library jars
+	 * @return
+	 * @throws LSMException
+	 */
+	public static Setup get(String jarIn, boolean readFileLibs, Collection<File> libs) throws LSMException {
 		boolean ignoredSetup = false;
 		if (!setup) {
 			if (!bypassSetup) {
@@ -64,11 +85,11 @@ public class LazySetupMaker {
 				ignoredSetup = true;
 			}
 		}
-		Logger.logLow("Loading: " + jarIn + " (Reading Libraries: " + readDefaultLibraries + ")...");
+		Logger.logLow("Loading: " + jarIn + " (Reading Libraries: " + readFileLibs + ")...");
 		File in = new File(jarIn);
 		Map<String, ClassNode> nodes = loadNodes(in);
 		Map<String, ClassNode> libNodes = new HashMap<String, ClassNode>();
-		if (readDefaultLibraries) {
+		if (readFileLibs) {
 			if (libs == null) {
 				libs = new ArrayList<File>();
 			}
@@ -88,8 +109,8 @@ public class LazySetupMaker {
 		//
 		//
 		Logger.logLow("Generating mappings...");
-		Map<String, MappedClass> mappings = MappingGen.mappingsFromNodesNoLinking(nodes);
-		Map<String, MappedClass> libMappings = new HashMap<String, MappedClass>(MappingGen.mappingsFromNodesNoLinking(libNodes));
+		Map<String, MappedClass> mappings = MappingFactory.mappingsFromNodesNoLinking(nodes);
+		Map<String, MappedClass> libMappings = new HashMap<String, MappedClass>(MappingFactory.mappingsFromNodesNoLinking(libNodes));
 		if (libMappings.size() > 0) {
 			Logger.logLow("Marking library nodes as read-only...");
 			for (MappedClass mc : libMappings.values()) {
@@ -112,32 +133,65 @@ public class LazySetupMaker {
 			mappings.putAll(libMappings);
 		}
 		for (MappedClass mc : mappings.values()) {
-			MappingGen.linkMappings(mc, mappings);
+			MappingFactory.linkMappings(mc, mappings);
 		}
 		Logger.logLow("Completed loading from: " + jarIn);
-		return new LazySetupMaker(jarIn, nodes, mappings, libNodes, libMappings);
+		return new Setup(jarIn, nodes, mappings, libNodes, libMappings);
 	}
 
-	public String getName() {
-		return name;
+	/**
+	 * Gets the name of the jar file this Setup read from.
+	 * 
+	 * @return
+	 */
+	public String getJarName() {
+		return jarName;
 	}
 
+	/**
+	 * Gets the map of ClassNodes <i>(name to node)</i>.
+	 * 
+	 * @return
+	 */
 	public Map<String, ClassNode> getNodes() {
 		return nodes;
 	}
 
+	/**
+	 * Gets the map of MappedClasses<i>(name to mapping)</i>.
+	 * 
+	 * @return
+	 */
 	public Map<String, MappedClass> getMappings() {
 		return mappings;
 	}
 
+	/**
+	 * Gets the map of ClassNodes<i>(name to mapping)</i>, but only for library
+	 * nodes.
+	 * 
+	 * @return
+	 */
 	public Map<String, ClassNode> getLibNodes() {
 		return libNodes;
 	}
 
+	/**
+	 * Gets the map of MappedClasses<i>(name to mapping)</i>, but only for
+	 * library nodes.
+	 * 
+	 * @return
+	 */
 	public Map<String, MappedClass> getLibMappings() {
 		return libMappings;
 	}
 
+	/**
+	 * Reads ClasNodes from a file and returns them as a map.
+	 * 
+	 * @param file
+	 * @return
+	 */
 	private static Map<String, ClassNode> loadNodes(File file) {
 		Map<String, ClassNode> nodes = null;
 		try {
@@ -146,14 +200,14 @@ public class LazySetupMaker {
 			e.printStackTrace();
 		}
 		if (nodes == null) {
-			System.err.println("COULD NOT READ CLASSES FROM " + file.getAbsolutePath());
+			Logger.errLow("Failed reading classes from: " + file.getAbsolutePath());
 			return null;
 		}
 		return nodes;
 	}
 
 	/**
-	 * Returns a list containing 'rt.jar'.
+	 * Returns a list of libraries on loaded from the fily system. May be empty.
 	 * 
 	 * @return
 	 */
@@ -162,8 +216,7 @@ public class LazySetupMaker {
 	}
 
 	/**
-	 * Returns a list containing 'rt.jar' plus any jars in the adjacent
-	 * 'libraries' folder.
+	 * Returns a list of libraries on loaded from the fily system. May be empty.
 	 * 
 	 * @param makeDir
 	 * @return
@@ -179,13 +232,6 @@ public class LazySetupMaker {
 			}
 		}
 		return files;
-	}
-
-	public void loadJarsToClasspath() throws IOException {
-		Classpather.addFile(name);
-		for (File file : this.libraries) {
-			Classpather.addFile(file);
-		}
 	}
 
 	/**
@@ -204,7 +250,7 @@ public class LazySetupMaker {
 	 */
 	public static void setup() {
 		try {
-			if (setup){
+			if (setup) {
 				return;
 			}
 			Logger.logLow("Setting up LazySetupMaker...");
@@ -212,7 +258,7 @@ public class LazySetupMaker {
 			for (ClassNode cn : JarUtils.loadRT().values()) {
 				libNodes.put(cn.name, cn);
 			}
-			Map<String, MappedClass> libMappings = new HashMap<String, MappedClass>(MappingGen.mappingsFromNodesNoLinking(libNodes));
+			Map<String, MappedClass> libMappings = new HashMap<String, MappedClass>(MappingFactory.mappingsFromNodesNoLinking(libNodes));
 
 			for (MappedClass mc : libMappings.values()) {
 				mc.setIsLibrary(true);
@@ -224,7 +270,7 @@ public class LazySetupMaker {
 				}
 			}
 			for (MappedClass mc : libMappings.values()) {
-				MappingGen.linkMappings(mc, libMappings);
+				MappingFactory.linkMappings(mc, libMappings);
 			}
 			rtMappings = libMappings;
 			setup = true;

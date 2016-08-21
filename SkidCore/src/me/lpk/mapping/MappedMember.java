@@ -101,7 +101,7 @@ public class MappedMember extends MappedObject {
 	}
 
 	/**
-	 * Returns true if the member overrides another.
+	 * Returns true if the member overrides another member.
 	 * 
 	 * @return
 	 */
@@ -110,7 +110,7 @@ public class MappedMember extends MappedObject {
 	}
 
 	/**
-	 * Returns true if the member is overriden.
+	 * Returns true if this member is overriden by another.
 	 * 
 	 * @return
 	 */

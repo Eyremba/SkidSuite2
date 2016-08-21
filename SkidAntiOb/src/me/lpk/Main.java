@@ -1,7 +1,6 @@
 package me.lpk;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,9 +11,8 @@ import me.lpk.antis.impl.*;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
-import me.lpk.util.Classpather;
 import me.lpk.util.JarUtils;
-import me.lpk.util.LazySetupMaker;
+import me.lpk.util.Setup;
 
 public class Main {
 
@@ -27,8 +25,8 @@ public class Main {
 	}
 	
 	private static void runAnti(File jar) throws Exception {
-		LazySetupMaker.setBypassSetup();
-		LazySetupMaker lsm = LazySetupMaker.get(jar.getAbsolutePath(), true);
+		Setup.setBypassSetup();
+		Setup lsm = Setup.get(jar.getAbsolutePath(), true);
 		for (String className : lsm.getNodes().keySet()) {
 			AntiBase anti = new AntiZKM8();
 			ClassNode node = lsm.getNodes().get(className);

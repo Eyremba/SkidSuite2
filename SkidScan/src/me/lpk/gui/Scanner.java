@@ -5,8 +5,6 @@ import javax.swing.JSplitPane;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -84,6 +82,7 @@ public class Scanner {
 	 * Create the application.
 	 */
 	public Scanner() {
+		// Register handlers so the GUI can auto-load them.
 		registerClassHandler(new CBase64());
 		registerClassHandler(new CClassLoader());
 		registerClassHandler(new CSuspiciousSynth());
@@ -158,15 +157,16 @@ public class Scanner {
 		chckbxIncludeCss.setSelected(true);
 		mnSettings.add(chckbxIncludeCss);
 
+		// Auto-populate detection options
 		JMenu mnDetectionsClass = new JMenu("Detections: Class");
 		JMenu mnDetectionsMethod = new JMenu("Detections: Method");
-		for (String s : classHandlers.keySet()){
+		for (String s : classHandlers.keySet()) {
 			JCheckBox chk = new JCheckBox(s, true);
 			chk.setBackground(Color.WHITE);
 			classHandlerStatus.put(s, chk);
 			mnDetectionsClass.add(chk);
 		}
-		for (String s : methodHandlers.keySet()){
+		for (String s : methodHandlers.keySet()) {
 			JCheckBox chk = new JCheckBox(s, true);
 			chk.setBackground(Color.WHITE);
 			methodHandlerStatus.put(s, chk);
@@ -174,7 +174,7 @@ public class Scanner {
 		}
 		mnSettings.add(mnDetectionsClass);
 		mnSettings.add(mnDetectionsMethod);
-		
+
 		//
 		//
 		// Left side (JTree)
@@ -195,6 +195,7 @@ public class Scanner {
 		treeFiles.addMouseListener(new MouseListener() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
+				// Scan clicked elements
 				File file = new File(path);
 				if (file.exists()) {
 					scan(file);
@@ -220,17 +221,19 @@ public class Scanner {
 		splitPane.setLeftComponent(pnlTree);
 		pnlTree.setLayout(new BorderLayout(0, 0));
 		pnlTree.add(treeFiles, BorderLayout.CENTER);
-		
+
 	}
 
 	private void updateTree() {
-		new Thread(){
+		// Threaded so the program can start up even in instances where there
+		// are LOTS of jars to be added.
+		new Thread() {
 			@Override
 			public void run() {
 				File dir = new File(System.getProperty("user.dir"));
 				treeFiles.setModel(new DefaultTreeModel(SwingUtils.sort(getTreeFromDir(dir))));
 			}
-			
+
 		}.start();
 	}
 
@@ -242,13 +245,13 @@ public class Scanner {
 	private void scan(File file) {
 		Map<String, ClassNode> nodes = null;
 		th.reset();
-		for (String s : classHandlers.keySet()){
-			if (classHandlerStatus.get(s).isSelected()){
+		for (String s : classHandlers.keySet()) {
+			if (classHandlerStatus.get(s).isSelected()) {
 				th.registerClassHandler(classHandlers.get(s));
 			}
 		}
-		for (String s : methodHandlers.keySet()){
-			if (methodHandlerStatus.get(s).isSelected()){
+		for (String s : methodHandlers.keySet()) {
+			if (methodHandlerStatus.get(s).isSelected()) {
 				th.registerMethodHandler(methodHandlers.get(s));
 			}
 		}
@@ -277,7 +280,7 @@ public class Scanner {
 			}
 		}.start();
 		mnSave.setEnabled(true);
-		if (chckbxAutomaticallyExportScans.isSelected()){
+		if (chckbxAutomaticallyExportScans.isSelected()) {
 			save();
 		}
 	}

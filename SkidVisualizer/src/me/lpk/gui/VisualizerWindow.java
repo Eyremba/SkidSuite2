@@ -19,7 +19,7 @@ import me.lpk.gui.component.SearchResultPanel;
 import me.lpk.gui.listeners.ContextMenuAdapter;
 import me.lpk.gui.listeners.SearchKeyListener;
 import me.lpk.mapping.MappedClass;
-import me.lpk.mapping.MappingGen;
+import me.lpk.mapping.MappingFactory;
 
 public class VisualizerWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -66,10 +66,9 @@ public class VisualizerWindow extends JFrame {
 		txtMenuSearch.setToolTipText(searchingTooltip );
 		searchType.setToolTipText(searchingTooltip);
 		JLabel searchLbl = new JLabel(" Search:  ");
-		searchType.addItem("LDC");
-		searchType.addItem("Class");
-		searchType.addItem("Field");
-		searchType.addItem("Method");
+		for (EnumSearchType search : EnumSearchType.values()){
+			searchType.addItem(search.getDisplayText());
+		}
 		decompileMode.addItem("ASM");
 		decompileMode.addItem("Procyon");
 		decompileMode.addActionListener (new ActionListener () {
@@ -109,7 +108,7 @@ public class VisualizerWindow extends JFrame {
 			setTitle("Loading classes...");
 			nodes = decompilePanel.getNodes();
 			setTitle("Generating class connections...");
-			mappings = MappingGen.mappingsFromNodes(nodes);
+			mappings = MappingFactory.mappingsFromNodes(nodes);
 			setTitle(TITLE);
 		}
 	}

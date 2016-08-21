@@ -17,6 +17,7 @@ import com.strobel.assembler.metadata.JarTypeLoader;
 import com.strobel.decompiler.Decompiler;
 import com.strobel.decompiler.DecompilerSettings;
 import com.strobel.decompiler.PlainTextOutput;
+import org.objectweb.asm.Type;
 
 import me.lpk.gui.component.DecompileSelection;
 import me.lpk.gui.component.SearchResultEntry;
@@ -160,8 +161,27 @@ public class ProcyonMode extends DecompileMode {
 
 	@Override
 	public void find(SearchResultEntry result, JTextPane txtEdit) {
-		String desc = result.getMethod().desc;
-		desc = desc.substring(desc.lastIndexOf(")") + 1).replace("[", "");
+		String desc = null;
+		String name = null;
+		if (result.isMethodResult()){
+			 name = result.getMethod().name;
+			desc = result.getMethod().desc;
+			desc = desc.substring(desc.lastIndexOf(")") + 1).replace("[", "");
+			// Searching in signature
+			if (desc.length() > 1) {
+				List<String> matches = RegexUtils.matchDescriptionClasses(desc);
+				if (matches.size() > 0) {
+					desc = matches.get(0);
+					desc = desc.substring(desc.lastIndexOf("/") + 1);
+				}
+			}
+			
+		}else{
+			 name = result.getField().name;
+			desc = Type.getType(result.getField().desc).getInternalName();
+		}			
+
+		
 		if (desc.length() == 1) {
 			switch (desc) {
 			case "V":
@@ -193,19 +213,16 @@ public class ProcyonMode extends DecompileMode {
 				break;
 			}
 		} else {
-			List<String> matches = RegexUtils.matchDescriptionClasses(desc);
-			if (matches.size() > 0) {
-				desc = matches.get(0);
-				desc = desc.substring(desc.lastIndexOf("/") + 1);
-			}
+			
 		}
-		String name = result.getMethod().name;
+		int k = 0;
+		
 		// Copy so the anonymous thread can access it...
-		String desc2 = desc;
 		Pattern pattern = Pattern.compile("(" + desc + ").*(" + name + ")");
 		Matcher m = pattern.matcher(txtEdit.getText());
 		boolean found = m.find();
 		int foundIndex = found ? m.start() : -1;
+		final int len = desc.length() + 1, lenName = name.length();
 		if (foundIndex >= 0) {
 			txtEdit.setCaretPosition(txtEdit.getText().length() - 1);
 			// Again with the threading shit becase setting the caret positon
@@ -220,8 +237,8 @@ public class ProcyonMode extends DecompileMode {
 						e.printStackTrace();
 					}
 					txtEdit.setCaretPosition(foundIndex);
-					txtEdit.setSelectionStart(foundIndex  + desc2.length() + 1);
-					txtEdit.setSelectionEnd(foundIndex  + desc2.length() + 1 + name.length()); 
+					txtEdit.setSelectionStart(foundIndex  + len);
+					txtEdit.setSelectionEnd(foundIndex  + len + lenName); 
 				}
 			}.start();
 		}

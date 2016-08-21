@@ -15,7 +15,7 @@ import org.objectweb.asm.tree.MethodNode;
 
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
-import me.lpk.mapping.MappingGen;
+import me.lpk.mapping.MappingFactory;
 
 public class EnigmaLoader extends MappingLoader {
 	/**
@@ -118,7 +118,7 @@ public class EnigmaLoader extends MappingLoader {
 		// Fixing the MappedClass's parent / child structure.
 		for (String className : remap.keySet()) {
 			MappedClass mappedClass = remap.get(className);
-			remap = MappingGen.linkMappings(mappedClass, remap);
+			remap = MappingFactory.linkMappings(mappedClass, remap);
 		}
 		return remap;
 	}

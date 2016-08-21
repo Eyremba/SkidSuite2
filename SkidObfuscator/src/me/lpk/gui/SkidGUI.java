@@ -1,11 +1,9 @@
 package me.lpk.gui;
 
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -22,7 +20,7 @@ import me.lpk.gui.panel.ObfuscationPanel;
 import me.lpk.gui.panel.OptimizationPanel;
 import me.lpk.gui.panel.SettingsPanel;
 import me.lpk.options.Options;
-import me.lpk.util.LazySetupMaker;
+import me.lpk.util.Setup;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -61,7 +59,7 @@ public class SkidGUI implements IDropUser {
 		new Runnable() {
 			@Override
 			public void run() {
-				LazySetupMaker.setup();
+				Setup.setup();
 			}
 		}.run();
 	}

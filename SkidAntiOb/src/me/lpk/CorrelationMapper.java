@@ -13,7 +13,7 @@ import org.objectweb.asm.tree.TypeInsnNode;
 
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
-import me.lpk.mapping.remap.MappingRenamer;
+import me.lpk.mapping.MappingRenamer;
 import me.lpk.mapping.remap.MappingMode;
 import me.lpk.util.ParentUtils;
 import me.lpk.util.RegexUtils;

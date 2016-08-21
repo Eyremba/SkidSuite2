@@ -4,7 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.BorderFactory;
@@ -12,6 +15,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListModel;
 import javax.swing.border.BevelBorder;
 
 import me.lpk.gui.VisualizerWindow;
@@ -39,7 +43,8 @@ public class SearchResultPanel extends JPanel {
 				if (list.getSelectedIndex() == lastIndex) {
 					String path = getPath();
 					if (path != null) {
-						if (VisualizerWindow.instance.getDecompilePanel().getCurrentNode() == null || !VisualizerWindow.instance.getDecompilePanel().getCurrentNode().name.equals(path)) {
+						if (VisualizerWindow.instance.getDecompilePanel().getCurrentNode() == null
+								|| !VisualizerWindow.instance.getDecompilePanel().getCurrentNode().name.equals(path)) {
 							VisualizerWindow.instance.getDecompilePanel().decompile(path);
 						}
 						VisualizerWindow.instance.getDecompilePanel().setIndex(getSelectedSearchEntry());
@@ -96,5 +101,22 @@ public class SearchResultPanel extends JPanel {
 		listModel.addElement(result.toString());
 		list.setModel(listModel);
 		list.invalidate();
+	}
+
+	/**
+	 * Sorts the list results.
+	 * 
+	 * @author Torsten H. (<a href=
+	 *         "http://www.codeproject.com/Questions/804653/How-to-sort-JList-of-element-while-new-item-is-add">
+	 *         CodeProject</a>)
+	 */
+	public void sort() {
+		DefaultListModel<String> listModel = (DefaultListModel<String>) list.getModel();
+		List<String> list = Collections.list(listModel.elements());
+		Collections.sort(list);
+		listModel.clear();
+		for (String o : list) {
+			listModel.addElement(o);
+		}
 	}
 }

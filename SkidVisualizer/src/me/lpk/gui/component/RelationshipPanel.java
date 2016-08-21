@@ -22,7 +22,7 @@ import javax.swing.JPopupMenu;
 import org.objectweb.asm.tree.ClassNode;
 
 import me.lpk.mapping.MappedClass;
-import me.lpk.mapping.MappingGen;
+import me.lpk.mapping.MappingFactory;
 import me.lpk.util.SearchUtil;
 
 /**
@@ -35,7 +35,7 @@ public class RelationshipPanel extends JPanel {
 	private Node grabbed;
 
 	public RelationshipPanel(Map<String, ClassNode> nodes, String start) {
-		this.maps = MappingGen.mappingsFromNodes(nodes);
+		this.maps = MappingFactory.mappingsFromNodes(nodes);
 		Node init = new Node(maps.get(start));
 		positions.put(init, new Rectangle(0, 0, 0, 0));
 		addMouseListener(new MouseClickListener());

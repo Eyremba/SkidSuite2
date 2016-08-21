@@ -9,7 +9,7 @@ import me.lpk.util.ParentUtils;
 
 /**
  * A ClassWriter that works off of MappedClasses. Does not require classes being
- * loaded into the JVM.
+ * loaded into the JVM like a standard ClassWriter.
  */
 public class MappingClassWriter extends ClassWriter {
 	private final Map<String, MappedClass> mappings;

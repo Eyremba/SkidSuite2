@@ -9,7 +9,6 @@ import org.objectweb.asm.tree.MethodNode;
 
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappedMember;
-import me.lpk.mapping.remap.MappingMode;
 import me.lpk.util.AccessHelper;
 import me.lpk.util.ParentUtils;
 
@@ -78,7 +77,7 @@ public class ModeSkidfuscate extends MappingModeImpl {
 			return mn.name;
 		}
 		if (!descs.containsKey(mn.desc)) {
-			descs.put(mn.desc, 0);//((int)(Math.random() * 100)));
+			descs.put(mn.desc, 0);
 		}
 		String name = getName(m, descs.get(mn.desc));
 		descs.put(mn.desc, descs.get(mn.desc) + 1);

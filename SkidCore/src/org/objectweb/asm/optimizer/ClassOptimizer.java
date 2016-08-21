@@ -26,7 +26,8 @@ import org.objectweb.asm.commons.ClassRemapper;
  */
 public class ClassOptimizer extends ClassRemapper {
 
-    private String pkgName;
+    @SuppressWarnings("unused")
+	private String pkgName;
     String clsName;
 
     boolean isInterface = false;

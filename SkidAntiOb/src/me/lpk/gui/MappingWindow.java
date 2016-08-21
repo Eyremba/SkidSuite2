@@ -23,7 +23,7 @@ import org.objectweb.asm.tree.ClassNode;
 
 import me.lpk.CorrelationMapper;
 import me.lpk.mapping.MappedClass;
-import me.lpk.mapping.MappingGen;
+import me.lpk.mapping.MappingFactory;
 import me.lpk.mapping.MappingProcessor;
 import me.lpk.mapping.loaders.EnigmaLoader;
 import me.lpk.mapping.loaders.MappingLoader;
@@ -31,7 +31,7 @@ import me.lpk.mapping.loaders.ProguardLoader;
 import me.lpk.mapping.loaders.SRGLoader;
 import me.lpk.mapping.remap.impl.ModeNone;
 import me.lpk.util.JarUtils;
-import me.lpk.util.LazySetupMaker;
+import me.lpk.util.Setup;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -82,7 +82,7 @@ public class MappingWindow {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		LazySetupMaker.setBypassSetup();		
+		Setup.setBypassSetup();		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -358,9 +358,9 @@ public class MappingWindow {
 		// Loading
 		File targetJar = new File(pathTarget);
 		File cleanJar = new File(pathClean);
-		LazySetupMaker.setBypassSetup();
-		LazySetupMaker targ = LazySetupMaker.get(targetJar.getAbsolutePath(), false);
-		LazySetupMaker clen = LazySetupMaker.get(cleanJar.getAbsolutePath(), false);
+		Setup.setBypassSetup();
+		Setup targ = Setup.get(targetJar.getAbsolutePath(), false);
+		Setup clen = Setup.get(cleanJar.getAbsolutePath(), false);
 		// Classpather.addFile(targetJar);
 
 		System.out.println("Loading classes...");
@@ -368,11 +368,11 @@ public class MappingWindow {
 		Map<String, ClassNode> baseNodes = clen.getNodes();
 		// Making maps
 		System.out.println("Generating mappings");
-		Map<String, MappedClass> targetMappings = MappingGen.mappingsFromNodes(targetNodes);
+		Map<String, MappedClass> targetMappings = MappingFactory.mappingsFromNodes(targetNodes);
 		for (MappedClass mappedClass : targetMappings.values()) {
-			targetMappings = MappingGen.linkMappings(mappedClass, targetMappings);
+			targetMappings = MappingFactory.linkMappings(mappedClass, targetMappings);
 		}
-		Map<String, MappedClass> cleanMappings = MappingGen.mappingsFromNodes(baseNodes);
+		Map<String, MappedClass> cleanMappings = MappingFactory.mappingsFromNodes(baseNodes);
 		// Linking
 		System.out.println("Linking correlating sources...");
 		targetMappings = resetRemapped(targetMappings);
@@ -383,7 +383,7 @@ public class MappingWindow {
 		// Processing
 		System.out.println("Processing output jar...");
 		saveJar(targetJar, targetNodes, targetMappings);
-		saveMappings(targetMappings, targ.getName() + ".enigma.map");
+		saveMappings(targetMappings, targ.getJarName() + ".enigma.map");
 		System.out.println("Done!");
 	}
 
@@ -457,7 +457,7 @@ public class MappingWindow {
 			try {
 				Map<String, ClassNode> nodes = JarUtils.loadClasses(jarProc);
 				log("Loaded nodes from jar: " + jarProc.getAbsolutePath());
-				Map<String, MappedClass> mappedClasses = MappingGen.mappingsFromEnigma(mapProc, nodes);
+				Map<String, MappedClass> mappedClasses = MappingFactory.mappingsFromEnigma(mapProc, nodes);
 				log("Loaded mappings from engima mappings: " + mapProc.getAbsolutePath());
 				saveJar(jarProc, nodes, mappedClasses);
 				log("Saved modified file!");
@@ -474,7 +474,7 @@ public class MappingWindow {
 			try {
 				Map<String, ClassNode> nodes = JarUtils.loadClasses(jarProc);
 				log("Loaded nodes from jar: " + jarProc.getAbsolutePath());
-				Map<String, MappedClass> mappedClasses = MappingGen.mappingsFromSRG(mapProc, nodes);
+				Map<String, MappedClass> mappedClasses = MappingFactory.mappingsFromSRG(mapProc, nodes);
 				log("Loaded mappings from engima mappings: " + mapProc.getAbsolutePath());
 				saveJar(jarProc, nodes, mappedClasses);
 				log("Saved modified file!");
@@ -491,7 +491,7 @@ public class MappingWindow {
 			try {
 				Map<String, ClassNode> nodes = JarUtils.loadClasses(jarProc);
 				log("Loaded nodes from jar: " + jarProc.getAbsolutePath());
-				Map<String, MappedClass> mappedClasses = MappingGen.mappingsFromProguard(mapProc, nodes);
+				Map<String, MappedClass> mappedClasses = MappingFactory.mappingsFromProguard(mapProc, nodes);
 				log("Loaded mappings from proguard mappings: " + mapProc.getAbsolutePath());
 				saveJar(jarProc, nodes, mappedClasses);
 				log("Saved modified file!");

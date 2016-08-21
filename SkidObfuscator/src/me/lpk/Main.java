@@ -3,10 +3,7 @@ package me.lpk;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
@@ -14,15 +11,12 @@ import org.objectweb.asm.tree.MethodNode;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
-import me.lpk.mapping.remap.MappingMode;
-import me.lpk.mapping.remap.MappingRenamer;
 import me.lpk.obfuscation.MiscAnti;
 import me.lpk.obfuscation.Flow;
 import me.lpk.obfuscation.Stringer;
 import me.lpk.util.AccessHelper;
-import me.lpk.util.Classpather;
 import me.lpk.util.JarUtils;
-import me.lpk.util.LazySetupMaker;
+import me.lpk.util.Setup;
 
 public class Main {
 
@@ -32,9 +26,9 @@ public class Main {
 
 	public static void obfuscating(String jarIn, String jarOut) throws Exception {
 		//Classpather.addFile(jarIn);
-		LazySetupMaker.setBypassSetup();
+		Setup.setBypassSetup();
 		//LazySetupMaker.setup();
-		LazySetupMaker dat = LazySetupMaker.get(jarIn, false);
+		Setup dat = Setup.get(jarIn, false);
 		Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 		Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 		//

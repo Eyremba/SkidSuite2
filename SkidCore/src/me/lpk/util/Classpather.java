@@ -6,24 +6,35 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-
 /**
  * Adds jar files to the classpath.
  */
 public class Classpather {
 	private static final Class<?>[] parameters = new Class[] { URL.class };
 
+	/**
+	 * Add a file to the classpath.
+	 * 
+	 * @param s
+	 * @throws IOException
+	 */
 	public static void addFile(String s) throws IOException {
 		File f = new File(s);
 		addFile(f);
 	}
 
+	/**
+	 * Add a file to the classpath.
+	 * 
+	 * @param s
+	 * @throws IOException
+	 */
 	@SuppressWarnings("deprecation")
 	public static void addFile(File f) throws IOException {
 		addURL(f.toURL());
 	}
 
-	public static void addURL(URL u) throws IOException {
+	private static void addURL(URL u) throws IOException {
 		URLClassLoader sysloader = (URLClassLoader) ClassLoader.getSystemClassLoader();
 		Class<URLClassLoader> sysclass = URLClassLoader.class;
 		try {

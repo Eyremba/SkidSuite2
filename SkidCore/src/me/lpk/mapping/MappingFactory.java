@@ -22,8 +22,28 @@ import me.lpk.util.JarUtils;
 import me.lpk.util.ParentUtils;
 import me.lpk.util.RegexUtils;
 
-public class MappingGen {
+/**
+ * Factory for generating Mappings from various sources such as:
+ * <ul>
+ * <li>Mappings
+ * <ul>
+ * <li>Proguard
+ * <li>Enigma
+ * <li>SRG
+ * </ul>
+ * <li>Files
+ * <ul>
+ * <li>Jar
+ * </ul>
+ * <li>Java Objects
+ * <ul>
+ * <li>Map&lt;String, ClassNode&gt;
+ * </ul>
+ * </ul>
+ */
+public class MappingFactory {
 	/**
+	 * Returns a map of class names to MappedClasses given an SRG mapping file.
 	 * 
 	 * @param map
 	 * @param nodes
@@ -45,7 +65,7 @@ public class MappingGen {
 	}
 
 	/**
-	 * Returns a map of class names to mapped classes given an Engima mapping
+	 * Returns a map of class names to MappedClasses given an Engima mapping
 	 * file.
 	 * 
 	 * @param file
@@ -67,7 +87,7 @@ public class MappingGen {
 	}
 
 	/**
-	 * Returns a map of class names to mapped classes given a proguard mapping
+	 * Returns a map of class names to mapped classes given a Proguard mapping
 	 * file.
 	 * 
 	 * @param file
@@ -96,7 +116,7 @@ public class MappingGen {
 	 * @param newMappings
 	 * @return
 	 */
-	private static Map<String, MappedClass> fixFromMappingsText(Map<String, MappedClass> base, Map<String, MappedClass> newMappings) {
+	public static Map<String, MappedClass> fixFromMappingsText(Map<String, MappedClass> base, Map<String, MappedClass> newMappings) {
 		for (String className : newMappings.keySet()) {
 			MappedClass baseClass = base.get(className);
 			MappedClass newClass = newMappings.get(className);
@@ -178,9 +198,12 @@ public class MappingGen {
 	 * @param mappings
 	 */
 	private static Map<String, MappedClass> generateClassMapping(ClassNode node, Map<String, ClassNode> nodes, Map<String, MappedClass> mappings) {
+		// If the node isn't Object, it has parents.
 		boolean hasParents = !node.name.equals("java/lang/Object");
 		boolean hasInterfaces = node.interfaces.size() > 0;
 		if (hasParents) {
+			// Since we're in the generation phase, parents won't be created
+			// yet.
 			boolean parentRenamed = mappings.containsKey(node.superName);
 			ClassNode parentNode = nodes.get(node.superName);
 			if (parentNode != null && !parentRenamed) {
@@ -195,6 +218,7 @@ public class MappingGen {
 			}
 		}
 		if (hasInterfaces) {
+			// For each interface if it has a ClassNode, map it.
 			for (String interfaze : node.interfaces) {
 				boolean interfaceRenamed = mappings.containsKey(interfaze);
 				ClassNode interfaceNode = nodes.get(interfaze);
@@ -203,6 +227,7 @@ public class MappingGen {
 				}
 			}
 		}
+		// Now map the ClassNode given by the parameter 'node'
 		if (!mappings.containsKey(node.name)) {
 			MappedClass mappedClass = new MappedClass(node, node.name);
 			for (FieldNode fn : node.fields) {
@@ -215,7 +240,7 @@ public class MappingGen {
 		}
 		return mappings;
 	}
-	
+
 	/**
 	 * Iterates through entries in the given map and matches together parent and
 	 * child classes.
@@ -300,40 +325,55 @@ public class MappingGen {
 		}
 		// Adding method overrides
 		for (MappedMember method : mc.getMethods()) {
-			if (method.getFirstOverride() != null) {
-				continue;
-			}
-			addOverrides(mc, method);
+			// Already checked for overrides. Skip.
+
+			addOverrides(method);
 		}
 		mappings.put(mc.getOriginalName(), mc);
 		return mappings;
 	}
-	
-	private static void addOverrides(MappedClass mappedClass, MappedMember method) {
+
+	/**
+	 * Given a MappedMember searches for members in parent classes that match
+	 * the same name & desc.
+	 * 
+	 * @param method
+	 */
+	private static void addOverrides(MappedMember method) {
+		// This method has already been searched. Skip.
+		if (method.getFirstOverride() != null) {
+			return;
+		}
+		MappedClass mappedClass = method.getOwner();
 		// Skip if already searched for methods
 		List<MappedMember> methodOverridens = new ArrayList<MappedMember>();
 		MappedClass parent = mappedClass.getParent();
-		// Search the parent
+		// Search the parents (search is inclusive from parent all the way up
+		// the class hierarchy) for matching methods.
 		if (parent != null) {
 			MappedMember parentMethod = ParentUtils.findMethodInParentInclusive(parent, method.getOriginalName(), method.getDesc(), true);
 			if (parentMethod != null) {
 				methodOverridens.add(parentMethod);
 			}
 		}
-		// Search interfaces
+		// Search the interfaces (search is inclusive from parent all the way up
+		// the class hierarchy) for matching methods.
 		for (MappedClass interfacee : mappedClass.getInterfaces()) {
 			MappedMember interfaceMethod = ParentUtils.findMethodInParentInclusive(interfacee, method.getOriginalName(), method.getDesc(), true);
 			if (interfaceMethod != null) {
 				methodOverridens.add(interfaceMethod);
 			}
 		}
-		// Add each override. Add overrides for the overriden.
-		for (MappedMember mmm : methodOverridens) {
-			addOverrides(mmm.getOwner(), mmm);
-			if (!method.getOverrides().contains(mmm)) {
-				method.addOverride(mmm);
-				mmm.addMemberThatOverridesMe(method);
-				method.setIsLibrary(mmm.isLibrary());
+		// Add each override.
+		for (MappedMember override : methodOverridens) {
+			// Check the overriden member for additional overrides.
+			addOverrides(override);
+			// Don't add duplicates. Set up override structure for the given
+			// method and the override.
+			if (!method.getOverrides().contains(override)) {
+				method.addOverride(override);
+				override.addMemberThatOverridesMe(method);
+				method.setIsLibrary(override.isLibrary());
 			}
 		}
 	}

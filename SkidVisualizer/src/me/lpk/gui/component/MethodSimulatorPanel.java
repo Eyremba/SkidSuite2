@@ -33,7 +33,6 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import me.lpk.analysis.StackFrame;
 import me.lpk.analysis.StackUtil;
-import me.lpk.gui.VisualizerWindow;
 import me.lpk.util.OpUtils;
 
 public class MethodSimulatorPanel extends JPanel {

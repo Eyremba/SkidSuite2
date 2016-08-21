@@ -17,8 +17,8 @@ import me.lpk.lang.Lang;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
 import me.lpk.mapping.MappingProcessor;
+import me.lpk.mapping.MappingRenamer;
 import me.lpk.mapping.loaders.EnigmaLoader;
-import me.lpk.mapping.remap.MappingRenamer;
 import me.lpk.obfuscation.Flow;
 import me.lpk.obfuscation.MiscAnti;
 import me.lpk.obfuscation.Stringer;
@@ -26,7 +26,7 @@ import me.lpk.obfuscation.rename.MappingModeImpl;
 import me.lpk.obfuscation.rename.ModeSkidfuscate;
 import me.lpk.optimization.Optimizer;
 import me.lpk.util.JarUtils;
-import me.lpk.util.LazySetupMaker;
+import me.lpk.util.Setup;
 
 public class Skidfuscate {
 	private static Skidfuscate instance;
@@ -47,7 +47,7 @@ public class Skidfuscate {
 		// Order: Load --> Optimize --> Obfuscation --> Renaming
 		try {
 			Logger.logLow("Loading & mapping from jar...");
-			LazySetupMaker dat = LazySetupMaker.get(jar.getAbsolutePath(), true, new ArrayList<File>(libraries.values()));
+			Setup dat = Setup.get(jar.getAbsolutePath(), true, new ArrayList<File>(libraries.values()));
 			Map<String, ClassNode> nodes = new HashMap<String, ClassNode>(dat.getNodes());
 			Map<String, MappedClass> mappings = new HashMap<String, MappedClass>(dat.getMappings());
 

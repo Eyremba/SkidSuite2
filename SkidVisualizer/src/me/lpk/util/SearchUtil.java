@@ -108,6 +108,21 @@ public class SearchUtil {
 	}
 
 	/**
+	 * Finds classes with the given name
+	 * @param node
+	 * @return
+	 */
+	public static List<SearchResultEntry> findClass(String name) {
+		List<SearchResultEntry> results = new ArrayList<SearchResultEntry>();
+		for (ClassNode cn : VisualizerWindow.instance.getNodes().values()) {
+			if (cn.name.toLowerCase().contains(name.toLowerCase())){
+				results.add(new SearchResultEntry(cn));
+			}
+		}
+		return results;
+	}
+
+	/**
 	 * Finds children of the given ClassNode.
 	 * 
 	 * @param node
@@ -131,21 +146,25 @@ public class SearchUtil {
 	 * Finds methods by the given name or description.
 	 * 
 	 * @param text
+	 * @param byDesc
+	 *            If checking for descriptions rather than names
 	 * @return
 	 */
-	public static List<SearchResultEntry> findMethods(String text) {
+	public static List<SearchResultEntry> findMethods(String text, boolean byDesc) {
 		List<SearchResultEntry> results = new ArrayList<SearchResultEntry>();
 		for (MappedClass mc : VisualizerWindow.instance.getMappings().values()) {
-			List<MappedMember> methodList = mc.findMethodsByName(text, false);
-			if (methodList.size() > 0) {
-				results.add(new SearchResultEntry(mc.getNode(), methodList.get(0).getMethodNode(), -1));
-				// Class already has a result. It does not need any further
-				// results.
-				continue;
-			}
-			methodList = mc.findMethodsByDesc(text);
-			if (methodList.size() > 0) {
-				results.add(new SearchResultEntry(mc.getNode(), methodList.get(0).getMethodNode(), -1));
+			if (byDesc) {
+				// Search for method's descriptions
+				List<MappedMember> methodList = mc.findMethodsByDesc(text);
+				for (MappedMember mm : methodList) {
+					results.add(new SearchResultEntry(mc.getNode(), mm.getMethodNode(), -1));
+				}
+			} else {
+				// Search for method's names
+				List<MappedMember> methodList = mc.findMethodsByName(text, false);
+				for (MappedMember mm : methodList) {
+					results.add(new SearchResultEntry(mc.getNode(), mm.getMethodNode(), -1));
+				}
 			}
 		}
 		return results;
@@ -155,20 +174,23 @@ public class SearchUtil {
 	 * Finds fields by the given name or description.
 	 * 
 	 * @param text
+	 * @param byDesc
+	 *            If checking for descriptions rather than names
 	 * @return
 	 */
-	public static List<SearchResultEntry> findFields(String text) {
+	public static List<SearchResultEntry> findFields(String text, boolean byDesc) {
 		List<SearchResultEntry> results = new ArrayList<SearchResultEntry>();
 		for (MappedClass mc : VisualizerWindow.instance.getMappings().values()) {
-			if (mc.findFieldsByName(text, false).size() > 0) {
-				results.add(new SearchResultEntry(mc.getNode()));
-				// Class already has a result. It does not need any further
-				// results.
-				continue;
-			}
-			List<MappedMember> finds = mc.findFieldsByDesc(text);
-			if (finds.size() > 0) {
-				results.add(new SearchResultEntry(mc.getNode()));
+			if (byDesc) {
+				List<MappedMember> fieldList = mc.findFieldsByDesc(text);
+				for (MappedMember mm : fieldList) {
+					results.add(new SearchResultEntry(mc.getNode(), mm.getFieldNode()));
+				}
+			} else {
+				List<MappedMember> fieldList = mc.findFieldsByName(text, false);
+				for (MappedMember mm : fieldList) {
+					results.add(new SearchResultEntry(mc.getNode(), mm.getFieldNode()));
+				}
 			}
 		}
 		return results;
@@ -182,12 +204,11 @@ public class SearchUtil {
 		return null;
 	}
 
-	public static MappedClass fromNode(ClassNode node) {
+	private static MappedClass fromNode(ClassNode node) {
 		return fromString(node.name);
 	}
 
-	public static MappedClass fromString(String owner) {
+	private static MappedClass fromString(String owner) {
 		return VisualizerWindow.instance.getMappings().get(owner);
 	}
-
 }
