@@ -13,6 +13,7 @@ import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.ParameterNode;
 
+import me.lpk.gui.ErrorDialog;
 import me.lpk.lang.Lang;
 import me.lpk.log.Logger;
 import me.lpk.mapping.MappedClass;
@@ -123,7 +124,7 @@ public class Skidfuscate {
 			saveJar(jar.getName().replace(".jar", "-re.jar"), jar, nodes, mappings);
 			Logger.logLow("Done!");
 		} catch (Exception e) {
-			e.printStackTrace();
+			ErrorDialog.show(e);
 		}
 	}
 

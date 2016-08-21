@@ -26,6 +26,7 @@ import me.lpk.mapping.MappingFactory;
 public class Setup {
 	private static volatile Map<String, MappedClass> rtMappings;
 	private static volatile boolean setup, bypassSetup;
+	private final static String sc = Setup.class.getSimpleName();
 	private final String jarName;
 	private final Map<String, ClassNode> nodes;
 	private final Map<String, MappedClass> mappings;
@@ -57,9 +58,9 @@ public class Setup {
 	 * @param readFileLibs
 	 *            If libraries from the 'libraries' folder should be read
 	 * @return
-	 * @throws LSMException
+	 * @throws ImpatientSetupException
 	 */
-	public static Setup get(String jarIn, boolean readFileLibs) throws LSMException {
+	public static Setup get(String jarIn, boolean readFileLibs) throws ImpatientSetupException {
 		return get(jarIn, readFileLibs, null);
 	}
 
@@ -74,13 +75,13 @@ public class Setup {
 	 * @param libs
 	 *            Additional library jars
 	 * @return
-	 * @throws LSMException
+	 * @throws ImpatientSetupException
 	 */
-	public static Setup get(String jarIn, boolean readFileLibs, Collection<File> libs) throws LSMException {
+	public static Setup get(String jarIn, boolean readFileLibs, Collection<File> libs) throws ImpatientSetupException {
 		boolean ignoredSetup = false;
 		if (!setup) {
 			if (!bypassSetup) {
-				throw new LSMException("LazySetupMaker has not been setup!");
+				throw new ImpatientSetupException();
 			} else {
 				ignoredSetup = true;
 			}
@@ -253,7 +254,7 @@ public class Setup {
 			if (setup) {
 				return;
 			}
-			Logger.logLow("Setting up LazySetupMaker...");
+			Logger.logLow("Setting up " + sc + "...");
 			Map<String, ClassNode> libNodes = new HashMap<String, ClassNode>();
 			for (ClassNode cn : JarUtils.loadRT().values()) {
 				libNodes.put(cn.name, cn);
@@ -278,12 +279,12 @@ public class Setup {
 			e.printStackTrace();
 			rtMappings = new HashMap<String, MappedClass>();
 		}
-		Logger.logLow("Finished setting up LazySetupMaker!");
+		Logger.logLow("Finished setting up "+sc+"!");
 	}
 
-	static class LSMException extends Exception {
-		public LSMException(String reason) {
-			super(reason);
+	static class ImpatientSetupException extends Exception {
+		public ImpatientSetupException() {
+			super(sc + " has not finished preparing!");
 		}
 
 		private static final long serialVersionUID = 54L;

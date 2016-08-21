@@ -47,8 +47,8 @@ public class SkidGUI implements IDropUser {
 		} catch (Exception e) {
 		}
 		// In this order, the GUI shows up and lets the user interact with it.
-		// While it's slow due to LazySetupMaker being run in the background it's
-		// better than a solid 5 second hang with no interaction allowed.
+		// While it's slow due to LazySetupMaker being run in the background
+		// it's better than a solid 5 second hang with no interaction allowed.
 		new Runnable() {
 			@Override
 			public void run() {
@@ -91,14 +91,8 @@ public class SkidGUI implements IDropUser {
 
 		tabbedPane.addTab("Inputs", null, pnlInputs, "Where the inputs are chosen");
 		tabbedPane.addTab("Obfuscation", null, scrollable(pnlObfuscation), "Options for obfuscation");
-		tabbedPane.addTab("Optimization", null,  scrollable(pnlOptimization), "Options for optimization");
+		tabbedPane.addTab("Optimization", null, scrollable(pnlOptimization), "Options for optimization");
 		// tabbedPane.setSelectedIndex(1);
-	}
-
-	private Component scrollable(SettingsPanel pnl) {
-		JScrollPane scroll = new JScrollPane(pnl);
-		scroll.setBorder(BorderFactory.createEmptyBorder());
-		return scroll;
 	}
 
 	private void addDropZones(JPanel pnl) {
@@ -143,4 +137,17 @@ public class SkidGUI implements IDropUser {
 	public List<SettingsPanel> getSettingPanels() {
 		return settingsPanels;
 	}
+
+	/**
+	 * Wraps a given component in a borderless scrollpane.
+	 * 
+	 * @param pnl
+	 * @return
+	 */
+	private Component scrollable(Component pnl) {
+		JScrollPane scroll = new JScrollPane(pnl);
+		scroll.setBorder(BorderFactory.createEmptyBorder());
+		return scroll;
+	}
+
 }
