@@ -208,7 +208,7 @@ public class MiscAnti {
 				if (mn.localVariables != null) {
 					for (LocalVariableNode lvn : mn.localVariables) {
 						lvn.signature = null;
-						lvn.desc = "Ljava/lang/Object;";
+						//lvn.desc = "Ljava/lang/Object;";
 					}
 				}
 			}

@@ -12,7 +12,7 @@ public class Lang {
 		OPTION_OPTIM_CLASS_REMOVE_MEMBERS =    "optimize.class.remove.methods",
 		OPTION_OPTIM_METHOD_REMOVE_PARAMNAME = "optimize.method.remove.param",
 		OPTION_OPTIM_METHOD_REMOVE_ANNO =      "optimize.method.remove.annotations",
-		OPTION_OPTIM_METHOD_REMOVE_LOCALDATA = "optimize.method.remove.localdata",
+		OPTION_OPTIM_METHOD_REMOVE_LOCALNAME = "optimize.method.remove.localdata",
 		OPTION_OPTIM_METHOD_REMOVE_LINES =     "optimize.method.remove.lines",
 		OPTION_OPTIM_METHOD_REMOVE_ATTRIB =    "optimize.method.remove.attributes",
 		OPTION_OPTIM_METHOD_REMOVE_FRAMES =    "optimize.method.remove.frames",
@@ -51,7 +51,7 @@ public class Lang {
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_PARAMNAME, "Remove parameter names");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_ANNO,      "Remove annotations");
 		translations.put(OPTION_OPTIM_CLASS_REMOVE_MEMBERS,    "Remove unused members");
-		translations.put(OPTION_OPTIM_METHOD_REMOVE_LOCALDATA, "Remove variable data");
+		translations.put(OPTION_OPTIM_METHOD_REMOVE_LOCALNAME, "Remove variable names");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_LINES,     "Remove line numbers");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_ATTRIB,    "Remove attributes");
 		translations.put(OPTION_OPTIM_METHOD_REMOVE_FRAMES,    "Remove frames");

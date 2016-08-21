@@ -52,7 +52,7 @@ public class Optimizer {
 		Logger.logLow("Beginning optimization...");
 		String mainClass = JarUtils.getManifestMainClass(jar);
 		boolean hasMain = mainClass != null;
-		boolean optionRemove = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_MEMBERS, Boolean.FALSE).booleanValue();
+		boolean optionRemove = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_MEMBERS, false).booleanValue();
 		boolean removeMethods = hasMain && optionRemove;
 
 		if (hasMain){
@@ -136,7 +136,7 @@ public class Optimizer {
 		@Override
 		public void visitSource(String source, String debug) {
 			// remove debug
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, false) && cv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, true) && cv != null) {
 				cv.visitSource(source, debug);
 			}
 		}
@@ -144,7 +144,7 @@ public class Optimizer {
 		@Override
 		public void visitOuterClass(final String owner, final String name, final String desc) {
 			// remove debug info
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_ATRIB, false) && cv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_ATRIB, true) && cv != null) {
 				cv.visitOuterClass(owner, name, desc);
 			}
 		}
@@ -152,7 +152,7 @@ public class Optimizer {
 		@Override
 		public void visitInnerClass(final String name, final String outerName, final String innerName, final int access) {
 			// remove debug info
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, false) && cv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, true) && cv != null) {
 				cv.visitInnerClass(name, outerName, innerName, access);
 			}
 		}
@@ -160,7 +160,7 @@ public class Optimizer {
 		@Override
 		public AnnotationVisitor visitAnnotation(final String desc, final boolean visible) {
 			// remove annotations
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_ANNO, false) && cv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_ANNO, true) && cv != null) {
 				return cv.visitAnnotation(desc, visible);
 			}
 			return null;
@@ -169,7 +169,7 @@ public class Optimizer {
 		@Override
 		public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
 			// remove annotations
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_ANNO, false) && cv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_ANNO, true) && cv != null) {
 				return cv.visitTypeAnnotation(typeRef, typePath, desc, visible);
 			}
 			return null;
@@ -178,7 +178,7 @@ public class Optimizer {
 		@Override
 		public void visitAttribute(final Attribute attr) {
 			// remove non standard attributes
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_ATRIB, false) && cv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_ATRIB, true) && cv != null) {
 				cv.visitAttribute(attr);
 			}
 		}
@@ -186,7 +186,7 @@ public class Optimizer {
 		@Override
 		public FieldVisitor visitField(final int access, final String name, final String desc, final String signature, final Object value) {
 			// remove signature
-			boolean remove = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, false);
+			boolean remove = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, true);
 			return super.visitField(access, name, desc, remove ? null : signature, value);
 		}
 
@@ -194,7 +194,7 @@ public class Optimizer {
 		public MethodVisitor visitMethod(final int access, final String name, final String desc, final String signature, final String[] exceptions) {
 			// Cancelling what ClassOptimizer does
 			if (rem.isMethodUsed(mapped.getNewName(), name + desc) || isOverride(name, desc)) {
-				boolean remove = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, false);
+				boolean remove = boolOpts.getOrDefault(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, true);
 				return createMethodVisitor(super.visitMethod(access, name, desc, remove ? null : signature, exceptions));
 			}
 			return null;
@@ -222,7 +222,7 @@ public class Optimizer {
 		@Override
 		public void visitParameter(String name, int access) {
 			// remove parameter info
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_PARAMNAME, false) && mv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_PARAMNAME, true) && mv != null) {
 				mv.visitParameter(name, access);
 			}
 		}
@@ -230,7 +230,7 @@ public class Optimizer {
 		@Override
 		public AnnotationVisitor visitAnnotationDefault() {
 			// remove annotations
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO, false) && mv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO, true) && mv != null) {
 				mv.visitAnnotationDefault();
 			}
 			return null;
@@ -239,7 +239,7 @@ public class Optimizer {
 		@Override
 		public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
 			// remove annotations
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO, false) && mv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO, true) && mv != null) {
 				mv.visitAnnotation(desc, visible);
 			}
 			return null;
@@ -248,7 +248,7 @@ public class Optimizer {
 		@Override
 		public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible) {
 			// remove annotations
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO, false) && mv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO, true) && mv != null) {
 				mv.visitTypeAnnotation(typeRef, typePath, desc, visible);
 			}
 			return null;
@@ -257,7 +257,7 @@ public class Optimizer {
 		@Override
 		public AnnotationVisitor visitParameterAnnotation(final int parameter, final String desc, final boolean visible) {
 			// remove annotations
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO, false) && mv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ANNO, true) && mv != null) {
 				mv.visitParameterAnnotation(parameter, desc, visible);
 			}
 			return null;
@@ -266,7 +266,7 @@ public class Optimizer {
 		@Override
 		public void visitLocalVariable(final String name, final String desc, final String signature, final Label start, final Label end, final int index) {
 			// remove debug info
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_LOCALDATA, false) && mv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_LOCALNAME, true) && mv != null) {
 				mv.visitLocalVariable(name, desc, signature, start, end, index);
 			}
 		}
@@ -274,7 +274,7 @@ public class Optimizer {
 		@Override
 		public void visitLineNumber(final int line, final Label start) {
 			// remove debug info
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_LINES, false) && mv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_LINES, true) && mv != null) {
 				mv.visitLineNumber(line, start);
 			}
 		}
@@ -282,7 +282,7 @@ public class Optimizer {
 		@Override
 		public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
 			// remove frames
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_FRAMES, false) && mv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_FRAMES, true) && mv != null) {
 				mv.visitFrame(type, nLocal, local, nStack, stack);
 			}
 		}
@@ -290,7 +290,7 @@ public class Optimizer {
 		@Override
 		public void visitAttribute(Attribute attr) {
 			// remove non standard attributes
-			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ATTRIB, false) && mv != null) {
+			if (!boolOpts.getOrDefault(Lang.OPTION_OPTIM_METHOD_REMOVE_ATTRIB, true) && mv != null) {
 				mv.visitAttribute(attr);
 			}
 		}

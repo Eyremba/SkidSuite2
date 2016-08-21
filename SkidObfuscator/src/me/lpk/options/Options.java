@@ -14,7 +14,7 @@ public class Options {
 	static {
 		defaultEnabledStates.put(Lang.OPTION_OPTIM_CLASS_REMOVE_SRC, true);
 		defaultEnabledStates.put(Lang.OPTION_OPTIM_METHOD_REMOVE_LINES, true);
-		defaultEnabledStates.put(Lang.OPTION_OPTIM_METHOD_REMOVE_LOCALDATA, true);
+		defaultEnabledStates.put(Lang.OPTION_OPTIM_METHOD_REMOVE_LOCALNAME, true);
 		defaultEnabledStates.put(Lang.OPTION_OPTIM_METHOD_REMOVE_PARAMNAME, true);
 	}
 	
