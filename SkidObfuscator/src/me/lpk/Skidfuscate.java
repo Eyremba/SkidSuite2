@@ -60,13 +60,30 @@ public class Skidfuscate {
 			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_SYNTHETIC).booleanValue()) {
 				MiscAnti.makeSynthetic(nodes.values());
 			}
-			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_DECOMPILE_VULNS).booleanValue()) {
+			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_VULN_EXCRET).booleanValue()) {
+				for (ClassNode cn : nodes.values()) {
+					MiscAnti.retObjErr(cn);
+				}
+			}
+			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_VULN_POP2).booleanValue()) {
+				for (ClassNode cn : nodes.values()) {
+					for (MethodNode mn : cn.methods) {
+						MiscAnti.badPop(mn);
+					}
+				}
+			}
+			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_VULN_LDC).booleanValue()) {
+				for (ClassNode cn : nodes.values()) {
+					for (MethodNode mn : cn.methods) {
+						MiscAnti.massiveLdc(mn);
+					}
+				}
+			}
+			if (boolOpts.get(Lang.OPTION_OBFU_ANTI_VULN_VARS).booleanValue()) {
 				for (ClassNode cn : nodes.values()) {
 					for (MethodNode mn : cn.methods) {
 						MiscAnti.duplicateVars(mn);
-						MiscAnti.badPop(mn);
 					}
-					MiscAnti.retObjErr(cn);
 				}
 			}
 			if (boolOpts.get(Lang.OPTION_OBFU_FLOW_GOTOFLOOD).booleanValue()) {
@@ -74,6 +91,11 @@ public class Skidfuscate {
 					for (MethodNode mn : cn.methods) {
 						Flow.randomGotos(mn);
 					}
+				}
+			}
+			if (boolOpts.get(Lang.OPTION_OBFU_FLOW_MERGE_FIELDS).booleanValue()) {
+				for (ClassNode cn : nodes.values()) {
+					Flow.mergeFields(cn);
 				}
 			}
 			if (boolOpts.get(Lang.OPTION_OBFU_STRINGS_INTOARRAY).booleanValue()) {

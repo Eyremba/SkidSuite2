@@ -44,7 +44,7 @@ public class Main {
 		boolean mergeFields = true;
 		if (mergeFields){
 			for (ClassNode cn : nodes.values()) {
-				MiscAnti.mergeFields(cn);
+				Flow.mergeFields(cn);
 			}
 		}
 		if (tryCatch) {

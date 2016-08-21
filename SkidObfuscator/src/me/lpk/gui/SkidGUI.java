@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
@@ -24,8 +25,10 @@ import me.lpk.util.Setup;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 
 public class SkidGUI implements IDropUser {
@@ -38,9 +41,6 @@ public class SkidGUI implements IDropUser {
 	private final List<SettingsPanel> settingsPanels = new ArrayList<SettingsPanel>();
 	private final Skidfuscate instance = Skidfuscate.get();
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -77,7 +77,7 @@ public class SkidGUI implements IDropUser {
 	private void initialize() {
 		frmSkidfuscator = new JFrame();
 		frmSkidfuscator.setTitle("Skidfuscator");
-		frmSkidfuscator.setBounds(100, 100, 704, 475);
+		frmSkidfuscator.setBounds(100, 100, 704, 535);
 		frmSkidfuscator.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.LEFT);
@@ -90,9 +90,15 @@ public class SkidGUI implements IDropUser {
 		settingsPanels.add(pnlOptimization);
 
 		tabbedPane.addTab("Inputs", null, pnlInputs, "Where the inputs are chosen");
-		tabbedPane.addTab("Obfuscation", null, pnlObfuscation, "Options for obfuscation");
-		tabbedPane.addTab("Optimization", null, pnlOptimization, "Options for optimization");
+		tabbedPane.addTab("Obfuscation", null, scrollable(pnlObfuscation), "Options for obfuscation");
+		tabbedPane.addTab("Optimization", null,  scrollable(pnlOptimization), "Options for optimization");
 		// tabbedPane.setSelectedIndex(1);
+	}
+
+	private Component scrollable(SettingsPanel pnl) {
+		JScrollPane scroll = new JScrollPane(pnl);
+		scroll.setBorder(BorderFactory.createEmptyBorder());
+		return scroll;
 	}
 
 	private void addDropZones(JPanel pnl) {

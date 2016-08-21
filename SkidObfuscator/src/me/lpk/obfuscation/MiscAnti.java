@@ -2,12 +2,10 @@ package me.lpk.obfuscation;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
@@ -102,7 +100,7 @@ public class MiscAnti {
 	 * @param cn
 	 */
 	public static void retObjErr(ClassNode cn) {
-		String mthdN = "REEEEEEEEE", mthdR = "()Ljava/lang/Object;";
+		String mthdN = Stringer.genKey(10), mthdR = "()Ljava/lang/Object;";
 		String catchType = "java/lang/Exception";
 		for (MethodNode mn : cn.methods) {
 			if (mn.name.contains("<") || AccessHelper.isAbstract(mn.access) || mn.instructions.size() < 4) {
@@ -235,150 +233,6 @@ public class MiscAnti {
 			for (MethodNode mn : cn.methods) {
 				if (!AccessHelper.isSynthetic(mn.access)) {
 					mn.access |= Opcodes.ACC_SYNTHETIC;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Merges private fields.
-	 * 
-	 * @param cn
-	 */
-	public static void mergeFields(ClassNode cn) {
-		// Get private fields
-		List<FieldNode> fields = new ArrayList<FieldNode>();
-		for (FieldNode fn : cn.fields) {
-			if (AccessHelper.isPrivate(fn.access) && AccessHelper.isStatic(fn.access)) {
-				fields.add(fn);
-			}
-		}
-		if (fields.size() == 0) {
-			return;
-		}
-		FieldNode merged = new FieldNode(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC, "_MERGE_", "Ljava/util/List;", null, null);
-		// Create getter/setter methods for fields
-		// TODO: Rewrite so it's only one getter and one setter
-		// Type casting will be inline, not at the g/s
-		List<MethodNode> getter = new ArrayList<MethodNode>();
-		List<MethodNode> setter = new ArrayList<MethodNode>();
-		for (FieldNode fn : fields) {
-			int i = fields.indexOf(fn);
-			MethodNode get = new MethodNode(Opcodes.ACC_STATIC, "get" + i, "()Ljava/lang/Object;", null, null);
-			get.instructions.add(new FieldInsnNode(Opcodes.GETSTATIC, cn.name, merged.name, merged.desc));
-			get.instructions.add(OpUtils.toInt(i));
-			get.instructions.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true));
-			get.instructions.add(new InsnNode(Opcodes.ARETURN));
-
-			/*
-			 * if (fn.desc.length() == 1){ switch (fn.desc){ case "I": case "Z":
-			 * get.instructions.add(new TypeInsnNode(Opcodes.CHECKCAST,
-			 * "Ljava/lang/Integer;")); get.instructions.add(new
-			 * MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Integer",
-			 * "intValue", "()I", false)); get.instructions.add(new
-			 * InsnNode(Opcodes.IRETURN)); break; case "L":
-			 * get.instructions.add(new TypeInsnNode(Opcodes.CHECKCAST,
-			 * "Ljava/lang/Long;")); get.instructions.add(new
-			 * MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Long",
-			 * "longValue", "()L", false)); get.instructions.add(new
-			 * InsnNode(Opcodes.LRETURN)); break; case "D":
-			 * get.instructions.add(new TypeInsnNode(Opcodes.CHECKCAST,
-			 * "Ljava/lang/Double;")); get.instructions.add(new
-			 * MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Double",
-			 * "doubleValue", "()D", false)); get.instructions.add(new
-			 * InsnNode(Opcodes.DRETURN)); break; case "F":
-			 * get.instructions.add(new TypeInsnNode(Opcodes.CHECKCAST,
-			 * "Ljava/lang/Float;")); get.instructions.add(new
-			 * MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Float",
-			 * "floatValue", "()F", false)); get.instructions.add(new
-			 * InsnNode(Opcodes.FRETURN)); break; } }else{
-			 * get.instructions.add(new TypeInsnNode(Opcodes.CHECKCAST,
-			 * fn.desc)); get.instructions.add(new InsnNode(Opcodes.ARETURN)); }
-			 */
-
-			MethodNode set = new MethodNode(Opcodes.ACC_STATIC, "set" + i, "(Ljava/lang/Object;)V", null, null);
-			set.instructions.add(new FieldInsnNode(Opcodes.GETSTATIC, cn.name, merged.name, merged.desc));
-			set.instructions.add(OpUtils.toInt(i));
-			set.instructions.add(new VarInsnNode(Opcodes.ALOAD, 0));
-			set.instructions.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "java/util/List", "add", "(ILjava/lang/Object;)V", true));
-			set.instructions.add(new InsnNode(Opcodes.RETURN));
-
-			getter.add(i, get);
-			setter.add(i, set);
-			cn.methods.add(get);
-			cn.methods.add(set);
-		}
-		// Get static
-		MethodNode clinit = null;
-		for (MethodNode mn : cn.methods) {
-			if (mn.name.equals("<clinit>")) {
-				clinit = mn;
-			}
-		}
-		if (clinit == null) {
-			clinit = new MethodNode(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
-			clinit.instructions.add(new InsnNode(Opcodes.RETURN));
-			cn.methods.add(clinit);
-
-		}
-		// Create map in static block
-		clinit.instructions.insert(new FieldInsnNode(Opcodes.PUTSTATIC, cn.name, merged.name, merged.desc));
-		clinit.instructions.insert(new MethodInsnNode(Opcodes.INVOKESPECIAL, "java/util/ArrayList", "<init>", "()V", false));
-		clinit.instructions.insert(new InsnNode(Opcodes.DUP));
-		clinit.instructions.insert(new TypeInsnNode(Opcodes.NEW, "java/util/ArrayList"));
-		cn.fields.add(merged);
-		// Remove fields
-		for (FieldNode fn : fields) {
-			cn.fields.remove(cn.fields.indexOf(fn));
-		}
-		// Iterate methods for field interaction
-		for (MethodNode mn : cn.methods) {
-			for (FieldNode fn : fields) {
-				int i = fields.indexOf(fn);
-				for (AbstractInsnNode ain : mn.instructions.toArray()) {
-					if (ain.getType() == AbstractInsnNode.FIELD_INSN) {
-						FieldInsnNode fin = (FieldInsnNode) ain;
-						if (fin.name.equals(fn.name) && fin.desc.equals(fn.desc) && fin.owner.equals(cn.name)) {
-							MethodNode set = setter.get(i);
-							MethodNode get = getter.get(i);
-							if (fin.getOpcode() == Opcodes.PUTSTATIC) {
-								mn.instructions.set(fin, new MethodInsnNode(Opcodes.INVOKESTATIC, cn.name, set.name, set.desc, false));
-							}
-							if (fin.getOpcode() == Opcodes.GETSTATIC) {
-								if (fn.desc.length() == 1) {
-									switch (fn.desc) {
-									case "Z":
-										mn.instructions.insert(fin, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Boolean", "booleanValue", "()Z", false));
-										mn.instructions.insert(fin, new TypeInsnNode(Opcodes.CHECKCAST, "Ljava/lang/Boolean;"));
-										break;
-									case "I":
-										mn.instructions.insert(fin, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Integer", "intValue", "()I", false));
-										mn.instructions.insert(fin, new TypeInsnNode(Opcodes.CHECKCAST, "Ljava/lang/Integer;"));
-										break;
-									case "L":
-										mn.instructions.insert(fin, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Long", "longValue", "()L", false));
-										mn.instructions.insert(fin, new TypeInsnNode(Opcodes.CHECKCAST, "Ljava/lang/Long;"));
-										break;
-									case "D":
-										mn.instructions.insert(fin, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Double", "doubleValue", "()D", false));
-										mn.instructions.insert(fin, new TypeInsnNode(Opcodes.CHECKCAST, "Ljava/lang/Double;"));
-										break;
-									case "F":
-										mn.instructions.insert(fin, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Float", "floatValue", "()F", false));
-										mn.instructions.insert(fin, new TypeInsnNode(Opcodes.CHECKCAST, "Ljava/lang/Float;"));
-										break;
-									case "C":
-										mn.instructions.insert(fin, new MethodInsnNode(Opcodes.INVOKEVIRTUAL, "java/lang/Character", "charValue", "()C", false));
-										mn.instructions.insert(fin, new TypeInsnNode(Opcodes.CHECKCAST, "Ljava/lang/Character;"));
-										break;
-									}
-								} else {
-									mn.instructions.insert(fin, new TypeInsnNode(Opcodes.CHECKCAST, fn.desc));
-								}
-								mn.instructions.set(fin, new MethodInsnNode(Opcodes.INVOKESTATIC, cn.name, get.name, get.desc, false));
-							}
-						}
-					}
 				}
 			}
 		}

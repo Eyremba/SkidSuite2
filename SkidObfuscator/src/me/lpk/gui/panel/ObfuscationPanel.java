@@ -22,10 +22,14 @@ public class ObfuscationPanel extends SettingsPanel {
 				Lang.translations.get(Lang.GUI_OBFUSCATION_GROUP_FLOW), 
 					Lang.OPTION_OBFU_FLOW_TRYCATCH,
 					Lang.OPTION_OBFU_FLOW_GOTOFLOOD,
+					Lang.OPTION_OBFU_FLOW_MERGE_FIELDS,
 					Lang.OPTION_OBFU_FLOW_MATH));
 		addGroup(createBoolGroup(
 				Lang.translations.get(Lang.GUI_OBFUSCATION_GROUP_ANTI), 
-				Lang.OPTION_OBFU_ANTI_DECOMPILE_VULNS,
+				Lang.OPTION_OBFU_ANTI_VULN_POP2,
+				Lang.OPTION_OBFU_ANTI_VULN_EXCRET,
+				Lang.OPTION_OBFU_ANTI_VULN_VARS,
+				Lang.OPTION_OBFU_ANTI_VULN_LDC,
 				Lang.OPTION_OBFU_ANTI_OBJECT_LOCALS,
 				Lang.OPTION_OBFU_ANTI_SYNTHETIC));
 		}
