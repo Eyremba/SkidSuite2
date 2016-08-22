@@ -4,7 +4,7 @@ package me.lpk.gui;
  * Enum for the type of search used in SkidVisualizer's search bar.
  */
 public enum EnumSearchType {
-	LDC("String constant"), CLASS_NAME("Class name"), CLASS_REF("Class reference"), METHOD_NAME("Method name"), METHOD_DESC("Method desc"), FIELD_NAME(
+	LDC("String constant"), CLASS_NAME("Class name"), CLASS_CHILDREN("Classes extending"), CLASS_REF("Class reference"), METHOD_NAME("Method name"), METHOD_DESC("Method desc"), FIELD_NAME(
 			"Field name"), FIELD_DESC("Field desc");
 
 	private final String text;

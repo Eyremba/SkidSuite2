@@ -109,14 +109,38 @@ public class SearchUtil {
 
 	/**
 	 * Finds classes with the given name
+	 * 
 	 * @param node
 	 * @return
 	 */
 	public static List<SearchResultEntry> findClass(String name) {
 		List<SearchResultEntry> results = new ArrayList<SearchResultEntry>();
 		for (ClassNode cn : VisualizerWindow.instance.getNodes().values()) {
-			if (cn.name.toLowerCase().contains(name.toLowerCase())){
+			if (cn.name.toLowerCase().contains(name.toLowerCase())) {
 				results.add(new SearchResultEntry(cn));
+			}
+		}
+		return results;
+	}
+
+	/**
+	 * Finds classes that extend a given name.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public static List<SearchResultEntry> findChildrenOfClass(String name) {
+		List<SearchResultEntry> results = new ArrayList<SearchResultEntry>();
+		for (ClassNode cn : VisualizerWindow.instance.getNodes().values()) {
+			if (cn.superName.toLowerCase().contains(name.toLowerCase())) {
+				results.add(new SearchResultEntry(cn));
+			} else {
+				for (String inter : cn.interfaces) {
+					if (inter.toLowerCase().contains(name.toLowerCase())) {
+						results.add(new SearchResultEntry(cn));
+						break;
+					}
+				}
 			}
 		}
 		return results;

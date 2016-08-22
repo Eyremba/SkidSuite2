@@ -36,6 +36,10 @@ public class SearchKeyListener implements KeyListener {
 				// Populate search results with classes with the search text
 				results = SearchUtil.findClass(VisualizerWindow.instance.getSearchText());
 				break;
+			case CLASS_CHILDREN:
+				// Populate search results with classes extending or implementing the class given by the search text
+				results = SearchUtil.findChildrenOfClass(VisualizerWindow.instance.getSearchText());
+				break;
 			case CLASS_REF:
 				// Populate search results with references to the class.
 				ClassNode node2 = VisualizerWindow.instance.getNodes().get(VisualizerWindow.instance.getSearchText());
