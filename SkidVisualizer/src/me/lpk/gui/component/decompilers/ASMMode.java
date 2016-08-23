@@ -83,10 +83,6 @@ public class ASMMode extends DecompileMode {
 						index = output.indexOf(target, index + 1);
 						continue;
 					}
-					if (output.charAt(index - 1) != ' '){
-						//index += 1;
-						//continue;
-					}
 					int newline = output.substring(index).indexOf(" ");
 					if (newline == -1) {
 						newline = output.substring(index).indexOf("\n");

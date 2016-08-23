@@ -41,7 +41,7 @@ public class InstAgent {
 
 	public static void initialize(String jarFilePath) {
 		if (instrumentation == null) {
-			RuntimeLoader.loadAgent(jarFilePath);
+			RuntimeLoader.loadAgentToCurrent(jarFilePath);
 		}
 	}
 
