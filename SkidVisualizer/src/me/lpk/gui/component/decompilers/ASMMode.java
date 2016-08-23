@@ -79,9 +79,13 @@ public class ASMMode extends DecompileMode {
 			for (String target : signatures) {
 				int index = output.indexOf(target);
 				while (index >= 0) {
-					if (target.equals("L") && (StringUtils.isNumeric(output.substring(index + 1, index + 2)) || output.substring(index - 1, index).equals("/"))) {
+					if (target.equals("L") && (StringUtils.isNumeric(output.substring(index + 1, index + 2)) || output.substring(index - 1, index).equals("/") || !output.substring(index - 1, index).equals(" "))) {
 						index = output.indexOf(target, index + 1);
 						continue;
+					}
+					if (output.charAt(index - 1) != ' '){
+						//index += 1;
+						//continue;
 					}
 					int newline = output.substring(index).indexOf(" ");
 					if (newline == -1) {

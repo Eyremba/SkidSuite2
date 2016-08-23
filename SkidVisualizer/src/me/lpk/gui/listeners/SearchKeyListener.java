@@ -74,16 +74,7 @@ public class SearchKeyListener implements KeyListener {
 				for (SearchResultEntry result : results) {
 					VisualizerWindow.instance.getResultPanel().addResult(result);
 				}
-				new Thread() {
-					@Override
-					public void run(){
-						try {
-							Thread.sleep(50L);
-							VisualizerWindow.instance.getResultPanel().sort();
-						} catch (Exception e) {
-						}
-					}
-				}.start();
+				VisualizerWindow.instance.getResultPanel().sort();
 			}
 		}
 	}
